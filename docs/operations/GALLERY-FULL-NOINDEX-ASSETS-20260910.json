@@ -1,0 +1,1309 @@
+{
+  "approval_reference": "owner-directive-20260910-full-noindex-product-gallery-release",
+  "scope": "Website display galleries only for every remaining /products/* route. Does not alter homepage, indexed standalone routes, metadata, sitemap, Merchant, feeds, or ads.",
+  "site_authority": "Owner directed full same-day release of the reviewed-safe illustrative asset pool.",
+  "other_channel_authority": false,
+  "excluded_routes": [
+    "/vehicle-decals-saskatoon"
+  ],
+  "excluded_assets": [
+    "artwork-setup:overview",
+    "business-cards:overview",
+    "coil-bound-booklets:overview",
+    "cosmetic-labels:overview",
+    "custom-shape-signs:overview",
+    "door-hangers:overview",
+    "flyers:overview",
+    "image-upscale:overview",
+    "magnet-calendars:overview",
+    "photo-posters:overview",
+    "stickers:alternate-design",
+    "stickers:overview",
+    "vehicle-decals:overview",
+    "vinyl-banners:material-detail"
+  ],
+  "products": [
+    {
+      "slug": "acp-signs",
+      "hero": {
+        "public_path": "/images/products/product/acp-aluminum-sign-800x600.webp",
+        "alt": "Original Aluminum Composite Signs product image.",
+        "width": 800,
+        "height": 534,
+        "bytes": 96712,
+        "sha256": "cad875a3ce7147c15b64d549f6e58e7cbc4b6004a14c4d028405c66b7d1a78b0"
+      },
+      "assets": [
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/acp-signs/acp-signs-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative Warm terracotta cafe directory on flat ACP, different graphic hierarchy",
+          "source_sha256": "fdf9992199891d59e53802cccc5777bfb1a7279bd522bfa76f8370ef3aa0a466",
+          "delivery_sha256": "0e16c3aaa4229a9c9cf9d24ea302c09b16da0811f5683b70381d9362c303d6b1",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 71876
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/acp-signs/acp-signs-application-v1-1200w.webp",
+          "alt": "Illustrative Aluminum Composite Signs application sample.",
+          "source_sha256": "a042b6ce9fe0bfc5bd06f92f6fa3c73973ef5545649290eaa3f15bc4d8776e90",
+          "delivery_sha256": "f7f8154cf354894b2628e7172944dd816d0aa56bd802ec048543afd093d6fb0d",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 162126
+        },
+        {
+          "slot": "material-detail",
+          "public_path": "/images/products/gallery/acp-signs/acp-signs-material-detail-v1-1200w.webp",
+          "alt": "Illustrative Thin rigid edge revealing dark PE core between aluminum skins and applied printed face",
+          "source_sha256": "58b5125819a56004afe3e1eafb1716ea2fdbe5085d1bc27533f35a9a03aa831a",
+          "delivery_sha256": "0d47406141bd47e3d0a564f8ccfa111bd8727b5d8942d19ae2cce03f753c972a",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 85372
+        },
+        {
+          "slot": "overview",
+          "public_path": "/images/products/gallery/acp-signs/acp-signs-overview-inherited-v1-1200w.webp",
+          "alt": "Illustrative Preserve accepted rigid sign concept",
+          "source_sha256": "b7e9c99d906058dc5f03da0fa64ef7f9f80a329ae3b294e893516f369e463042",
+          "delivery_sha256": "1a03fec8fd71e6d310e328d10d98a1f6205715f4bc0ac9b82ef003d461414b93",
+          "format": "webp",
+          "width": 1200,
+          "height": 800,
+          "bytes": 91448
+        }
+      ]
+    },
+    {
+      "slug": "artwork-setup",
+      "hero": {
+        "public_path": "/images/products/product/logo-vectorization-formats-800x600.webp",
+        "alt": "Original Artwork Setup & File Fixes product image.",
+        "width": 1448,
+        "height": 1086,
+        "bytes": 120282,
+        "sha256": "82aa1dcc049c38f3820fa19996d574c8182edb16e5aedf259779c1a2e17214d5"
+      },
+      "assets": [
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/artwork-setup/artwork-setup-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative Simple fictional business card file correction with consistent artwork and visible safe margin",
+          "source_sha256": "00a7d01677dde44fc30e260ebd1c7c64234c7dd744a996ed03c800b1865e0f21",
+          "delivery_sha256": "7fe526d4e06f2cc4bc73867b79e0047b5038c1f7edaf4f63007e1a43c743984a",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 68104
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/artwork-setup/artwork-setup-application-v1-1200w.webp",
+          "alt": "Illustrative Same print-ready flyer paired with finished gloss print, no fake calibration claims",
+          "source_sha256": "7287acacb01128e9daa4d310d6c141add74b0e26934783d50ff08021f4c9c3c8",
+          "delivery_sha256": "0ae77527f04109629433ff55a509bb8a22f639182651ef92681ce5661ebf80d4",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 114034
+        },
+        {
+          "slot": "material-detail",
+          "public_path": "/images/products/gallery/artwork-setup/artwork-setup-material-detail-v1-1200w.webp",
+          "alt": "Illustrative Close trim line, bleed and safe margin; guides outside final artwork and explanatory labels typeset separately",
+          "source_sha256": "840c997fcf2aa043bbc1e43f213b00d6cb8694dbfce1429f7516b0a1de5ecb42",
+          "delivery_sha256": "730193abac69f0683bc3b58a8c993c7ff523b178788e2ca9675c8acfac8893ac",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 85728
+        }
+      ]
+    },
+    {
+      "slug": "boat-registration-numbers",
+      "hero": {
+        "public_path": "/images/industries/boat-registration-numbers/boat-registration-number-decal-aluminum-bow-1200x800.webp",
+        "alt": "Original Boat Registration Number Decals product image.",
+        "width": 1200,
+        "height": 800,
+        "bytes": 52652,
+        "sha256": "3614c10b798e856f289d09ba648dcb2a75c571bfd59a6e9af9deb0d2a602558e"
+      },
+      "assets": [
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/boat-registration-numbers/boat-registration-numbers-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative White sample number lettering on dark fibreglass hull; straight readable alignment",
+          "source_sha256": "5c8945cc3f1608acd6bfc4fcdca6d190c72c6887c03aa2aede81c833dea6d54d",
+          "delivery_sha256": "3ea021e5860d15c052af74923cb56742e47b3a97bfedd6d402f6da6065304c03",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 87674
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/boat-registration-numbers/boat-registration-numbers-application-v1-1200w.webp",
+          "alt": "Illustrative Dry boat on trailer with illustrative number at bow, no fabricated real registration",
+          "source_sha256": "364afd411fa3e294828ee49df1ed151750ea74be93fa39f59f6b8e607e603c53",
+          "delivery_sha256": "5f18bcaba2bfc5830d871e187dbd5367383963a1d2e9b1110f2c2662e052065b",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 157272
+        },
+        {
+          "slot": "material-detail",
+          "public_path": "/images/products/gallery/boat-registration-numbers/boat-registration-numbers-material-detail-v1-1200w.webp",
+          "alt": "Illustrative Close smooth individual cut character edge, no printed background rectangle",
+          "source_sha256": "e91bbc91cac2655739148e9ccecf3e9f487b491bf375c63c2c06c97a19352a84",
+          "delivery_sha256": "30218765f1d490c2946e6d5230068c9db66c51e4646294f5fd9fa02836dcd46e",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 64338
+        },
+        {
+          "slot": "overview",
+          "public_path": "/images/products/gallery/boat-registration-numbers/boat-registration-numbers-overview-v1-1200w.webp",
+          "alt": "Illustrative Contrasting fictional sample block character decal on clean aluminum bow, above waterline",
+          "source_sha256": "54642d4db85f21d5b48bdf36c5f6836eecf27850a39037705081ad0c2f54f28e",
+          "delivery_sha256": "7c20a22824df8c3353451351611c11059b46492a1a492b3e95528348a14f079a",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 159212
+        }
+      ]
+    },
+    {
+      "slug": "business-cards",
+      "hero": {
+        "public_path": "/images/products/product/business-cards-800x600.webp",
+        "alt": "Original Business Cards product image.",
+        "width": 1536,
+        "height": 1024,
+        "bytes": 96412,
+        "sha256": "4b8f4f202af54342a4191d3ce57d1dd3bc34e16fe528a4a926e5e5831b133a41"
+      },
+      "assets": [
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/business-cards/business-cards-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative Electric orange/navy trades-business design on smooth gloss stock",
+          "source_sha256": "dd85a8edd81884806f97f0b71afff7f825acd879d8cadc3b2e15f0c60eb51668",
+          "delivery_sha256": "df4c639abdb8678099b31e25eb9b692c9380c47f94b06864f3c29aa117f07490",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 93352
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/business-cards/business-cards-application-v1-1200w.webp",
+          "alt": "Illustrative Two-sided fictional ceramics studio card pair at a restrained reception counter",
+          "source_sha256": "9e73490ac73b9f1d371bfbc1c399a073d2da1d3cdc323fbdc0b3f54242629de1",
+          "delivery_sha256": "8d8e195c11a96ea0772dcf5d2a0e5f9379ede39095d85ead9f08fe7cfcc4c927",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 53964
+        },
+        {
+          "slot": "material-detail",
+          "public_path": "/images/products/gallery/business-cards/business-cards-material-detail-v1-1200w.webp",
+          "alt": "Illustrative Macro on smooth gloss card faces with restrained reflection and thin stacked edges",
+          "source_sha256": "ce9d78066d63a97d072dd4136f7e0bb70dd91708adce402ace24dfe3ff8e1576",
+          "delivery_sha256": "2fb5b3244271418b6d2cd38d206c42a945728cb9fba92aa6fc6038dc1e0ed036",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 59976
+        }
+      ]
+    },
+    {
+      "slug": "candle-jar-labels",
+      "hero": {
+        "public_path": "/images/products/product/candle-jar-labels-product-800x600.webp",
+        "alt": "Original Candle & Jar Labels product image.",
+        "width": 1448,
+        "height": 1086,
+        "bytes": 67714,
+        "sha256": "b05dba3f656608687a7f20a3f714019e09372d135f9351fb5c0d2b2906059a58"
+      },
+      "assets": [
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/candle-jar-labels/candle-jar-labels-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative Botanical green marmalade jar label as materially different application",
+          "source_sha256": "54ad2188275db6e10f1f9d8b8292b989497fb47eac3a1b0d8e0d2f51bb52b108",
+          "delivery_sha256": "7dd48dd33f03356e275eb1a817d8b8c510a78cc07d6a80dea6a6a91a7eddc8d8",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 90078
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/candle-jar-labels/candle-jar-labels-application-v1-1200w.webp",
+          "alt": "Illustrative Unlit candle collection on warm wood boutique display",
+          "source_sha256": "ad4b587d732f94be4cd2f0e7d01628ce8ded6e86f7e7fba4cd62f7af2cb8054b",
+          "delivery_sha256": "d80a12b8339fc3e320ae6abcb492ad2194019b63b3c8ebd618ad039bf6526d02",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 124554
+        },
+        {
+          "slot": "material-detail",
+          "public_path": "/images/products/gallery/candle-jar-labels/candle-jar-labels-material-detail-v1-1200w.webp",
+          "alt": "Illustrative Gloss labelled curved jar edge, no wrinkle or metallic foil",
+          "source_sha256": "795e18e10e86d6ec871bb6a058728d90c173178488a2137a891b3eb51d84359e",
+          "delivery_sha256": "550eb9117d7b6c04c8e20ec35350349ac7517391c9d7308e7e0a34137eddea48",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 83692
+        },
+        {
+          "slot": "overview",
+          "public_path": "/images/products/gallery/candle-jar-labels/candle-jar-labels-overview-v1-1200w.webp",
+          "alt": "Illustrative Unlit fictional candle jar and tin with distinctive printed label artwork",
+          "source_sha256": "160a40912fc34e76f1e17fb3caae27d15597a2ab7c765897c7fd1387e882321f",
+          "delivery_sha256": "03ee1ed1b4ccf6cb95a514ddd51fa37ae177518976325a59e4da17cb15e8c8db",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 117266
+        }
+      ]
+    },
+    {
+      "slug": "coil-bound-booklets",
+      "hero": {
+        "public_path": "/images/products/product/coil-bound-booklet-hero-800x600.webp",
+        "alt": "Original Coil-Bound Booklets product image.",
+        "width": 800,
+        "height": 600,
+        "bytes": 8230,
+        "sha256": "8e9771003d544aecd0a613f7a0bb29db97297a20afbedf21791f7e911694e5d1"
+      },
+      "assets": [
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/coil-bound-booklets/coil-bound-booklets-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative Lilac and charcoal original workshop manual alternate cover, same physical binding",
+          "source_sha256": "7b6e739c2298f7ebe9134357b778a3c77eaa7af15f2d3f848e3e3ad8ce62daf7",
+          "delivery_sha256": "2d63cc601815896b20febced503170aa59ebb0dd542e4487b19db1cdad716d96",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 86470
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/coil-bound-booklets/coil-bound-booklets-application-v1-1200w.webp",
+          "alt": "Illustrative Open booklet lying flat on indoor training desk, continuous plastic coil and full-colour spread",
+          "source_sha256": "0313041ebbdbfadcf6fde76f7453c1b153437c42f9477bf2c24c953ed4cc4ecf",
+          "delivery_sha256": "6e3603b102eda569a32b49f577f25f0eb30bc5d69fc3dd93f9949dffde2b5fcf",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 69122
+        },
+        {
+          "slot": "material-detail",
+          "public_path": "/images/products/gallery/coil-bound-booklets/coil-bound-booklets-material-detail-v1-1200w.webp",
+          "alt": "Illustrative Close black plastic helical coil threading evenly spaced holes through gloss cover/pages",
+          "source_sha256": "36dd73da92e263a3bd226db1c96ce80d6fb51f0fa6f97128ef14e517c9608d1c",
+          "delivery_sha256": "6016cc5e5cd0a37379597bbc5360558cad438cf7992cfa1e4381cf647715d9cf",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 113682
+        }
+      ]
+    },
+    {
+      "slug": "cosmetic-labels",
+      "hero": {
+        "public_path": "/images/products/product/cosmetic-labels-product-800x600.webp",
+        "alt": "Original Cosmetic Labels product image.",
+        "width": 1448,
+        "height": 1086,
+        "bytes": 119148,
+        "sha256": "67d8946e32c00fcfa532e0344d111890fc882300e698846fe394af41bacff565"
+      },
+      "assets": [
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/cosmetic-labels/cosmetic-labels-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative Violet and apricot expressive hair-care label on smooth cylindrical bottle",
+          "source_sha256": "376826153f475356921b3829fee6184c9bb258eeaf636e1aa4a264e61df8728e",
+          "delivery_sha256": "51872f01ede8ab9d9528c645c7525bd9bb7f7e6be832d40239cef5cea7ab733c",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 90930
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/cosmetic-labels/cosmetic-labels-application-v1-1200w.webp",
+          "alt": "Illustrative Bathroom vanity application scene with two labelled skincare products",
+          "source_sha256": "4f95490b7e079b16cf49e95cddafe20127f11de55e3c0de38fe5bdb340e60b8d",
+          "delivery_sha256": "cb45ef599faf85ee41aa8a1fe9fb05410ed28dc18c5bcacec4efdf4b2e2596e5",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 73978
+        },
+        {
+          "slot": "material-detail",
+          "public_path": "/images/products/gallery/cosmetic-labels/cosmetic-labels-material-detail-v1-1200w.webp",
+          "alt": "Illustrative Gloss laminated label on smooth amber glass under angled soft light",
+          "source_sha256": "5842a0be1d7e3fa405db1c9306df37b4d9b1c28c51146e5c66ef772e93caac80",
+          "delivery_sha256": "4dfa6e093a76c42b30679511a5fd79a2d9ea84db01918eb607ca87e8ddee9f16",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 84348
+        }
+      ]
+    },
+    {
+      "slug": "custom-logo-design",
+      "hero": {
+        "public_path": "/images/products/product/logo-vectorization-sign-application-800x600.webp",
+        "alt": "Original Logo Design & Print-Ready Artwork product image.",
+        "width": 1448,
+        "height": 1086,
+        "bytes": 157474,
+        "sha256": "c627a8a1e3168193126cb81a5f8f2d6012e77bc8c0ef8799717f182daa820709"
+      },
+      "assets": [
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/custom-logo-design/custom-logo-design-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative Bold red/black fictional repair studio identity, different visual language",
+          "source_sha256": "826fc790fe22a013043457e04f0429426fe626a1321b68550ceef4d38f8e2144",
+          "delivery_sha256": "12cdd32c94286dfb292fbe2e6b50b98a80818502cf34084f172196a3be1afc2a",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 122916
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/custom-logo-design/custom-logo-design-application-v1-1200w.webp",
+          "alt": "Illustrative Same fictional identity on business card and small packaging label, each material credible",
+          "source_sha256": "efe704c1cb362254af2acd6e6af8ff49b053890453b567dbf9156e485fdf206f",
+          "delivery_sha256": "c60d1b326e5fd77765411640835067edfad268f0f8524bab98c6d9ce2adf407e",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 83816
+        },
+        {
+          "slot": "material-detail",
+          "public_path": "/images/products/gallery/custom-logo-design/custom-logo-design-material-detail-v1-1200w.webp",
+          "alt": "Illustrative Original logo vector curves, colour chips and layout detail with generous space",
+          "source_sha256": "e51b88e8d7881d11f4640b2e0102d82eafb2390b583badaf45bd272a85079428",
+          "delivery_sha256": "95a78c0953f588586e6ac30a6da90cb2bcd07dc0d8995a7bfd9a2fd6be95a30c",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 95632
+        },
+        {
+          "slot": "overview",
+          "public_path": "/images/products/gallery/custom-logo-design/custom-logo-design-overview-v1-1200w.webp",
+          "alt": "Illustrative Fictional new botanical studio identity presented as expressive sketch-to-mark composition",
+          "source_sha256": "de83f32c671d698e7ce5acbddbf845f8aa8b006ae68adae09e845518fc75254f",
+          "delivery_sha256": "0c1509ef8a0e09c1e46ad8996da53900506af991c9db9dcc0a88a49e5ef0ce31",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 93308
+        }
+      ]
+    },
+    {
+      "slug": "custom-shape-signs",
+      "hero": {
+        "public_path": "/images/products/product/coroplast-diecut-sasknation-key-800x600.webp",
+        "alt": "Original Custom-Shape Signs product image.",
+        "width": 800,
+        "height": 600,
+        "bytes": 47612,
+        "sha256": "831fc7fa02a7dee6a6d63c88742b1ad15d1a01e93a92a308feea714ab502758d"
+      },
+      "assets": [
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/custom-shape-signs/custom-shape-signs-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative Forest-green leaf-shaped ACP concept, thin dark core/aluminum skins; quote/material confirmation before release",
+          "source_sha256": "907acf0f7069a921d1c13a4584b47089cedfb16af51df2be57b969d1829eb325",
+          "delivery_sha256": "d30c76d5f95cc568eac85eea4f1c3346587221be85d35b16ae77dd6ef651dc00",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 46490
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/custom-shape-signs/custom-shape-signs-application-v1-1200w.webp",
+          "alt": "Illustrative Fictional outdoor frozen-treat counter with securely supported shaped sign",
+          "source_sha256": "d23d8fef304ec5eb7139822b7a102840da18cee1b6f6e1008bd04005d1d92f00",
+          "delivery_sha256": "a90a4abbb4d9055376c4ff459242182b0f161d0d45e8dd14f223a1cc40715edf",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 108072
+        },
+        {
+          "slot": "material-detail",
+          "public_path": "/images/products/gallery/custom-shape-signs/custom-shape-signs-material-detail-v1-1200w.webp",
+          "alt": "Illustrative Visible coroplast cut-edge flutes following broad manageable contour",
+          "source_sha256": "cb907b655d949397cedbef33ee1922667aa75a7332b668ab4d1b9f66f05f0bcd",
+          "delivery_sha256": "50af014e71d78997f658586625237b3df7c4fe4293d84e397c827f846317d0f3",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 78372
+        }
+      ]
+    },
+    {
+      "slug": "door-hangers",
+      "hero": {
+        "public_path": "/images/products/product/brochure-flat-trifold-800x600.webp",
+        "alt": "Original Rack Cards product image.",
+        "width": 800,
+        "height": 600,
+        "bytes": 48704,
+        "sha256": "8167aded7eece56329e68eff430a73cd8aa8cb452fc5abccf019ac270b5caa28"
+      },
+      "assets": [
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/door-hangers/door-hangers-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative Mint and cream pet-care alternate door-hanger artwork, clearly labelled concept outside image",
+          "source_sha256": "28c43b839ef5ee47b1e2dc46d80fe88c5e4ecd1644bf478edaf07d61ca0eabe4",
+          "delivery_sha256": "3ca23f60b12debddd3a3d5e6ce7e4835474e8576648a8dad996f14c9fe1dfc31",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 75228
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/door-hangers/door-hangers-application-v1-1200w.webp",
+          "alt": "Illustrative Conceptual hanger naturally suspended from ordinary door knob through opening",
+          "source_sha256": "d4be7faa45460486e35f124cd378e108b71cd7fa8511205d2c37da03e5580666",
+          "delivery_sha256": "01e08158ee8bb5980f00539517f031e521a49a29ee80f5e5ce0e6caa40ae2054",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 57112
+        },
+        {
+          "slot": "material-detail",
+          "public_path": "/images/products/gallery/door-hangers/door-hangers-material-detail-v1-1200w.webp",
+          "alt": "Illustrative Top hole and slit detail in thin gloss stock, no impossible unbroken attachment",
+          "source_sha256": "b875dbb086bc68eaa62320cc07d316888a91f16776ff759f7ff0b96f78222824",
+          "delivery_sha256": "e204cd0d0963da89dd80de5b7a3e781dffa8b2562717d90b8e9fba4b0f123f7a",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 67008
+        }
+      ]
+    },
+    {
+      "slug": "flyers",
+      "hero": {
+        "public_path": "/images/products/product/flyers-stack-800x600.webp",
+        "alt": "Original Flyers product image.",
+        "width": 1536,
+        "height": 1024,
+        "bytes": 51604,
+        "sha256": "ca8e5d15607119b6edd7b738bf3303dc56abf271225a3ee02e4ea652fd71e25c"
+      },
+      "assets": [
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/flyers/flyers-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative High-energy acid-yellow/black cycling event flyer with different imagery and hierarchy",
+          "source_sha256": "049963283f18ef6f59d19f2fec63919148ae5726e5f69c42ba7f89794000ddfe",
+          "delivery_sha256": "2c6c207104b18ad76b6d1db72a548640659a81dfa30de4f08e423f3d636953fb",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 120176
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/flyers/flyers-application-v1-1200w.webp",
+          "alt": "Illustrative Fictional community art class flyer on a cafe information counter",
+          "source_sha256": "a9e396339461828854f10d87c3af6d8b0b1791aa873dfae977d699c49a4bab3d",
+          "delivery_sha256": "5d32c5616b44f3882d0b6971cb972b1457653c91683ae7ef39b0a485ecd12088",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 111512
+        },
+        {
+          "slot": "material-detail",
+          "public_path": "/images/products/gallery/flyers/flyers-material-detail-v1-1200w.webp",
+          "alt": "Illustrative Lifted corner and thin gloss paper edge with controlled highlight",
+          "source_sha256": "9f68b21dded8f07448f0cb075c7e3773c860bb4719dd70e64764f62dfb054388",
+          "delivery_sha256": "61e45dd0ed781b062271fd5eebd18693666ea037023c6efe6ec9adc25e40f140",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 81184
+        }
+      ]
+    },
+    {
+      "slug": "foamboard-displays",
+      "hero": {
+        "public_path": "/images/products/product/foamboard-display-800x600.webp",
+        "alt": "Original Foamboard Displays product image.",
+        "width": 1536,
+        "height": 1024,
+        "bytes": 118504,
+        "sha256": "6b7ea1bba7c1cfab624f5c609d11d8b81f734729f6915f3543a69902d18bc8ef"
+      },
+      "assets": [
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/foamboard-displays/foamboard-displays-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative Burnt-orange gallery event display leaning safely on indoor shelf",
+          "source_sha256": "d66c2f6717a5db01881f47a5ae010b993ae4f1e98de853c34b796326df7e9134",
+          "delivery_sha256": "321294b592cab05c2617325878c0304b519bccece23ac766f04a4a7c954f1c02",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 63536
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/foamboard-displays/foamboard-displays-application-v1-1200w.webp",
+          "alt": "Illustrative Conference reception easel display in a calm sunlit indoor foyer",
+          "source_sha256": "15680dcc85cc829e0c3739b816806ee3560edf3212fea4d968cbec2e1e24f2ce",
+          "delivery_sha256": "582db206e10ef7275ef50e5f56e35c3327d8037a0afcb8e40b37824eebb05b48",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 64852
+        },
+        {
+          "slot": "material-detail",
+          "public_path": "/images/products/gallery/foamboard-displays/foamboard-displays-material-detail-v1-1200w.webp",
+          "alt": "Illustrative Close clean white 5mm board edge and printed face without magnifying unverified core",
+          "source_sha256": "dd8320b11fcaea10a52eb2c9a4aa9dca31b8c2c12ed7e2406a10dc6a33852473",
+          "delivery_sha256": "74c672275904602b427293d857435c4556424a6fffad9c5af30649f5b7b4a117",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 60654
+        },
+        {
+          "slot": "overview",
+          "public_path": "/images/products/gallery/foamboard-displays/foamboard-displays-overview-v1-1200w.webp",
+          "alt": "Illustrative Indoor fictional botanical exhibition display on easel, full panel shown",
+          "source_sha256": "a16830bfdcaab7fd912c82321534160860b423574a4c7c92b798d45c93be9c31",
+          "delivery_sha256": "9cdde0448e4cc8076f33f4d5253d324d2c59125d390ac2cb9d4cecb8a356c719",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 83114
+        }
+      ]
+    },
+    {
+      "slug": "freezer-labels",
+      "hero": {
+        "public_path": "/images/products/product/freezer-labels-product-800x600.webp",
+        "alt": "Original Freezer Labels product image.",
+        "width": 1448,
+        "height": 1086,
+        "bytes": 198732,
+        "sha256": "a0d5c36b9fefe91e57fb92942bf71288ef8b1dbbc6ec639c5d89f2df0af24a73"
+      },
+      "assets": [
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/freezer-labels/freezer-labels-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative Ochre/cream bakery dough label on a smooth freezer-safe tub",
+          "source_sha256": "f81088b36ad20935b27ec1bb5df9cb32929328094070302b21e6355d41fd88a0",
+          "delivery_sha256": "f7a85fdb378b6025e765654dcdbf829b5a212c3c46d60b50bd53fa71f7ed7fbc",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 138404
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/freezer-labels/freezer-labels-application-v1-1200w.webp",
+          "alt": "Illustrative Freezer Labels application sample.",
+          "source_sha256": "d394b0bb5e12c3de4db2fb2a88beec807c6c81adab0c7a3f9cd84c40983fa987",
+          "delivery_sha256": "dc6c19c1f6a371251bc28921cce1f2c568cf5de82e998854997fd4ad9fc75b88",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 100150
+        },
+        {
+          "slot": "material-detail",
+          "public_path": "/images/products/gallery/freezer-labels/freezer-labels-material-detail-v1-1200w.webp",
+          "alt": "Illustrative Dry labelled container before freezing; smooth firmly attached label corners",
+          "source_sha256": "d90cd31ad7cd1a251875af27da2f881054b15c57c16c18a4a21b8232bdc84dab",
+          "delivery_sha256": "6cfdcda5b5523061a432c27f5775791e37669772d3cea60f900055c00d47a9b1",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 72894
+        },
+        {
+          "slot": "overview",
+          "public_path": "/images/products/gallery/freezer-labels/freezer-labels-overview-v1-1200w.webp",
+          "alt": "Illustrative Fictional meal-prep container with clean flat gloss label on lid",
+          "source_sha256": "5ba3db2ab82d0457023f6da6b5ab6f4bf6d877578131cf232a9e1307c24070e0",
+          "delivery_sha256": "86a0782b034975d8efe7660a0c0f2333c89cdcfedf9415a0bd9b77a06bc62af8",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 125756
+        }
+      ]
+    },
+    {
+      "slug": "image-upscale",
+      "hero": {
+        "public_path": "/images/products/product/image-upscale-product-800x600.webp",
+        "alt": "Original Image Upscale & Enhancement product image.",
+        "width": 1448,
+        "height": 1086,
+        "bytes": 61330,
+        "sha256": "67d03e5e67e1f2536cecc7a48a7671e4375ab9e927ee95e87465d93914735754"
+      },
+      "assets": [
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/image-upscale/image-upscale-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative Original food still-life enhancement workspace, no fabricated recovered texture",
+          "source_sha256": "cbf6bf6dd005caad36f65284fb2513ff9b539abba2bcd6ed4db9a48a840db0f5",
+          "delivery_sha256": "db8c4496c00ff891ecb75ef306be1c53d1827e5bbd4106f7010fa3c9a79ea5eb",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 139910
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/image-upscale/image-upscale-application-v1-1200w.webp",
+          "alt": "Illustrative Print-size preview of same original landscape image on a matte poster mockup",
+          "source_sha256": "c0a6dd57f7b70341c9912e13a82b0d3793619c2df7231e2b604bdae576732ba5",
+          "delivery_sha256": "c00920735711ec72542e7210d2bac529a1c88281bfd8c2d96381cd215c9fee0a",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 142242
+        },
+        {
+          "slot": "material-detail",
+          "public_path": "/images/products/gallery/image-upscale/image-upscale-material-detail-v1-1200w.webp",
+          "alt": "Illustrative Matching region shown at equal magnification; produce comparison from same source, never two invented scenes",
+          "source_sha256": "4d21e537cee1b13ba5463452a8d70a07a509ae7d8254fbf13a64903d25298000",
+          "delivery_sha256": "f2912e24eab2db4b71d007d816facaddcb18687a4599a18ee84bbf7985fe7d15",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 134960
+        }
+      ]
+    },
+    {
+      "slug": "logo-vectorization",
+      "hero": {
+        "public_path": "/images/products/product/logo-vectorization-product-800x600.webp",
+        "alt": "Original Logo Vectorization product image.",
+        "width": 1448,
+        "height": 1086,
+        "bytes": 100616,
+        "sha256": "298e8493a7c9beb31a5bbebd714a02def1de2510cfaaef911003870662066449"
+      },
+      "assets": [
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/logo-vectorization/logo-vectorization-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative Alternate original geometric flower mark; before/after derived from same source needed for honest comparison",
+          "source_sha256": "63011c9c754fe92d0c4b22d67c9b8e601f1abb6f2cbef8b43d3ed275e30c803a",
+          "delivery_sha256": "cb5cda5bbede90a291144019a1f571094e75faed4cee6b6d9e48c934b7b7aa1e",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 64890
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/logo-vectorization/logo-vectorization-application-v1-1200w.webp",
+          "alt": "Illustrative Fictional mark consistently applied to card and sign design mockups",
+          "source_sha256": "33009a2bf5f04f8bb69e98d1fc6a74acc407f238eb79797f56850125a2ec840e",
+          "delivery_sha256": "e5aa2bc25cc79e338e4b7f4e590b222af4007ca6da03d7d71af6b82750265dd0",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 53694
+        },
+        {
+          "slot": "material-detail",
+          "public_path": "/images/products/gallery/logo-vectorization/logo-vectorization-material-detail-v1-1200w.webp",
+          "alt": "Illustrative Logo Vectorization material detail sample.",
+          "source_sha256": "08ceabbb3b791e70295c09a5f9f2d187714b9887b30f4039de436be11733782f",
+          "delivery_sha256": "3123c4fc95a6d2c8d8dd47d94d85e5a50cbcae3a7b0384df4bdd6bb91ff1ab2a",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 64282
+        },
+        {
+          "slot": "overview",
+          "public_path": "/images/products/gallery/logo-vectorization/logo-vectorization-overview-v1-1200w.webp",
+          "alt": "Illustrative Original fictional geometric bird mark in a design workspace, crisp vector result on card",
+          "source_sha256": "6fe3cffad694cef29cea065fe2b0cd9866811e6012de20e88f66a0d1a8a7fe6d",
+          "delivery_sha256": "f69594407d48d147ccf71dd0c1ea8c54af6aa7e838cf61a4716879911d62f8e6",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 104704
+        }
+      ]
+    },
+    {
+      "slug": "magnet-calendars",
+      "hero": {
+        "public_path": "/images/products/product/magnet-calendars-800x600.webp",
+        "alt": "Original Magnet Calendars product image.",
+        "width": 800,
+        "height": 600,
+        "bytes": 65224,
+        "sha256": "3bd353fc20994e5b0f61d743312b0f716280b7301c9f87d31518999e14634046"
+      },
+      "assets": [
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/magnet-calendars/magnet-calendars-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative Forest-green gardening season planner magnet with visual blocks; final dates deferred",
+          "source_sha256": "ec76e6b863baf51da809660bb76f2319b85efc210685626bb866d71cfc5ce5c1",
+          "delivery_sha256": "7453dd13a2b0653bb17e2e21f7363c129f441ccc9c9ed2ad6f0d9359fc72dc06",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 60516
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/magnet-calendars/magnet-calendars-application-v1-1200w.webp",
+          "alt": "Illustrative Magnet schedule on clean steel office cabinet; surrounding negative space",
+          "source_sha256": "e5fea2250764feda878f0174c86a9f67019a032521c7a0ed35d0a7b1d93e8b9b",
+          "delivery_sha256": "9117810275c44b1c7cb30b0ff357f0a952b657cbb1296387d9ad6e492ff1fabe",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 38856
+        },
+        {
+          "slot": "material-detail",
+          "public_path": "/images/products/gallery/magnet-calendars/magnet-calendars-material-detail-v1-1200w.webp",
+          "alt": "Illustrative Flexible thin magnetic back edge and smooth gloss printed face",
+          "source_sha256": "d32133c293025713f5e8a533a0dd06d39bda6bbaf1a3c25f902095ed47e59143",
+          "delivery_sha256": "f7888ce074e77d943f70f2821f9a67ba8fa9a4e4be1345b9377e052250cc8f82",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 65190
+        }
+      ]
+    },
+    {
+      "slug": "photo-posters",
+      "hero": {
+        "public_path": "/images/products/product/photo-posters-800x600.webp",
+        "alt": "Original Photo Posters product image.",
+        "width": 800,
+        "height": 600,
+        "bytes": 47294,
+        "sha256": "1da3b4c300c1a13fa51f87b250908a3a3427e1bf33368cfed75176175fdb4bd2"
+      },
+      "assets": [
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/photo-posters/photo-posters-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative Large graphic botanical photography poster with emerald palette; original imagery",
+          "source_sha256": "e388c895e091f81466a262f5c7c4dde15318113e46484fd509120daf806f2063",
+          "delivery_sha256": "d1fe7c87f8808a96685fa890f676715f798641dad7e5793986971b19a6369fd4",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 127656
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/photo-posters/photo-posters-application-v1-1200w.webp",
+          "alt": "Illustrative Original landscape print in optional illustrative frame on quiet indoor wall",
+          "source_sha256": "3317761ee6396ec1db7e7e0d3cf2bdc15272c136ddb74447c4924c5171c3544c",
+          "delivery_sha256": "2ba76827d229c99d4a4f19221705ac124f10c3078387823bf7cab7cf676087ae",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 119198
+        },
+        {
+          "slot": "material-detail",
+          "public_path": "/images/products/gallery/photo-posters/photo-posters-material-detail-v1-1200w.webp",
+          "alt": "Illustrative Close matte poster surface and thin gently curled edge, no glass or canvas texture",
+          "source_sha256": "ae546ca54e6a6b3feed09660b130a3ea7ee26cc219a5d57694c37752cc3878f0",
+          "delivery_sha256": "1194d17f51e922437000962dbc1117e91ab39121debc13ea3a416d2d8a8d8c11",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 92120
+        }
+      ]
+    },
+    {
+      "slug": "product-labels",
+      "hero": {
+        "public_path": "/images/products/product/product-labels-product-800x600.webp",
+        "alt": "Original Product Labels product image.",
+        "width": 1448,
+        "height": 1086,
+        "bytes": 147284,
+        "sha256": "e0fe21d04aa50d70c854040e439956dd2052f0711c81a96cc735cde5d55cfb60"
+      },
+      "assets": [
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/product-labels/product-labels-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative Indigo and cream botanical tea packaging label on smooth tin",
+          "source_sha256": "b79aec940c223767ba0cf13265e873a335d8b55e9413c20640f85b1bed57c084",
+          "delivery_sha256": "af1b98df7f1c9af80dd8fc911ad9a219fe852e8fc550e405285e5e9bf99baee1",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 101522
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/product-labels/product-labels-application-v1-1200w.webp",
+          "alt": "Illustrative Small producer packing desk with neatly labelled jars and sparse props",
+          "source_sha256": "d000aecec7565e17a12cf369a1fdba55e49dee6c197c8d03c3fce57968bbb217",
+          "delivery_sha256": "a1c188b919785d17d8b19b2553218590345da38732a9b70dc7ceda14e5471f86",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 125164
+        },
+        {
+          "slot": "material-detail",
+          "public_path": "/images/products/gallery/product-labels/product-labels-material-detail-v1-1200w.webp",
+          "alt": "Illustrative Gloss label edge conforming smoothly to cylindrical jar, no paper fibres",
+          "source_sha256": "7269812ca3769b8c39b0843c3bb3c8e140e5368cb143818f9bb910737e7340f7",
+          "delivery_sha256": "bf4a04bc65f1c6367d04e35305c65ee03c9663d4a4240bf5eecafe5236fc2241",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 82376
+        },
+        {
+          "slot": "overview",
+          "public_path": "/images/products/gallery/product-labels/product-labels-overview-v1-1200w.webp",
+          "alt": "Illustrative Fictional tomato preserve labels on jars plus one loose label, clear product-first composition",
+          "source_sha256": "6801f369d0d84bd7c9df43785d96729d48d98421e9a90e35932b97d37537eef7",
+          "delivery_sha256": "86829ad49b1e8a736590dc7538ef9389e14fba9c46bf5caa995c44f0dcc154be",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 139806
+        }
+      ]
+    },
+    {
+      "slug": "rack-cards",
+      "hero": {
+        "public_path": "/images/products/product/brochure-flat-trifold-800x600.webp",
+        "alt": "Original Rack Cards product image.",
+        "width": 800,
+        "height": 600,
+        "bytes": 48704,
+        "sha256": "8167aded7eece56329e68eff430a73cd8aa8cb452fc5abccf019ac270b5caa28"
+      },
+      "assets": [
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/rack-cards/rack-cards-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative Burgundy/cream restaurant tasting-event rack card with different visual hierarchy",
+          "source_sha256": "6672befcd7e0c8b21bc75803c66476b96c92af62d20bbdf1895ad4f059335891",
+          "delivery_sha256": "a944c13e3524707f253f788bf5088ea57e216c85ba50c8b210408992580803b4",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 94326
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/rack-cards/rack-cards-application-v1-1200w.webp",
+          "alt": "Illustrative 4x9in cards in matching acrylic lobby rack, image unobstructed",
+          "source_sha256": "834b8c2c984b0f5098e8d240a91d74317a5630181c6d805b73b6bc28ab9fd807",
+          "delivery_sha256": "59a37a6225fc1b3a24a002e0ad1e385b46dac6c3b93f7422c7af6870ef7120bc",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 85406
+        },
+        {
+          "slot": "material-detail",
+          "public_path": "/images/products/gallery/rack-cards/rack-cards-material-detail-v1-1200w.webp",
+          "alt": "Illustrative Close thin gloss rack-card corners in a modest stack",
+          "source_sha256": "c90c3260078052d8b45cfb0253332289f8f3da5d81eb59b3bd6dd80656c3369f",
+          "delivery_sha256": "a0f6b32ba1237b99caa8b86bfb9e4bc7082527c82832bc21b77ddd5273e2d9d7",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 95510
+        },
+        {
+          "slot": "overview",
+          "public_path": "/images/products/gallery/rack-cards/rack-cards-overview-v1-1200w.webp",
+          "alt": "Illustrative Tall narrow fictional walking-tour rack cards with full trim shown",
+          "source_sha256": "352c1eb9c7b55b2d94bff5686c13901001de6420308d4c34b24b4e4583ada177",
+          "delivery_sha256": "568d9e3e7cef39756061de162da93a23bf8622624e6162f77dc2526c5f848053",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 145532
+        }
+      ]
+    },
+    {
+      "slug": "roll-labels",
+      "hero": {
+        "public_path": "/images/products/product/roll-labels-product-800x600.webp",
+        "alt": "Original Roll Labels product image.",
+        "width": 1448,
+        "height": 1086,
+        "bytes": 197708,
+        "sha256": "0cb7bfa301114938ed02f22566eb589fb81e01e8702a6b514a97157214a33d23"
+      },
+      "assets": [
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/roll-labels/roll-labels-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative Alternate plum/cream bulk label artwork as flat sheets; actual roll reference held pending specification",
+          "source_sha256": "1dc91d29e73abec286629655d96165df0b7fb80994ba1d309710489c0c3bd0a9",
+          "delivery_sha256": "8a39525784627403147a0f12f0c24fef00ada0ec1f148753cdd8be8881e90c52",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 74066
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/roll-labels/roll-labels-application-v1-1200w.webp",
+          "alt": "Illustrative Small producer manually applying sheet-supplied labels to smooth containers",
+          "source_sha256": "eaf240ce013b1aecaceeaffeb2d32add59410fb61ae7cfbafa7d971bee4c5cf9",
+          "delivery_sha256": "ee4d8f9987547e3ace7b1ab4d5789596f22cbbdd5f3221bdbbf23969b1402294",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 78262
+        },
+        {
+          "slot": "material-detail",
+          "public_path": "/images/products/gallery/roll-labels/roll-labels-material-detail-v1-1200w.webp",
+          "alt": "Illustrative Close one die-cut label peeling from flat release sheet, consistent repeated artwork",
+          "source_sha256": "65665d4fa44c205ae3ecd7301349825ee30fa27fd198b665e362ae693c80cacf",
+          "delivery_sha256": "8552737fca9abc37f4ee0887053c7187487339fbac13b28f572b0383e1ba5472",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 83580
+        },
+        {
+          "slot": "overview",
+          "public_path": "/images/products/gallery/roll-labels/roll-labels-overview-v1-1200w.webp",
+          "alt": "Illustrative Orderly sheets of repeated original fictional pantry labels, broad clear margins",
+          "source_sha256": "5218fc5edba31d3a302192e3c2ee07e3fa72b9a146f9f0b8bdb137951cb7640a",
+          "delivery_sha256": "73deaa722e77d9a277b707eeb4b99780f13b4d794d04003ce94bd9694433795f",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 106824
+        }
+      ]
+    },
+    {
+      "slug": "stickers",
+      "hero": {
+        "public_path": "/images/products/product/stickers-800x600.webp",
+        "alt": "Original Vinyl Stickers product image.",
+        "width": 800,
+        "height": 600,
+        "bytes": 61964,
+        "sha256": "bba7e97e4838909a096412aca9fbd0df20835ac1ae91030a879dd017d8fbeee2"
+      },
+      "assets": [
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/stickers/stickers-application-v1-1200w.webp",
+          "alt": "Illustrative Fictional juice-studio sticker neatly adhered to a smooth reusable bottle",
+          "source_sha256": "423d7a97baabdfe278c74646f4e2548d8b6d8184032b9ede431c6f8cfa62a4ea",
+          "delivery_sha256": "9317284ada354136f36d792d8735f8b6cdb43cf5aedbc680d58ff644cf506a32",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 57290
+        },
+        {
+          "slot": "material-detail",
+          "public_path": "/images/products/gallery/stickers/stickers-material-detail-v1-1200w.webp",
+          "alt": "Illustrative Macro on a square vinyl sticker edge and backing, no thick card",
+          "source_sha256": "506f3bef2024769b799b98489d9998c95f970a3c9ccf65d0e0656decb075da72",
+          "delivery_sha256": "d82340feb4bb92ee4f18ccc6dffd76766a7c73c506d9536b56d6f80f8b5163c8",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 56806
+        }
+      ]
+    },
+    {
+      "slug": "vehicle-magnets",
+      "hero": {
+        "public_path": "/images/products/product/vehicle-magnets-800x600.webp",
+        "alt": "Original Vehicle Magnets product image.",
+        "width": 1536,
+        "height": 1024,
+        "bytes": 103214,
+        "sha256": "95237719d23a5ea795eda612afbac7a3348feb0827a8fa9b9b7f2eabb781e2ec"
+      },
+      "assets": [
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/vehicle-magnets/vehicle-magnets-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative Orange/black locksmith identity on magnet on flat steel work truck door",
+          "source_sha256": "b6f9b1473822d87f873204759960a687ffa903f2f1e11f969dcbf06d801fb70d",
+          "delivery_sha256": "593a85e6c525db6b1f4609ebbf43f6bd1e194e8585d0da8fb59cd0729d6c4777",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 59832
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/vehicle-magnets/vehicle-magnets-application-v1-1200w.webp",
+          "alt": "Illustrative Rectangular fictional landscape contractor magnet fully contacting flat white steel van door",
+          "source_sha256": "69f420b158a173f8e1eb77cb4c2235f59a07784b3f01f22fda6783e2e0deb8e4",
+          "delivery_sha256": "f7d225725db2873095946d0ca65ec94aa384472134db9b65ebf96ff6107b510c",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 47670
+        },
+        {
+          "slot": "material-detail",
+          "public_path": "/images/products/gallery/vehicle-magnets/vehicle-magnets-material-detail-v1-1200w.webp",
+          "alt": "Illustrative Separate gently curved magnet showing dark magnetic back; no adhesive liner",
+          "source_sha256": "635ed0eb6781c4dee9e63915c345a5a5c80d4a012f19db5bb86e9ea185bf4835",
+          "delivery_sha256": "82e466e1338fc0c4129196367ca9056a07d7eb374297f5244807709faac5ef5a",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 51168
+        },
+        {
+          "slot": "overview",
+          "public_path": "/images/products/gallery/vehicle-magnets/vehicle-magnets-overview-inherited-v1-1200w.webp",
+          "alt": "Illustrative Preserve accepted removable vehicle magnet concept",
+          "source_sha256": "17c6e891b99b451955d6a6cbc6b6398a8628b77536fccd51f15b35ae0214698d",
+          "delivery_sha256": "2ed21168c165c0d82718e6fecb72f4176d2362ccddfe03642b6f312a750cf7d5",
+          "format": "webp",
+          "width": 1200,
+          "height": 800,
+          "bytes": 52876
+        }
+      ]
+    },
+    {
+      "slug": "vinyl-banners",
+      "hero": {
+        "public_path": "/images/products/product/banner-vinyl-colorful-800x600.webp",
+        "alt": "Original Vinyl Banners product image.",
+        "width": 1536,
+        "height": 1024,
+        "bytes": 78444,
+        "sha256": "b0f5c0fd11f1f8de975d589f11e0329701b22739c163161dd6e011c0a2457bcd"
+      },
+      "assets": [
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/vinyl-banners/vinyl-banners-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative A bold burnt-orange local music event layout, broad typography and graphic rhythm",
+          "source_sha256": "a82f0a09a044c3d30a965dcdea0d1d28e9b7e4b0eec1ac8a688ba80749b9b41b",
+          "delivery_sha256": "b6c410c2dbe23cd9c9b44dc84e816c31d13cfee3b44022210f85327b4965890e",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 164372
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/vinyl-banners/vinyl-banners-application-v1-1200w.webp",
+          "alt": "Illustrative Horizontal fictional pottery market banner secured evenly on a courtyard fence",
+          "source_sha256": "38ef228348f6639b9d2d886c921826d9ca66244e79789495e0d8166151e143e2",
+          "delivery_sha256": "3a4d7cc511d215d55d08abf8b75a7aadb7114243d45d159743fdd1325447c047",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 166520
+        },
+        {
+          "slot": "overview",
+          "public_path": "/images/products/gallery/vinyl-banners/vinyl-banners-overview-inherited-v1-1200w.webp",
+          "alt": "Illustrative Preserve accepted colourful horizontal banner concept",
+          "source_sha256": "5a249781faa733d368c2ecba439a55b2ae0b63c1851e0a1135f122a7113825db",
+          "delivery_sha256": "83c232e7fa9f5cbb29d2d6293423c98090c958682096f674b218d477ae8c3a3c",
+          "format": "webp",
+          "width": 1200,
+          "height": 800,
+          "bytes": 130822
+        }
+      ]
+    },
+    {
+      "slug": "vinyl-lettering",
+      "hero": {
+        "public_path": "/images/products/product/vinyl-lettering-800x600.webp",
+        "alt": "Original Vinyl Lettering product image.",
+        "width": 800,
+        "height": 600,
+        "bytes": 38422,
+        "sha256": "c565ffa373249b7276ae9074eed9e51faf6d4a86fb8ff55885a2da377beff510"
+      },
+      "assets": [
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/vinyl-lettering/vinyl-lettering-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative Red cut geometric lettering on clear shop window, restrained alternate composition",
+          "source_sha256": "448b55a7669ec889b11be20f6bee39dc934a1ecc18fb7a351ae4ccdafc176327",
+          "delivery_sha256": "7c88d438262e255c1737bf575047f7f95977ee6f2025b832242fd6b6193fc489",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 69750
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/vinyl-lettering/vinyl-lettering-application-v1-1200w.webp",
+          "alt": "Illustrative Black vinyl unit-name lettering on flat light-painted metal door",
+          "source_sha256": "ad1d538bf09363c48de54bd6821a5ad93714c22c26bdb088ebed55d5011bc6fe",
+          "delivery_sha256": "92f027a9e0c979782c50311c1736c57f814dc0b5f412c5f2c4cff375bb2b3a2b",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 40524
+        },
+        {
+          "slot": "material-detail",
+          "public_path": "/images/products/gallery/vinyl-lettering/vinyl-lettering-material-detail-v1-1200w.webp",
+          "alt": "Illustrative Transfer tape lifted away from single-colour letter edges; no floating or printed backing",
+          "source_sha256": "1a99fe27d1b1221d4ef4e7f82c8d7ceb0560a205abbd08f8c92dd7d9a84633b8",
+          "delivery_sha256": "b5abfc09de24cd8911747cd2fd96aec5f5326f274d538f4bca0e91cca6855b1f",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 85088
+        },
+        {
+          "slot": "overview",
+          "public_path": "/images/products/gallery/vinyl-lettering/vinyl-lettering-overview-v1-1200w.webp",
+          "alt": "Illustrative Fictional studio hours and simple white cut wordmark on glass",
+          "source_sha256": "c6305e83fefbc111cf8d494cdd2b66a69044de6bdc08917114e31a64cb08c9ba",
+          "delivery_sha256": "9c9374ae5305ac6be515ab25141122e5f75db99d4b1b3c8f304644ec4a738e0f",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 87078
+        }
+      ]
+    },
+    {
+      "slug": "window-perf",
+      "hero": {
+        "public_path": "/images/products/product/perf-vinyl-interior-seethrough-800x600.webp",
+        "alt": "Original Perforated Window Vinyl product image.",
+        "width": 800,
+        "height": 600,
+        "bytes": 112154,
+        "sha256": "d11a345cbf500845dd44fc3b859974b34a2514567e05f3584c3a5928f53920f7"
+      },
+      "assets": [
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/window-perf/window-perf-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative Fresh green produce-shop graphic on one panel of storefront glass",
+          "source_sha256": "e907f010ace2e67fb8d66ed321f2524f5e2b659bd39e2b011cba3aff8c1a4b5f",
+          "delivery_sha256": "fef975c654c634103bfd63119c44ed648110cb77aabd20a6c0b694f6b5259953",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 210464
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/window-perf/window-perf-application-v1-1200w.webp",
+          "alt": "Illustrative Inside view through same perforated storefront panel, daylight outside, screen-like visibility",
+          "source_sha256": "6af8b9a7767400be615a70621b9c5489b91179d7433bd0e0eaf17ac45ca06b60",
+          "delivery_sha256": "f9d60db4b4cc0ee5d2bf0849e85eed47d8b59e433cba9bb147f44f9cf1712e4f",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 329680
+        },
+        {
+          "slot": "material-detail",
+          "public_path": "/images/products/gallery/window-perf/window-perf-material-detail-v1-1200w.webp",
+          "alt": "Illustrative Macro of physically regular real perforation holes interrupting the printed ink",
+          "source_sha256": "78584c95ede8272d9b43fe127f15f852c46c21c5d87c2c6dc86239da53fbe748",
+          "delivery_sha256": "3b081d2f087c22946257b7e1134362185f7ad2f5b7c496fecc0a40f153ebe967",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 225356
+        },
+        {
+          "slot": "overview",
+          "public_path": "/images/products/gallery/window-perf/window-perf-overview-v1-1200w.webp",
+          "alt": "Illustrative Fictional fitness-studio perforated glass graphic viewed from street",
+          "source_sha256": "95b9fc1aea901ab5f1d29ee143b83aaee0ab61c64dff4488961afa6dc95db9db",
+          "delivery_sha256": "b581168cbe881cc50683b4df153aab51babea8b54b1e2a10ee2bd2465c2e7cd7",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 202590
+        }
+      ]
+    }
+  ]
+}
