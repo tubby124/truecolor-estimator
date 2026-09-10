@@ -325,13 +325,41 @@ const FULL_NOINDEX_DISPLAY_GALLERIES: Readonly<Record<string, readonly ProductDi
   ],
 };
 
+// Owner-selected visual leads for the catalogue and product-page gallery.
+// These do not alter ProductContent.heroImage, so the reviewed Merchant feed
+// image and all SEO-facing hero consumers remain on their existing asset.
+const PROMOTED_DISPLAY_LEAD_SOURCES: Readonly<Record<string, string>> = {
+  "acp-signs": "/images/products/gallery/acp-signs/acp-signs-application-v1-1200w.webp",
+  "business-cards": "/images/products/gallery/business-cards/business-cards-application-v1-1200w.webp",
+  "flyers": "/images/products/gallery/flyers/flyers-application-v1-1200w.webp",
+  "foamboard-displays": "/images/products/gallery/foamboard-displays/foamboard-displays-application-v1-1200w.webp",
+  "vehicle-magnets": "/images/products/gallery/vehicle-magnets/vehicle-magnets-application-v1-1200w.webp",
+  "vinyl-banners": "/images/products/gallery/vinyl-banners/vinyl-banners-application-v1-1200w.webp",
+  "vinyl-lettering": "/images/products/gallery/vinyl-lettering/vinyl-lettering-overview-v1-1200w.webp",
+};
+
+function withPromotedDisplayLead(
+  slug: string,
+  images: readonly ProductDisplayImage[],
+): readonly ProductDisplayImage[] {
+  const source = PROMOTED_DISPLAY_LEAD_SOURCES[slug];
+  if (!source) return images;
+
+  const lead = images.find((image) => image.src === source);
+  return lead ? [lead, ...images.filter((image) => image !== lead)] : images;
+}
+
 export function getProductDisplayGallery(slug: string): readonly ProductDisplayImage[] | undefined {
-  switch (slug) {
-    case "coroplast-signs": return COROPLAST_DISPLAY_GALLERY;
-    case "postcards": return POSTCARDS_DISPLAY_GALLERY;
-    case "retractable-banners": return RETRACTABLE_DISPLAY_GALLERY;
-    case "window-decals": return WINDOW_DECALS_DISPLAY_GALLERY;
-    case "brochures": return BROCHURES_DISPLAY_GALLERY;
-    default: return Object.hasOwn(FULL_NOINDEX_DISPLAY_GALLERIES, slug) ? FULL_NOINDEX_DISPLAY_GALLERIES[slug] : undefined;
-  }
+  const images = (() => {
+    switch (slug) {
+      case "coroplast-signs": return COROPLAST_DISPLAY_GALLERY;
+      case "postcards": return POSTCARDS_DISPLAY_GALLERY;
+      case "retractable-banners": return RETRACTABLE_DISPLAY_GALLERY;
+      case "window-decals": return WINDOW_DECALS_DISPLAY_GALLERY;
+      case "brochures": return BROCHURES_DISPLAY_GALLERY;
+      default: return Object.hasOwn(FULL_NOINDEX_DISPLAY_GALLERIES, slug) ? FULL_NOINDEX_DISPLAY_GALLERIES[slug] : undefined;
+    }
+  })();
+
+  return images ? withPromotedDisplayLead(slug, images) : undefined;
 }
