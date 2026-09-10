@@ -8,6 +8,7 @@ import { getProductDisplayGallery } from "../product-display-galleries";
 import { findChannelClearedImageForOffer, isImageSitemapCleared } from "../image-rights";
 import batchReceipt from "../../../../docs/operations/GALLERY-BATCH-TWO-ASSETS-20260909.json";
 import batchThreeReceipt from "../../../../docs/operations/GALLERY-BATCH-THREE-ASSETS-20260910.json";
+import fullNoindexReceipt from "../../../../docs/operations/GALLERY-FULL-NOINDEX-ASSETS-20260910.json";
 import receipt from "../../../../docs/operations/COROPLAST-PILOT-ASSETS-20260909.json";
 
 describe("isolated coroplast display gallery", () => {
@@ -24,8 +25,8 @@ describe("isolated coroplast display gallery", () => {
     expect(PRODUCTS["coroplast-signs"].galleryImages).toHaveLength(14);
   });
 
-  it("leaves every non-pilot product and the standalone vehicle route on the existing path", () => {
-    for (const slug of [...Object.keys(PRODUCTS).filter((slug) => !["coroplast-signs", "postcards", "retractable-banners", "window-decals", "brochures"].includes(slug)), "vehicle-decals", "unknown", "__proto__"])
+  it("keeps the standalone vehicle route and unknown values out of the product-display registry", () => {
+    for (const slug of ["vehicle-decals", "unknown", "__proto__"])
       expect(getProductDisplayGallery(slug)).toBeUndefined();
   });
 
@@ -123,6 +124,36 @@ for (const product of batchThreeReceipt.products) {
       for (const asset of product.assets) {
         const url = `https://truecolorprinting.ca${asset.public_path}`;
         expect(findChannelClearedImageForOffer(url, "merchant", product.hero.offer_id, asset.delivery_sha256)).toBeUndefined();
+        expect(isImageSitemapCleared(url)).toBe(false);
+      }
+    });
+  });
+}
+
+for (const product of fullNoindexReceipt.products) {
+  describe(`${product.slug} full noindex gallery`, () => {
+    it("keeps the existing hero first and binds every website-only illustration", () => {
+      const images = getProductDisplayGallery(product.slug)!;
+      expect(images.map((image) => image.src)).toEqual([product.hero.public_path, ...product.assets.map((asset) => asset.public_path)]);
+      expect(images[0].src).toBe(PRODUCTS[product.slug].heroImage);
+    });
+
+    it("uses decoded, hash-bound WebP files without granting Merchant or sitemap distribution", async () => {
+      const images = getProductDisplayGallery(product.slug)!;
+      for (const [index, image] of images.entries()) {
+        const bound = index === 0 ? product.hero : product.assets[index - 1];
+        expect(image.alt).toBe(bound.alt);
+        expect(image.alt.length).toBeGreaterThanOrEqual(10);
+        expect(image.alt.length).toBeLessThanOrEqual(125);
+        const bytes = await readFile(path.join(process.cwd(), "public", image.src));
+        const metadata = await sharp(bytes).metadata();
+        expect([metadata.width, metadata.height, metadata.format]).toEqual([image.width, image.height, "webp"]);
+        expect(bytes.length).toBe(bound.bytes);
+        expect(createHash("sha256").update(bytes).digest("hex")).toBe(index === 0 ? product.hero.sha256 : product.assets[index - 1].delivery_sha256);
+      }
+      for (const asset of product.assets) {
+        const url = `https://truecolorprinting.ca${asset.public_path}`;
+        expect(findChannelClearedImageForOffer(url, "merchant", "", asset.delivery_sha256)).toBeUndefined();
         expect(isImageSitemapCleared(url)).toBe(false);
       }
     });
