@@ -25,6 +25,10 @@ All receipt files bind source/delivery hashes, dimensions, bytes, alt text, prov
 | Product/cosmetic/freezer/candle/roll labels, custom-shape signs | Alias, quote-only or named-client/privacy/factual holds | Do not duplicate an offer family or reuse a customer/named-client image; resolve each hold separately. |
 | Logo vectorization, image upscale, custom logo design, artwork setup | Service rather than a physical display-gallery candidate | Excluded from this product-image rollout. |
 
+## Separate indexed-image distribution receipt
+
+The seven previously promoted leads are not a new product-gallery asset wave. Owner later authorized a separate, narrow image-search distribution release: the already-approved ACP signs, business cards, flyers, foamboard, vehicle magnets, vinyl banners and vinyl lettering images appear on their matching indexable service page and each page/image pair is present in the image sitemap. [PR 87](https://github.com/tubby124/truecolor-estimator/pull/87) is live; the [harness receipt](PROMOTED-IMAGE-SEO-HARNESS-20260910.md) owns hashes, delivery evidence, channel boundaries and observation limits. This does not clear other images or change the factual holds above.
+
 ## Next safe wave
 
 No 8–12-product implementation wave is currently eligible: only the five released products have a recorded, visually reviewed, hash-bound website-display asset set. The next safe action is a source-review tranche for the first five unblocked physical families (vinyl banners, ACP signs, flyers, business cards and photo posters). It may become an 8–12-product PR only when at least eight products pass the same asset, factual and rights gates; otherwise the tracker remains a hold rather than widening a weaker set.

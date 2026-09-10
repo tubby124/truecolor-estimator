@@ -763,6 +763,8 @@ PR80 merge0734da25 deployed successfully; 1558 unit and60 browser contracts pass
   labelled illustrative; no customer-job or installation claim is added. Window decals, stickers,
   and product labels remain out of this image-search distribution until dedicated replacement
   artwork is approved.
-- **Next:** Verify production page galleries and image sitemap after deployment, then observe
-  Google Search Console image data separately. Inclusion in an image sitemap is a discovery signal,
-  not proof of indexing, rank, or sales impact.
+- **Harness closeout:** Main CI passed and Railway deployment `dccf2d6d-ef3e-41a0-a222-21e049cccfc3`
+  succeeded. Production page, responsive-image and image-sitemap readback are recorded in
+  `docs/operations/PROMOTED-IMAGE-SEO-HARNESS-20260910.md`; Google Search Console image data
+  remains the next separate observation. Inclusion in an image sitemap is a discovery signal,
+  not proof of indexing, rank, performance, or sales impact.
