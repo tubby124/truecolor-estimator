@@ -127,6 +127,19 @@ const ADDITIONAL_INDUSTRY_HERO_PAGES: {
   { slug: "flyer-printing-yorkton-sk", image: "/images/products/heroes/retail-hero-1200x500.webp", alt: "Flyer printing for Yorkton SK businesses and events — True Color Display Printing" },
 ] as const;
 
+// Owner-approved, rights-cleared catalogue leads rendered in the galleries of
+// their matching canonical service pages. Keep this set narrow: each image is
+// visible on the listed page and has an explicit image-sitemap permission.
+const PROMOTED_CATALOGUE_IMAGE_SEO_PAGES = [
+  { slug: "aluminum-signs-saskatoon", image: "/images/products/gallery/acp-signs/acp-signs-application-v1-1200w.webp", alt: "Illustrative aluminum composite business directory sign mounted outdoors in Saskatoon" },
+  { slug: "business-cards-saskatoon", image: "/images/products/gallery/business-cards/business-cards-application-v1-1200w.webp", alt: "Illustrative two-sided business cards displayed at a reception counter" },
+  { slug: "flyer-printing-saskatoon", image: "/images/products/gallery/flyers/flyers-application-v1-1200w.webp", alt: "Illustrative full-colour flyers displayed on a Saskatoon cafe information counter" },
+  { slug: "foamboard-printing-saskatoon", image: "/images/products/gallery/foamboard-displays/foamboard-displays-application-v1-1200w.webp", alt: "Illustrative foamboard display on an easel at an indoor reception event" },
+  { slug: "vehicle-magnets-saskatoon", image: "/images/products/gallery/vehicle-magnets/vehicle-magnets-application-v1-1200w.webp", alt: "Illustrative removable contractor vehicle magnet applied flat to a white van door" },
+  { slug: "banner-printing-saskatoon", image: "/images/products/gallery/vinyl-banners/vinyl-banners-application-v1-1200w.webp", alt: "Illustrative custom vinyl banner secured on an outdoor courtyard fence" },
+  { slug: "vinyl-lettering-saskatoon", image: "/images/products/gallery/vinyl-lettering/vinyl-lettering-overview-v1-1200w.webp", alt: "Illustrative white cut vinyl storefront hours and wordmark lettering on glass" },
+] as const;
+
 const PAGES = [
   // ══════════════════════════════════════════════════════════════════════════
   // HOMEPAGE
@@ -1548,6 +1561,10 @@ const PAGES = [
         caption: additionalAlt,
       })),
     ],
+  })),
+  ...PROMOTED_CATALOGUE_IMAGE_SEO_PAGES.map(({ slug, image, alt }) => ({
+    loc: `${BASE}/${slug}`,
+    images: [{ loc: `${BASE}${image}`, title: alt, caption: alt }],
   })),
 ];
 

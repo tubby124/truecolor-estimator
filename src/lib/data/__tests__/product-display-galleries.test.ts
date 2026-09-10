@@ -151,7 +151,7 @@ for (const product of fullNoindexReceipt.products) {
       expect(PRODUCTS[product.slug].heroImage).toBe(product.hero.public_path);
     });
 
-    it("uses decoded, hash-bound WebP files without granting Merchant or sitemap distribution", async () => {
+    it("uses decoded, hash-bound WebP files without granting Merchant distribution", async () => {
       const images = getProductDisplayGallery(product.slug)!;
       for (const image of images) {
         const bound = image.src === product.hero.public_path
@@ -172,7 +172,7 @@ for (const product of fullNoindexReceipt.products) {
       for (const asset of product.assets) {
         const url = `https://truecolorprinting.ca${asset.public_path}`;
         expect(findChannelClearedImageForOffer(url, "merchant", "", asset.delivery_sha256)).toBeUndefined();
-        expect(isImageSitemapCleared(url)).toBe(false);
+        expect(isImageSitemapCleared(url)).toBe(asset.public_path === PROMOTED_LEADS[product.slug]);
       }
     });
   });

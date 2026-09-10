@@ -156,6 +156,7 @@ export default function FlyerPrintingSaskatoonPage() {
           <DesignDirectionGrid sections={designDirections} />
         </>
       }
+      galleryImages={[{ src: "/images/products/gallery/flyers/flyers-application-v1-1200w.webp", alt: "Illustrative full-colour flyers displayed on a Saskatoon cafe information counter" }]}
       products={[
         { name: "Flyers", from: "from $45", slug: "flyers" },
         { name: "Brochures", from: "from $70", slug: "brochures" },

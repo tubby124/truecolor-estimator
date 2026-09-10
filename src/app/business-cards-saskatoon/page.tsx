@@ -139,6 +139,7 @@ Volume pricing: 250 for $45, 500 for $65, 1000 for $110. Most orders are ready i
           <DesignDirectionGrid sections={designDirections} />
         </>
       }
+      galleryImages={[{ src: "/images/products/gallery/business-cards/business-cards-application-v1-1200w.webp", alt: "Illustrative two-sided business cards displayed at a reception counter" }]}
       products={[
         { name: "Business Cards", from: "250 for $45", slug: "business-cards" },
         { name: "Flyers", from: "100 for $45", slug: "flyers" },

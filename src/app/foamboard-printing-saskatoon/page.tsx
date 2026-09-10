@@ -83,6 +83,7 @@ export default function FoamboardPrintingSaskatoon() {
           </p>
         </>
       }
+      galleryImages={[{ src: "/images/products/gallery/foamboard-displays/foamboard-displays-application-v1-1200w.webp", alt: "Illustrative foamboard display on an easel at an indoor reception event" }]}
       products={[
         {
           name: "Foamboard Displays",
