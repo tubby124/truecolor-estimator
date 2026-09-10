@@ -1,6 +1,10 @@
+## Gallery batch two — September 9, 2026
+
+Owner requested more noindex product galleries after the coroplast release. Candidate scope: postcards and retractable banners, original hero first plus three illustrative views each. [Batch record](GALLERY-BATCH-TWO-20260909.md) owns exclusions, image SEO/provenance, consumer controls, baseline and rollback. The existing display component is reused without modification. Fresh coroplast production recheck found zero differences across nine HTML contracts/four XML files. Required exact-head CI and live deployment verification remain release gates for this second batch; no indexed-page experiment or social publishing expansion.
+
 ## Coroplast display-gallery pilot — September 9, 2026
 
-Owner authorized a tested pilot. The candidate preserves the original cyan/magenta FOR SALE image first, followed by three illustrative views; the questionable material-detail view is held. [Pilot record](COROPLAST-GALLERY-PILOT-20260909.md) owns exact scope, asset approvals, tests and rollback. Only the noindex coroplast product-detail binding changes. The shared source galleries, Merchant hero/rights, indexed routes and customer records stay intact. Local implementation is prepared; exact-head CI, deployment and production readback determine live completion. Subsequent image work must use the image SEO skill and current GitHub SEO rules.
+Owner authorized a tested pilot. The candidate preserves the original cyan/magenta FOR SALE image first, followed by three illustrative views; the questionable material-detail view is held. [Pilot record](COROPLAST-GALLERY-PILOT-20260909.md) owns exact scope, asset approvals, tests and rollback. Only the noindex coroplast product-detail binding changes. The shared source galleries, Merchant hero/rights, indexed routes and customer records stay intact. PR 79 merged at `0346691e`; both CI runs passed and Railway deployment `1d477baf-b689-4259-a4a2-f72ce3c5e6ef` succeeded. Production readback passed all image controls, nine HTML contracts and four XML comparisons; [dated release receipt](https://github.com/tubby124/truecolor-estimator/pull/79) records completion. Subsequent image work must use the image SEO skill and current GitHub SEO rules.
 
 ## Gallery assurance and measured learning — September 9, 2026
 

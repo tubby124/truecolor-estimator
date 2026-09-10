@@ -1,0 +1,133 @@
+{
+  "approval_reference": "owner-gallery-batch-two-20260909",
+  "scope": "Website display gallery only: postcards and retractable-banners",
+  "provenance": {
+    "origin": "AI-generated illustrative artwork; source bytes matched retained local generated output",
+    "generator_result_receipt": null,
+    "prompt_linkage": "Only retractable overview has an exact-version saved prompt; other five unproven"
+  },
+  "site_authority": "Owner requested additional noindex product galleries after the verified coroplast pilot on 2026-09-09",
+  "other_channel_authority": false,
+  "expiry": "No expiry supplied; review on owner revocation or byte changes",
+  "runbook": "docs/operations/GALLERY-BATCH-TWO-20260909.md",
+  "products": [
+    {
+      "slug": "postcards",
+      "preserved_old_gallery_count": 4,
+      "excluded_slot": "overview",
+      "hero": {
+        "public_path": "/images/products/product/postcards-800x600.webp",
+        "alt": "Cyan and magenta promotional postcards with home, food, business and concert artwork on a white surface.",
+        "width": 800,
+        "height": 600,
+        "bytes": 80686,
+        "sha256": "5260515024468e08356da4947d3d559f783a55714e5fd634e50506347f9d3ebd",
+        "offer_id": "tc-postcards-5f8ac3be2a8e",
+        "rights_id": "merchant-postcards-2026-09-04"
+      },
+      "assets": [
+        {
+          "slot": "material-detail",
+          "public_path": "/images/products/gallery/postcards/postcards-material-detail-v1-1200w.webp",
+          "alt": "Illustrative glossy postcard with a blue-and-yellow coastal scene and a blank address reverse.",
+          "source_sha256": "db9e6cba9060eb076d7b57341abd2941ff050180cf41ddb70aa5e380e9d3b9fe",
+          "source_format": "png",
+          "source_width": 1448,
+          "source_height": 1086,
+          "delivery_sha256": "cc835d1761e985ceafbb15e3c24b3929ecfce6eb5632e3dcff46e29a513c1aef",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 86330
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/postcards/postcards-application-v1-1200w.webp",
+          "alt": "Illustrative blue-and-yellow art postcards in a clear display rack on a gallery counter.",
+          "source_sha256": "0c71d9a9d796963fae186f73959e397c4f4791dc7bc1f01af0ffd22ade888a54",
+          "source_format": "png",
+          "source_width": 1448,
+          "source_height": 1086,
+          "delivery_sha256": "5b010b6e86ac1054615b0c4557bf0e2ddc3b1740d99cc4aa23c72cb14c5a5679",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 143492
+        },
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/postcards/postcards-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative Harbor Point coastal postcard beside its address reverse on a wooden table.",
+          "source_sha256": "f0b3f9057fa8300ca9555ae24cf093eb526386aa9443bedbda407c9b9409cd6a",
+          "source_format": "png",
+          "source_width": 1448,
+          "source_height": 1086,
+          "delivery_sha256": "abde71a50c2f3156ec197a9f60a96b1313d1335bbcb6f4632e653db8e6f72314",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 138056
+        }
+      ]
+    },
+    {
+      "slug": "retractable-banners",
+      "preserved_old_gallery_count": 10,
+      "excluded_slot": "material-detail",
+      "hero": {
+        "public_path": "/images/products/product/retractable-stand-600x900.webp",
+        "alt": "Cyan and magenta retractable banner with abstract geometric artwork and a silver base in an indoor lobby.",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 72126,
+        "sha256": "c1c12c72fca9ae4bd7ab408a2062375af76ffa22c18571e0f458368e7b22eda3",
+        "offer_id": "tc-retractable-banners-85e2542c9a34",
+        "rights_id": "retractable-economy-owner-created-2026-09-02"
+      },
+      "assets": [
+        {
+          "slot": "overview",
+          "public_path": "/images/products/gallery/retractable-banners/retractable-banners-overview-v1-1200w.webp",
+          "alt": "Illustrative teal-and-orange After Hours retractable banner with saxophone artwork in an indoor lobby.",
+          "source_sha256": "2f39e749d7bfa87d92c2205c11184cbcb8a410ee25bc5762fbc65dc354bc581b",
+          "source_format": "png",
+          "source_width": 1448,
+          "source_height": 1086,
+          "delivery_sha256": "a78765ef73750396cc74c5b25afad9bc856f4390ba6a0996e5fce6e03c6ffecc",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 99604
+        },
+        {
+          "slot": "application",
+          "public_path": "/images/products/gallery/retractable-banners/retractable-banners-application-v1-1200w.webp",
+          "alt": "Illustrative teal-and-white retractable banner with a mountain-and-lake design in a bright indoor foyer.",
+          "source_sha256": "b17616f3e74c76e14a034fb98c3a14794d9998c5c7c0b71a21c7dc00c52e2341",
+          "source_format": "png",
+          "source_width": 1448,
+          "source_height": 1086,
+          "delivery_sha256": "62b56e962915e048da2f08ea5e14aa4ba0baa5c09af9cbd8100f71345b19c344",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 84700
+        },
+        {
+          "slot": "alternate-design",
+          "public_path": "/images/products/gallery/retractable-banners/retractable-banners-alternate-design-v1-1200w.webp",
+          "alt": "Illustrative Find Your Balance retractable banner with yoga artwork in a studio.",
+          "source_sha256": "60a0acda849f16cccd3976b5df2060c2119a6f34321d0cd234b8824b61bc5247",
+          "source_format": "png",
+          "source_width": 1448,
+          "source_height": 1086,
+          "delivery_sha256": "c42535c8d3bacb539ffd42b799511d3175e8fb034833e653cf593df9704dc24c",
+          "format": "webp",
+          "width": 1200,
+          "height": 900,
+          "bytes": 80446
+        }
+      ]
+    }
+  ]
+}

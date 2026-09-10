@@ -736,3 +736,8 @@ the stale `$75–$150` tier figures were left in place where they describe genui
 ## Coroplast product-gallery pilot — September 9, 2026
 
 Owner authorized a bounded deployment test on `/products/coroplast-signs` (existing noindex/follow). Original FOR SALE stays first, followed by three illustrative views; material-detail held for flute/stake plausibility. New display binding preserves Merchant hero, old customer assets, indexed content, metadata/schema/links and sitemap dates. See [pilot release record](../docs/operations/COROPLAST-GALLERY-PILOT-20260909.md) for evidence and rollback. This is a shopper presentation pilot, not a ranking experiment or proof of conversion improvement. Image SEO skill and live GitHub rule review apply to all subsequent image changes.
+
+
+## Gallery batch two - September 9, 2026
+
+Owner requested two more noindex product-detail galleries after verified coroplast release. Postcards and retractable banners retain their original heroes and Merchant bindings, adding three illustrative views each through the unchanged display component. Postcard overview and retractable hardware-detail stay excluded. Current GitHub SEO rules and image SEO skill applied. See [batch record](../docs/operations/GALLERY-BATCH-TWO-20260909.md) for evidence, publication gates and scoped rollback. No organic ranking or conversion improvement is claimed.

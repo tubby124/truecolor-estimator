@@ -2,9 +2,14 @@ import { test, expect } from "@playwright/test";
 import { getProductDisplayGallery } from "../src/lib/data/product-display-galleries";
 
 // Real optimizer requests: never substitute public originals for /_next/image.
-const images = getProductDisplayGallery("coroplast-signs")!;
+for (const { slug, offer } of [
+  { slug: "coroplast-signs", offer: "tc-coroplast-signs-0ace18fa203c" },
+  { slug: "postcards", offer: "tc-postcards-5f8ac3be2a8e" },
+  { slug: "retractable-banners", offer: "tc-retractable-banners-85e2542c9a34" },
+]) {
+const images = getProductDisplayGallery(slug)!;
 for (const viewport of [{ width: 375, height: 812 }, { width: 768, height: 1024 }, { width: 1440, height: 900 }]) {
-  test(`coroplast gallery has stable explicit views and keyboard modal at ${viewport.width}px`, async ({ page, baseURL }) => {
+  test(`${slug} gallery has stable explicit views and keyboard modal at ${viewport.width}px`, async ({ page, baseURL }) => {
     await page.setViewportSize(viewport);
     const origin = new URL(baseURL!).origin;
     await page.route("**/*", (route) => {
@@ -13,7 +18,7 @@ for (const viewport of [{ width: 375, height: 812 }, { width: 768, height: 1024 
       const safe = ["GET", "HEAD"].includes(request.method()) || (url.origin === origin && url.pathname === "/api/estimate");
       return url.origin === origin && safe ? route.continue() : route.abort();
     });
-    await page.goto("/products/coroplast-signs?merchant=tc-coroplast-signs-0ace18fa203c");
+    await page.goto(`/products/${slug}?merchant=${offer}`);
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, follow");
     const gallery = page.locator("[data-product-display-gallery]");
     const main = gallery.locator(":scope > button");
@@ -64,4 +69,5 @@ for (const viewport of [{ width: 375, height: 812 }, { width: 768, height: 1024 
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   });
+}
 }
