@@ -4,7 +4,7 @@ September 9, 2026. Coroplast, postcards and retractable banners are now distinct
 
 ## Default next batch
 
-Use Terra High for a bounded batch of two to four products with distinct shapes/materials, one PR and explicit excluded factual holds. Reuse the retained source pool, source hashes, display registry, existing component and tests. Inspect candidate artwork; illustration acceptance does not prove hardware, material or customer provenance. Escalate to Astra only for an identified unresolved issue. This is an operating choice, not a cost/quality benchmark. Evaluate Luna later on one reversible reviewed task before assigning it production release work.
+Use a bounded batch of roughly eight to twelve independently eligible products with distinct shapes/materials, one PR and explicit excluded factual holds. Do not pad a wave: if fewer than eight have source bytes, factual review and website-display rights, prepare their receipts and wait. Reuse the retained source pool, source hashes, display registry, existing component and tests. Inspect candidate artwork; illustration acceptance does not prove hardware, material or customer provenance. Escalate only for an identified unresolved issue. This is an operating choice, not a cost/quality benchmark.
 
 Read current AGENTS, current state, SEO-STANDARD, protected-page rules, gallery assurance and the image SEO skill. Preserve original heroes and files, Merchant/rights bindings, indexed route semantics and every source consumer. Use new versioned image URLs and explicit descriptive alt. Noindex product pages still share infrastructure with indexed pages; noindex is not a blanket SEO exemption.
 
