@@ -220,7 +220,7 @@ const FULL_NOINDEX_DISPLAY_GALLERIES: Readonly<Record<string, readonly ProductDi
     { src: "/images/products/gallery/custom-shape-signs/custom-shape-signs-material-detail-v1-1200w.webp", alt: "Illustrative Visible coroplast cut-edge flutes following broad manageable contour", width: 1200, height: 900 },
   ],
   "door-hangers": [
-    { src: "/images/products/product/brochure-flat-trifold-800x600.webp", alt: "Original Rack Cards product image.", width: 800, height: 600 },
+    { src: "/images/products/product/brochure-flat-trifold-800x600.webp", alt: "Original Door Hangers product image.", width: 800, height: 600 },
     { src: "/images/products/gallery/door-hangers/door-hangers-alternate-design-v1-1200w.webp", alt: "Illustrative Mint and cream pet-care alternate door-hanger artwork, clearly labelled concept outside image", width: 1200, height: 900 },
     { src: "/images/products/gallery/door-hangers/door-hangers-application-v1-1200w.webp", alt: "Illustrative Conceptual hanger naturally suspended from ordinary door knob through opening", width: 1200, height: 900 },
     { src: "/images/products/gallery/door-hangers/door-hangers-material-detail-v1-1200w.webp", alt: "Illustrative Top hole and slit detail in thin gloss stock, no impossible unbroken attachment", width: 1200, height: 900 },
