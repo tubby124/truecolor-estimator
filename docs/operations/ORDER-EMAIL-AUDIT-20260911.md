@@ -19,6 +19,10 @@ The manual copy-payment-link feature and payment accounting are unchanged. A pro
 
 ## Verification and remaining work
 
-Focused email/status/lifecycle tests, TypeScript and lint are required before release. Release evidence will be appended after CI and deployment.
+Released through [PR 90](https://github.com/tubby124/truecolor-estimator/pull/90), squash commit `53d90f242eeecb52754253d09fcc4ba5fcddfec8`. All 1,642 local tests passed; TypeScript passed and lint had zero errors. Main CI run `34631520090` passed. Railway production deployment `d645a037-2205-4a55-9515-396d58bb7d64` reported SUCCESS for that exact commit. Live `/api/health` returned 200 with `ok:true`; staff orders and lifecycle remained login-gated (307). No post-release customer send was performed; these checks do not establish inbox placement.
+
+## Resume after account change
+
+Owner paused September 11 due to account usage limits and requested Git/Vault continuity. The whole platform has NOT been audited by this investigation. Next work is the [platform audit handoff](PLATFORM-AUDIT-HANDOFF-20260911.md), not a claim of overall platform health. Preserve the separate manual payment-link feature. Do not resend customer messages or switch sender/DNS merely to test access.
 
 Next operational evidence: recipient IT message trace for the two reported emails. Recommended sender work: establish a verified transactional subdomain under the website domain, with matching first-party links where supported, before switching production credentials/sender. A new sender is not a guarantee of inbox placement. [Resend's guidance](https://www.resend.com/blog/how-to-warm-up-a-new-domain) recommends separating transactional and marketing reputation.
