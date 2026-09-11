@@ -28,6 +28,7 @@ import {
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface StatusUpdateParams {
+  orderId?: string;
   status: "payment_received" | "in_production" | "ready_for_pickup";
   orderNumber: string;
   customerName: string;
@@ -52,7 +53,7 @@ export async function sendOrderStatusEmail(params: StatusUpdateParams): Promise<
   const html = buildHtml(params);
   const text = buildText(params);
 
-  await sendEmail({ from, to: params.customerEmail, subject, html, text });
+  await sendEmail({ from, to: params.customerEmail, subject, html, text, orderId: params.orderId, includeUnsubscribeHeaders: false });
 
   console.log(
     `[statusUpdate] email sent → ${params.customerEmail} | ${params.orderNumber} | status: ${params.status}`

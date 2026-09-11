@@ -741,6 +741,7 @@ export async function POST(req: NextRequest) {
     let customerEmailSent = false;
     try {
       await sendPaymentRequestEmail({
+        orderId: order.id,
         orderNumber: order.order_number,
         contact: {
           name: contact.name.trim(),

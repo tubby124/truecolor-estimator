@@ -170,12 +170,15 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       }
     }
 
-    // ── Status-change side effects (all non-fatal) ────────────────────────────
+    // Status persistence and notification acceptance are separate outcomes.
+    let notificationWarning: string | undefined;
+    const expectsNotification = status === "payment_received" || status === "ready_for_pickup";
+    const warningText = "Order status saved, but the customer email could not be confirmed. Check email delivery before resending; the message may already have been accepted.";
 
     // Standard status notification emails (payment_received / in_production / ready_for_pickup)
     if (NOTIFY_STATUSES.has(status)) {
       try {
-        const { data: order } = await supabase
+        const { data: order, error: notificationOrderError } = await supabase
           .from("orders")
           .select(`order_number, subtotal, gst, pst, total, is_rush, discount_code,
                    discount_amount, wave_invoice_id, wave_invoice_approved_at,
@@ -185,11 +188,15 @@ export async function PATCH(req: NextRequest, { params }: Params) {
           .eq("id", id)
           .single();
 
+        if (expectsNotification && (notificationOrderError || !order)) {
+          notificationWarning = warningText;
+        }
         if (order) {
           const customerRaw = Array.isArray(order.customers)
             ? order.customers[0]
             : order.customers;
           const customer = customerRaw as { name: string; email: string } | null;
+          if (expectsNotification && !customer?.email) notificationWarning = warningText;
 
           // Only email the customer at ready_for_pickup.
           // payment_received: receipt below is sufficient (was duplicate).
@@ -198,6 +205,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
           if (customer?.email && status === "ready_for_pickup") {
             const statusItems = Array.isArray(order.order_items) ? order.order_items : [];
             await sendOrderStatusEmail({
+              orderId: id,
               status: "ready_for_pickup",
               orderNumber: order.order_number,
               customerName: customer.name,
@@ -328,6 +336,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
               });
               console.log(`[staff/orders/status] receipt sent at payment_received → ${customer.email}${waveInvoiceUrl ? " (with Wave PDF)" : ""}`);
             } catch (receiptErr) {
+              notificationWarning = warningText;
               console.error("[staff/orders/status] receipt at payment_received failed (non-fatal):", receiptErr);
             }
           }
@@ -338,6 +347,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
           // who need the Wave invoice can download it from their account dashboard.
         }
       } catch (emailErr) {
+        if (expectsNotification) notificationWarning = warningText;
         // Non-fatal — status already updated, just log the email failure
         console.error("[staff/orders/status] customer notification failed (non-fatal):", emailErr);
       }
@@ -346,7 +356,16 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     // Review email delivery is deliberately decoupled from this staff mutation.
     // The authenticated cron waits five days, applies customer-level cadence and
     // consent/suppression checks, then sends at most two messages in one cycle.
-    return NextResponse.json({ ok: true, status });
+    if (expectsNotification) {
+      await recordAuditEvent({
+        actor_type: "system",
+        event_type: "order.notification_outcome",
+        entity_type: "order",
+        entity_id: id,
+        detail: { order_number: current.order_number, status, outcome: notificationWarning ? "unconfirmed" : "accepted" },
+      });
+    }
+    return NextResponse.json({ ok: true, status, ...(notificationWarning ? { notificationWarning } : {}) });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to update status";
     console.error("[staff/orders/status]", message);

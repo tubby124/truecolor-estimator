@@ -25,6 +25,7 @@
 import Link from "next/link";
 
 export type ActivityType =
+  | "email_notification"
   | "signup"
   | "order_placed"
   | "wave_approved"
@@ -48,6 +49,7 @@ export interface ActivityEvent {
 }
 
 const TYPE_LABELS: Record<ActivityType, { label: string; tone: string; actor: ActivityEvent["actor"] }> = {
+  email_notification: { label: "Email outcome", tone: "bg-amber-50 text-amber-800", actor: "system" },
   signup:           { label: "Signed up",       tone: "bg-cyan-100 text-cyan-800",     actor: "customer" },
   order_placed:     { label: "Order placed",    tone: "bg-emerald-100 text-emerald-800", actor: "customer" },
   wave_approved:    { label: "Invoice approved",   tone: "bg-amber-100 text-amber-800",   actor: "staff"    },

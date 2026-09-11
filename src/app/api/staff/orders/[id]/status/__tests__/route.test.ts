@@ -1,11 +1,11 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const harness = vi.hoisted(() => ({ currentStatus: "ready_for_pickup", sendReview: vi.fn(), audit: vi.fn() }));
+const harness = vi.hoisted(() => ({ currentStatus: "ready_for_pickup", sendReview: vi.fn(), sendStatus: vi.fn(), audit: vi.fn() }));
 const ORDER_ID = "11111111-1111-4111-8111-111111111111";
 
 vi.mock("@/lib/email/reviewRequest", () => ({ sendReviewRequestEmail: harness.sendReview }));
-vi.mock("@/lib/email/statusUpdate", () => ({ sendOrderStatusEmail: vi.fn() }));
+vi.mock("@/lib/email/statusUpdate", () => ({ sendOrderStatusEmail: harness.sendStatus }));
 vi.mock("@/lib/email/paymentReceipt", () => ({ sendPaymentReceipt: vi.fn() }));
 vi.mock("@/lib/customers/incrementOrderStats", () => ({ incrementCustomerOrderStats: vi.fn() }));
 vi.mock("@/lib/notifications/telegram", () => ({ sendTelegramNotification: vi.fn(), escapeTelegramHtml: (value: string) => value }));
@@ -15,7 +15,10 @@ vi.mock("@/lib/supabase/server", () => ({
   requireStaffUser: async () => ({ id: "staff-1", email: "info@true-color.ca" }),
   createServiceClient: () => ({
     from: () => ({
-      select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { status: harness.currentStatus, order_number: "TC-1001", completed_at: null }, error: null }) }) }),
+      select: () => ({ eq: () => ({
+        maybeSingle: async () => ({ data: { status: harness.currentStatus, order_number: "TC-1001", completed_at: null }, error: null }),
+        single: async () => ({ data: { order_number: "TC-1001", customers: { name: "Customer", email: "customer@example.com" }, total: 111, order_items: [] }, error: null }),
+      }) }),
       update: (values: Record<string, unknown>) => {
         const chain = { eq: () => chain, is: () => chain, select: () => chain, maybeSingle: async () => { if (typeof values.status === "string") harness.currentStatus = values.status; return { data: { id: ORDER_ID }, error: null }; } };
         return chain;
@@ -27,7 +30,7 @@ vi.mock("@/lib/supabase/server", () => ({
 import { PATCH } from "../route";
 
 describe("complete-order review lifecycle", () => {
-  beforeEach(() => { harness.currentStatus = "ready_for_pickup"; harness.sendReview.mockReset(); });
+  beforeEach(() => { harness.currentStatus = "ready_for_pickup"; harness.sendReview.mockReset(); harness.sendStatus.mockReset(); });
   afterEach(() => vi.restoreAllMocks());
 
   it("does not send a review email during the staff completion mutation", async () => {
@@ -35,5 +38,22 @@ describe("complete-order review lifecycle", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ ok: true, status: "complete" });
     expect(harness.sendReview).not.toHaveBeenCalled();
+  });
+
+  it("keeps the saved pickup status but reports an unconfirmed notification", async () => {
+    harness.currentStatus = "in_production";
+    harness.sendStatus.mockRejectedValue(new Error("provider unavailable"));
+    const response = await PATCH(new NextRequest(`http://localhost/api/staff/orders/${ORDER_ID}/status`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "ready_for_pickup" }) }), { params: Promise.resolve({ id: ORDER_ID }) });
+    expect(response.status).toBe(200);
+    expect(harness.currentStatus).toBe("ready_for_pickup");
+    expect(await response.json()).toEqual(expect.objectContaining({ status: "ready_for_pickup", notificationWarning: expect.stringContaining("could not be confirmed") }));
+    expect(harness.sendStatus).toHaveBeenCalledWith(expect.objectContaining({ orderId: ORDER_ID }));
+  });
+
+  it("does not claim a notification failure when pickup email is accepted", async () => {
+    harness.currentStatus = "in_production";
+    harness.sendStatus.mockResolvedValue(undefined);
+    const response = await PATCH(new NextRequest(`http://localhost/api/staff/orders/${ORDER_ID}/status`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "ready_for_pickup" }) }), { params: Promise.resolve({ id: ORDER_ID }) });
+    expect(await response.json()).toEqual({ ok: true, status: "ready_for_pickup" });
   });
 });

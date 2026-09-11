@@ -128,6 +128,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     // Overwriting it with the URL breaks webhook matching.
 
     await sendPaymentRequestEmail({
+      orderId: id,
       orderNumber: order.order_number,
       contact: {
         name: customer.name,

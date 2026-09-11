@@ -797,6 +797,10 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
   // for the same entity+event_type pair where both exist). For now both render;
   // the audit-sourced row is distinguishable by its id prefix "audit:".
   const auditTypeMap: Record<string, { type: ActivityEvent["type"]; label: (d: Record<string, unknown> | null) => string }> = {
+    "order.notification_outcome": {
+      type: "email_notification",
+      label: (d) => `${d?.status ?? "order"} email: ${d?.outcome === "accepted" ? "accepted by sender" : "unconfirmed — check delivery before resending"}`,
+    },
     "order.created": {
       type: "order_placed",
       label: (d) => `$${Number(d?.total ?? 0).toFixed(2)} · ${d?.payment_method ?? "—"} · ${d?.is_rush ? "RUSH" : "standard"}`,
@@ -1575,7 +1579,23 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     return campaigns.some((c) => (c as { status?: string }).status === "ENABLED");
   })();
 
+  const { data: notificationOutcomes, error: notificationQueryError } = await supabase
+    .from("audit_events")
+    .select("entity_id, detail")
+    .eq("event_type", "order.notification_outcome")
+    .gte("at", cutoff)
+    .order("at", { ascending: false })
+    .limit(1000);
+  const latestNotificationOutcomes = new Map<string, string>();
+  for (const event of notificationOutcomes ?? []) {
+    const detail = event.detail as { status?: string; outcome?: string } | null;
+    if (!detail?.status || !detail.outcome) continue;
+    const key = `${event.entity_id}/${detail.status}`;
+    if (!latestNotificationOutcomes.has(key)) latestNotificationOutcomes.set(key, detail.outcome);
+  }
   const rollup: StatusRollup = buildRollup({
+    unconfirmedOrderNotifications: [...latestNotificationOutcomes.values()].filter((outcome) => outcome === "unconfirmed").length,
+    orderNotificationQueryFailed: Boolean(notificationQueryError),
     bookkeepingRisks,
     webhookGroups,
     heartbeats,

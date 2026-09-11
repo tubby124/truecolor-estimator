@@ -257,6 +257,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     // 11. Send updated payment email
     // Pass originalSubtotal so customer sees pre-discount subtotal, then discount row, then new total
     await sendPaymentRequestEmail({
+      orderId: order.id,
       orderNumber: order.order_number,
       contact: {
         name: customer.name as string,

@@ -42,6 +42,11 @@ const baseInputs = (overrides: Partial<RollupInputs> = {}): RollupInputs => ({
 });
 
 describe("paid revenue that never reached the conversion outbox", () => {
+  it("surfaces unconfirmed order notifications without claiming they were rejected", () => {
+    expect(buildRollup(baseInputs({ unconfirmedOrderNotifications: 2 })).yellows).toContainEqual(expect.objectContaining({ key: "order-notifications:unconfirmed", panel: "panel-order-notifications" }));
+    expect(buildRollup(baseInputs({ orderNotificationQueryFailed: true })).yellows).toContainEqual(expect.objectContaining({ label: "Order email checks unavailable" }));
+    expect(buildRollup(baseInputs()).yellows.map((issue) => issue.key)).not.toContain("order-notifications:unconfirmed");
+  });
   it("is silent when every paid order is classified and enqueued", () => {
     const rollup = buildRollup(baseInputs());
     expect(rollup.reds.map((i) => i.key)).not.toContain("conversion:missing-type");
