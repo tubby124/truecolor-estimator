@@ -11,6 +11,7 @@ import { CallTracker } from "@/components/site/CallTracker";
 import { createServiceClient } from "@/lib/supabase/server";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { recordPaymentAttempt } from "@/lib/payments/attempts";
+import { fetchOrderLedger, remainingBalanceCents } from "@/lib/orders/payLink";
 import {
   resolveStoredQuotePaymentBreakdown,
   type QuotePaymentBreakdown,
@@ -100,8 +101,7 @@ export default async function PaymentGatewayPage({ params, searchParams }: Props
     const orderId = signedOrderId;
     if (!orderId) return <ExpiredPage />;
 
-    // Stale link check: if the order's current total doesn't match the token amount,
-    // a newer pay link was generated (e.g. staff applied a discount). Block payment.
+    // Stale-link and payment-ledger checks for order-scoped tokens.
     if (orderId) {
       const supabase = createServiceClient();
       const { data: orderCheck, error: orderCheckError } = await supabase
@@ -127,8 +127,24 @@ export default async function PaymentGatewayPage({ params, searchParams }: Props
         return <ErrorPage />;
       }
       if (orderCheck?.status === "pending_payment") {
-        const dbAmountCents = Math.round(Number(orderCheck.total) * 100);
-        if (dbAmountCents !== amountCents) {
+        // The link must charge exactly what is still owed. A partial payment
+        // leaves orders.total untouched, so this compares against the remaining
+        // balance: comparing against the raw total would reject a valid balance
+        // link, and accepting a full-total link would charge the customer twice
+        // for the part they already paid.
+        let remainingCents: number;
+        try {
+          remainingCents = remainingBalanceCents(
+            Number(orderCheck.total),
+            await fetchOrderLedger(supabase, orderId),
+          );
+        } catch (ledgerError) {
+          // Fail closed: an unreadable ledger means we cannot know what this
+          // customer already paid.
+          console.error("[pay/token] payment ledger lookup failed:", ledgerError);
+          return <ErrorPage />;
+        }
+        if (remainingCents !== amountCents) {
           return <UpdatedLinkPage />;
         }
       }

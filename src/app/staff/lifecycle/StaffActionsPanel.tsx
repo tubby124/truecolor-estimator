@@ -32,6 +32,7 @@ const EVENT_PILLS: Record<string, { label: string; tone: string }> = {
   "order.proof_sent":             { label: "Sent proof",          tone: "bg-purple-100 text-purple-800" },
   "order.customer_email_sent":    { label: "Sent custom email",   tone: "bg-indigo-100 text-indigo-800" },
   "order.payment_link_resent":    { label: "Resent pay link",     tone: "bg-cyan-100 text-cyan-800" },
+  "order.payment_link_copied":    { label: "Copied pay link",     tone: "bg-sky-100 text-sky-800" },
   "order.notes_updated":          { label: "Updated notes",       tone: "bg-gray-100 text-gray-700" },
   "order.archived":               { label: "Archived",            tone: "bg-gray-200 text-gray-800" },
   "order.unarchived":             { label: "Unarchived",          tone: "bg-gray-100 text-gray-700" },
@@ -74,6 +75,8 @@ function summarizeDetail(eventType: string, detail: Record<string, unknown> | nu
       return `"${String(detail.subject ?? "").slice(0, 60)}" → ${detail.recipient ?? "?"}`;
     case "order.payment_link_resent":
       return `$${Number(detail.total ?? 0).toFixed(2)} → ${detail.recipient ?? "?"}`;
+    case "order.payment_link_copied":
+      return `$${Number(detail.amount_due ?? 0).toFixed(2)} of $${Number(detail.total ?? 0).toFixed(2)}`;
     case "order.manual_created":
     case "order.manual_quote_created":
       return `${detail.item_count ?? "?"} item(s) · ${detail.customer_email ?? "?"}`;

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase/server";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
-import { encodePaymentToken } from "@/lib/payment/token";
+import { resolveOrderPayLink } from "@/lib/orders/payLink";
 import type { LatestPaymentAttempt } from "@/lib/payments/attempts";
 
 type PaymentResultKind = "success" | "failed" | "cancelled";
@@ -90,13 +90,16 @@ export async function PaymentResult({ kind, searchParams }: PaymentResultProps) 
   let retryUrl: string | null = null;
   if (order && order.status === "pending_payment") {
     try {
-      retryUrl = `/pay/${encodePaymentToken(
-        Number(order.total),
-        `Order ${order.order_number}`,
-        customerEmail ?? undefined,
-        `${siteUrl}/order-confirmed?oid=${order.id}`,
-        { orderId: order.id },
-      )}`;
+      // Ledger-aware: a declined attempt after a partial payment must retry the
+      // remaining balance, not the whole order total again.
+      const resolved = await resolveOrderPayLink(supabase, {
+        orderId: order.id,
+        orderNumber: order.order_number,
+        total: Number(order.total),
+        customerEmail: customerEmail ?? "",
+        siteUrl,
+      });
+      retryUrl = resolved.amountDueCents > 0 ? new URL(resolved.paymentUrl).pathname : null;
     } catch {
       retryUrl = null;
     }

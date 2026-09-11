@@ -5,7 +5,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { encodePaymentToken } from "@/lib/payment/token";
+import { resolveOrderPayLink } from "@/lib/orders/payLink";
 import type { LatestPaymentAttempt } from "@/lib/payments/attempts";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://dczbgraekmzirxknjvwe.supabase.co";
@@ -122,24 +122,26 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const ordersWithPayUrl = (orders ?? []).map((order) => {
+  const ordersWithPayUrl = await Promise.all((orders ?? []).map(async (order) => {
     let pay_url: string | null = null;
     if (order.status === "pending_payment" && order.payment_method === "clover_card") {
       try {
-        const token = encodePaymentToken(
-          order.total,
-          `Order ${order.order_number}`,
-          user.email ?? undefined,
-          `${siteUrl}/order-confirmed?oid=${order.id}`,
-          { orderId: order.id },
-        );
-        pay_url = `/pay/${token}`;
+        // Ledger-aware: an account "Pay now" link must charge the balance that
+        // is still owed, not the original order total.
+        const resolved = await resolveOrderPayLink(supabase, {
+          orderId: order.id,
+          orderNumber: order.order_number,
+          total: Number(order.total),
+          customerEmail: user.email ?? "",
+          siteUrl,
+        });
+        pay_url = resolved.amountDueCents > 0 ? new URL(resolved.paymentUrl).pathname : null;
       } catch {
-        // Non-fatal — payment token secret may not be configured
+        // Non-fatal — payment token secret or ledger may be unavailable
       }
     }
     return { ...order, pay_url, latest_payment_attempt: latestAttemptByOrder.get(order.id) ?? null };
-  });
+  }));
 
   return NextResponse.json({ orders: ordersWithPayUrl });
 }

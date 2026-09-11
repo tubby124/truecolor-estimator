@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { decodePaymentToken } from "@/lib/payment/token";
 
 const mocks = vi.hoisted(() => ({
   createServiceClient: vi.fn(),
@@ -34,6 +35,7 @@ function query(result: QueryResult | Promise<never>) {
     not: vi.fn(),
     or: vi.fn(),
     order: vi.fn(),
+    in: vi.fn(),
   };
   builder.select.mockReturnValue(builder);
   builder.eq.mockReturnValue(builder);
@@ -41,6 +43,8 @@ function query(result: QueryResult | Promise<never>) {
   builder.not.mockReturnValue(builder);
   builder.or.mockReturnValue(builder);
   builder.order.mockImplementation(() => Promise.resolve(result));
+  // The payment-ledger query is awaited straight off .in()
+  builder.in.mockImplementation(() => Promise.resolve(result));
   return builder;
 }
 
@@ -95,7 +99,7 @@ describe("aging-orders cron required query boundary", () => {
   it("fails closed on the production query without sending a pending-only digest", async () => {
     const pendingQuery = query({
       data: [{
-        id: "order-1",
+        id: "22222222-2222-4222-8222-222222222222",
         order_number: "TC-1",
         total: 25,
         created_at: "2026-07-20T00:00:00.000Z",
@@ -152,5 +156,68 @@ describe("aging-orders cron required query boundary", () => {
       true,
       "no aging orders",
     );
+  });
+
+  it("offers the remaining balance, not the full total, for a partially-paid order", async () => {
+    vi.stubEnv("PAYMENT_TOKEN_SECRET", "test-payment-secret-that-is-long-enough");
+    const from = vi.fn()
+      .mockReturnValueOnce(query({
+        data: [{
+          id: "22222222-2222-4222-8222-222222222222",
+          order_number: "TC-1",
+          total: 245.55,
+          created_at: "2026-07-20T00:00:00.000Z",
+          is_rush: false,
+          followup_count: 1,
+          followup_paused_at: null,
+          followup_paused_reason: null,
+          customers: { name: "Dana Smith", email: "dana@example.com" },
+        }],
+        error: null,
+      }))
+      .mockReturnValueOnce(query({ data: [], error: null }))
+      .mockReturnValueOnce(query({
+        data: [{ order_id: "22222222-2222-4222-8222-222222222222", amount: 100, method: "clover", status: "recorded" }],
+        error: null,
+      }));
+    mocks.createServiceClient.mockReturnValue({ from });
+
+    const response = await GET(request());
+
+    expect(response.status).toBe(200);
+    expect(mocks.sendEmail).toHaveBeenCalledOnce();
+
+    const html = String((mocks.sendEmail.mock.calls[0][0] as { html?: string }).html ?? "");
+    const token = html.match(/\/pay\/([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)/)?.[1];
+    expect(token).toBeTruthy();
+    expect(decodePaymentToken(token as string).amountCents).toBe(14555);
+  });
+
+  it("fails closed when the payment ledger cannot be read", async () => {
+    const from = vi.fn()
+      .mockReturnValueOnce(query({
+        data: [{
+          id: "22222222-2222-4222-8222-222222222222",
+          order_number: "TC-1",
+          total: 245.55,
+          created_at: "2026-07-20T00:00:00.000Z",
+          customers: { name: "Customer", email: "customer@example.com" },
+        }],
+        error: null,
+      }))
+      .mockReturnValueOnce(query({ data: [], error: null }))
+      .mockReturnValueOnce(query({ data: null, error: { message: "private ledger detail" } }));
+    mocks.createServiceClient.mockReturnValue({ from });
+
+    const response = await GET(request());
+
+    expect(response.status).toBe(503);
+    expect(mocks.sendEmail).not.toHaveBeenCalled();
+    expect(mocks.recordCronRun).toHaveBeenCalledWith(
+      "aging-orders",
+      false,
+      "required_query_failed=payment-ledger",
+    );
+    expect(JSON.stringify(mocks.recordCronRun.mock.calls)).not.toContain("private ledger detail");
   });
 });
