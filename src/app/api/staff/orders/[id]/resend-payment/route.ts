@@ -14,7 +14,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireStaffUser, createServiceClient } from "@/lib/supabase/server";
-import { encodePaymentToken } from "@/lib/payment/token";
+import { resolveOrderPayLink, type ResolvedOrderPayLink } from "@/lib/orders/payLink";
 import { sendPaymentRequestEmail } from "@/lib/email/paymentRequest";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { recordAuditEvent } from "@/lib/audit/record";
@@ -97,9 +97,31 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     // All orders route through Clover gateway. Wave invoice (if any) stays
     // DRAFT until webhook approves + records payment.
-    const redirectUrl = `${siteUrl}/order-confirmed?oid=${id}`;
-    const payToken = encodePaymentToken(total, description, customer.email, redirectUrl, { orderId: id });
-    const paymentUrl = `${siteUrl}/pay/${payToken}`;
+    // Ledger-aware: a partially-paid order gets a balance link, never the raw
+    // total, and the email below quotes the same amount the link charges.
+    let payLink: ResolvedOrderPayLink;
+    try {
+      payLink = await resolveOrderPayLink(supabase, {
+        orderId: id,
+        orderNumber: order.order_number,
+        total,
+        customerEmail: customer.email,
+        siteUrl,
+      });
+    } catch (err) {
+      console.error("[resend-payment] pay link resolution failed:", err instanceof Error ? err.message : err);
+      return NextResponse.json(
+        { error: "Could not read the payment ledger — no email was sent" },
+        { status: 500 }
+      );
+    }
+    if (payLink.amountDueCents <= 0) {
+      return NextResponse.json(
+        { error: "This order is already covered by recorded payments — nothing left to charge" },
+        { status: 400 }
+      );
+    }
+    const paymentUrl = payLink.paymentUrl;
 
     // NOTE: do NOT update payment_reference here — it is set to the order UUID
     // by /pay/[token] when the customer clicks, and the Clover webhook matches on it.
@@ -123,6 +145,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       gst,
       pst,
       total,
+      balanceDue: payLink.amountDue,
       paymentUrl,
       paymentMethod: order.payment_method === "wave" ? "wave" : "clover",
       notes: order.notes as string | null,
@@ -132,7 +155,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       }) ?? undefined,
     });
 
-    console.log(`[resend-payment] payment link resent → ${customer.email} | order ${order.order_number} | wave_invoice_id ${order.wave_invoice_id ?? "none"}`);
+    console.log(`[resend-payment] payment link resent → ${customer.email} | order ${order.order_number} | due $${payLink.amountDue.toFixed(2)} of $${total.toFixed(2)} | wave_invoice_id ${order.wave_invoice_id ?? "none"}`);
 
     void recordAuditEvent({
       actor_type: "staff",
@@ -144,6 +167,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         order_number: order.order_number,
         recipient: customer.email,
         total,
+        amount_due: payLink.amountDue,
         payment_method: order.payment_method ?? "clover",
       },
     });

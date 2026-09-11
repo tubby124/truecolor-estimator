@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   STATUS_LABELS,
   STATUS_COLORS,
@@ -15,6 +15,17 @@ import { OrderMessagesPanel } from "./OrderMessagesPanel";
 import { formatAttemptAge } from "@/lib/payments/attempts";
 
 const SUPABASE_STORAGE_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://dczbgraekmzirxknjvwe.supabase.co"}/storage/v1/object/public/print-files`;
+
+/** Response of POST /api/staff/orders/[id]/payment-link */
+interface StaffPayLinkResponse {
+  paymentUrl: string;
+  amountDue: number;
+  orderTotal: number;
+  amountPaid: number;
+  orderNumber: string;
+  customerFirstName: string;
+  message: string;
+}
 
 interface StaffOrderCardProps {
   order: Order;
@@ -40,6 +51,34 @@ interface StaffOrderCardProps {
   confirmingClover: boolean;
   cloverConfirmed: boolean;
   onConfirmCloverPayment: (paymentId: string, reason: string) => void;
+}
+
+/**
+ * Clipboard write with a legacy fallback — staff browsers can block
+ * navigator.clipboard (permissions, insecure context, older Safari).
+ */
+async function writeClipboard(text: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    // Fall through to the execCommand path below.
+  }
+  try {
+    const helper = document.createElement("textarea");
+    helper.value = text;
+    helper.setAttribute("readonly", "");
+    helper.style.position = "fixed";
+    helper.style.top = "0";
+    helper.style.opacity = "0";
+    document.body.appendChild(helper);
+    helper.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(helper);
+    return ok;
+  } catch {
+    return false;
+  }
 }
 
 export function StaffOrderCard({
@@ -83,6 +122,12 @@ export function StaffOrderCard({
   const [cloverPaymentId, setCloverPaymentId] = useState("");
   const [cloverReason, setCloverReason] = useState("Verified in Clover dashboard");
   const [cloverFormError, setCloverFormError] = useState<string | null>(null);
+  // Payment link for copy/paste — fetched on demand, never emailed
+  const [payLink, setPayLink] = useState<StaffPayLinkResponse | null>(null);
+  const [loadingPayLink, setLoadingPayLink] = useState(false);
+  const [payLinkError, setPayLinkError] = useState<string | null>(null);
+  const [copiedPayField, setCopiedPayField] = useState<"link" | "message" | null>(null);
+  const payLinkInputRef = useRef<HTMLInputElement | null>(null);
 
   const customer = Array.isArray(order.customers) ? order.customers[0] : order.customers;
   const nextStatus = NEXT_STATUS[order.status];
@@ -133,6 +178,41 @@ export function StaffOrderCard({
 
   // Current value for the status override dropdown
   const currentOverride = overrideStatus;
+
+  /**
+   * Fetch the customer's pay link so staff can paste it directly (text /
+   * Messenger). Nothing is emailed — that stays the Resend button's job.
+   */
+  async function loadPayLink() {
+    setLoadingPayLink(true);
+    setPayLinkError(null);
+    try {
+      const res = await fetch(`/api/staff/orders/${order.id}/payment-link`, { method: "POST" });
+      const data = (await res.json()) as Partial<StaffPayLinkResponse> & { error?: string };
+      if (!res.ok || !data.paymentUrl || !data.message) {
+        throw new Error(data.error ?? "Could not build the payment link");
+      }
+      setPayLink(data as StaffPayLinkResponse);
+    } catch (err) {
+      setPayLinkError(err instanceof Error ? err.message : "Could not build the payment link");
+    } finally {
+      setLoadingPayLink(false);
+    }
+  }
+
+  async function copyPayField(field: "link" | "message") {
+    if (!payLink) return;
+    const text = field === "link" ? payLink.paymentUrl : payLink.message;
+    if (await writeClipboard(text)) {
+      setCopiedPayField(field);
+      setPayLinkError(null);
+      setTimeout(() => setCopiedPayField((current) => (current === field ? null : current)), 4000);
+      return;
+    }
+    // Both clipboard paths failed — select the URL so staff can copy by hand.
+    payLinkInputRef.current?.select();
+    setPayLinkError("Copy was blocked by the browser — the link is selected, press ⌘C / Ctrl+C");
+  }
 
   async function saveNote() {
     setSavingNote(true);
@@ -815,6 +895,79 @@ export function StaffOrderCard({
               <p className="text-xs text-gray-400 mt-1">
                 Re-emails the customer a fresh payment link
               </p>
+
+              {/* Copy/paste the link — builds it without emailing anything */}
+              <div className="mt-3">
+                {!payLink ? (
+                  <button
+                    onClick={() => void loadPayLink()}
+                    disabled={loadingPayLink}
+                    className="text-sm font-semibold px-4 py-2 rounded-lg border border-sky-400 text-sky-700 hover:bg-sky-50 disabled:opacity-50 transition-colors"
+                  >
+                    {loadingPayLink ? "Building…" : "🔗 Get payment link"}
+                  </button>
+                ) : (
+                  <div className="rounded-lg border border-sky-200 bg-sky-50/60 p-3">
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <p className="text-[11px] font-bold text-sky-900 uppercase tracking-widest">
+                        Payment link — nothing emailed
+                      </p>
+                      <button
+                        onClick={() => {
+                          setPayLink(null);
+                          setPayLinkError(null);
+                          setCopiedPayField(null);
+                        }}
+                        className="text-xs text-gray-400 hover:text-gray-600"
+                      >
+                        Hide
+                      </button>
+                    </div>
+                    <input
+                      ref={payLinkInputRef}
+                      readOnly
+                      value={payLink.paymentUrl}
+                      onFocus={(e) => e.currentTarget.select()}
+                      className="w-full px-2 py-1.5 text-[11px] font-mono text-gray-700 bg-white border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    />
+                    <div className="flex items-center gap-2 mt-2 flex-wrap">
+                      <button
+                        onClick={() => void copyPayField("link")}
+                        className="px-2.5 py-1.5 rounded bg-sky-600 hover:bg-sky-700 text-white text-[11px] font-semibold whitespace-nowrap"
+                      >
+                        {copiedPayField === "link" ? "✓ Copied" : "Copy link"}
+                      </button>
+                      <button
+                        onClick={() => void copyPayField("message")}
+                        className="px-2.5 py-1.5 rounded border border-sky-400 text-sky-700 hover:bg-sky-50 text-[11px] font-semibold whitespace-nowrap"
+                      >
+                        {copiedPayField === "message" ? "✓ Copied" : "Copy message"}
+                      </button>
+                      <span className="text-[11px] text-gray-600">
+                        Charges{" "}
+                        <span className="font-semibold">${payLink.amountDue.toFixed(2)} CAD</span>
+                        {payLink.amountPaid > 0
+                          ? ` — balance of $${payLink.orderTotal.toFixed(2)} (already paid $${payLink.amountPaid.toFixed(2)})`
+                          : " — full order total"}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-gray-500 mt-2 whitespace-pre-line border-t border-sky-100 pt-2">
+                      {payLink.message}
+                    </p>
+                    <p className="text-[11px] text-gray-400 mt-1">
+                      Paste into a text or Messenger · 30-day link, opens secure Clover checkout
+                    </p>
+                  </div>
+                )}
+                {!payLink && !payLinkError && (
+                  <p className="text-xs text-gray-400 mt-1">
+                    Builds the link for you to send yourself — no email is sent
+                  </p>
+                )}
+                {payLinkError && (
+                  <p className="text-[11px] text-red-600 mt-1">{payLinkError}</p>
+                )}
+              </div>
               {!order.voided_at && !order.quote_request_id && (
                 <button
                   onClick={() => onVoidAndReplace()}

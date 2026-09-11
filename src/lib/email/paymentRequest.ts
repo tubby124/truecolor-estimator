@@ -59,6 +59,13 @@ export interface PaymentRequestEmailParams {
   discount_code?: string;
   discount_amount?: number;
   pstExemptionNote?: string | null;
+  /**
+   * Remaining balance when the customer already paid part of the order
+   * (deposit / partial Clover payment). Drives the requested amount in the
+   * subject, CTA and e-transfer copy so they match the ledger-aware /pay link.
+   * Omit for fully-unpaid orders.
+   */
+  balanceDue?: number;
 }
 
 // ─── Public entry point ───────────────────────────────────────────────────────
@@ -67,10 +74,11 @@ export async function sendPaymentRequestEmail(
   params: PaymentRequestEmailParams
 ): Promise<void> {
   const { orderNumber, contact, total, quoteOnly } = params;
+  const amountDue = params.balanceDue ?? total;
 
   const defaultSubject = quoteOnly
     ? `Your Quote — $${total.toFixed(2)} CAD | True Color Display Printing`
-    : `Payment Request — $${total.toFixed(2)} CAD | True Color Display Printing`;
+    : `Payment Request — $${amountDue.toFixed(2)} CAD | True Color Display Printing`;
   const subject = params.subjectOverride?.trim() || defaultSubject;
 
   await sendEmail({
@@ -81,7 +89,7 @@ export async function sendPaymentRequestEmail(
   });
 
   console.log(
-    `[paymentRequest] email sent → ${contact.email} | order ${orderNumber} | total $${total.toFixed(2)} | ${params.items.length} item(s)`
+    `[paymentRequest] email sent → ${contact.email} | order ${orderNumber} | total $${total.toFixed(2)} | due $${amountDue.toFixed(2)} | ${params.items.length} item(s)`
   );
 }
 
@@ -203,6 +211,10 @@ function buildProofHtml(proofUrl?: string): string {
 
 function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
   const { orderNumber, contact, items, subtotal, gst, pst, total, paymentUrl, paymentMethod, quoteOnly, notes, customMessage, accountInfo, discount_code, discount_amount, pstExemptionNote } = p;
+
+  const amountDue = p.balanceDue ?? total;
+  const alreadyPaid = Math.max(0, total - amountDue);
+  const isPartial = p.balanceDue !== undefined && p.balanceDue < total;
 
   const heroTitle = quoteOnly ? "Your Quote" : "Payment Request";
   const methodNote = quoteOnly
@@ -350,6 +362,12 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
                       $${total.toFixed(2)}
                     </td>
                   </tr>
+
+                  ${isPartial ? `<tr style="background: #fffbeb;">
+                    <td colspan="2" style="padding: 12px 16px; border-top: 2px solid #fde68a; font-size: 13px; color: #92400e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                      Already paid <strong>$${alreadyPaid.toFixed(2)}</strong> — balance due now <strong>$${amountDue.toFixed(2)} CAD</strong>
+                    </td>
+                  </tr>` : ""}
                 </tbody>
               </table>
 
@@ -360,12 +378,12 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
               <div style="background: #f0fbff; border: 1px solid #7de0f7; border-radius: 10px; padding: 20px 24px; margin-bottom: 24px; text-align: center;">
                 <p style="margin: 0 0 16px; font-size: 14px; color: #0c4a6e; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                   ${quoteOnly
-                    ? `Pay <strong>$${total.toFixed(2)} CAD</strong> to lock in your quote — or reply to this email if you'd like changes first.`
-                    : `Click the button below to pay <strong>$${total.toFixed(2)} CAD</strong> securely online. Your payment is protected by Clover.`}
+                    ? `Pay <strong>$${amountDue.toFixed(2)} CAD</strong> to lock in your quote — or reply to this email if you'd like changes first.`
+                    : `Click the button below to pay <strong>$${amountDue.toFixed(2)} CAD</strong> securely online. Your payment is protected by Clover.`}
                 </p>
                 <a href="${escHtml(paymentUrl)}"
                   style="display: inline-block; background: #16C2F3; color: #ffffff; font-size: 16px; font-weight: 700; text-decoration: none; padding: 14px 36px; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.01em;">
-                  Pay $${total.toFixed(2)} Now &rarr;
+                  Pay $${amountDue.toFixed(2)} Now &rarr;
                 </a>
                 <p style="margin: 14px 0 0; font-size: 11px; color: #6b7280; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                   ${quoteOnly
@@ -380,7 +398,7 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
                   Prefer Interac e-Transfer?
                 </p>
                 <p style="margin: 0; font-size: 13px; color: #4a3728; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                  Send <strong>$${total.toFixed(2)} CAD</strong> to
+                  Send <strong>$${amountDue.toFixed(2)} CAD</strong> to
                   <a href="mailto:info@true-color.ca" style="color: #0369a1; text-decoration: none; font-weight: 600;">info@true-color.ca</a>
                   and put <strong>${escHtml(orderNumber)}</strong> in the message. We&rsquo;ll confirm receipt and start production within 1 business day.
                 </p>
@@ -420,6 +438,10 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
 function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
   const { orderNumber, contact, items, subtotal, gst, pst, total, paymentUrl, quoteOnly, customMessage, accountInfo, discount_code, discount_amount, pstExemptionNote } = p;
 
+  const amountDue = p.balanceDue ?? total;
+  const alreadyPaid = Math.max(0, total - amountDue);
+  const isPartial = p.balanceDue !== undefined && p.balanceDue < total;
+
   // Plain-text rendering uses Albert's pre-built block when available (kind="product"
   // with spec fields), and falls back to a 1-line representation otherwise.
   const itemLines: string[] = [];
@@ -443,7 +465,7 @@ function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
   const ctaBlock = quoteOnly
     ? [
         `--- APPROVE & PAY ---`,
-        `Pay $${total.toFixed(2)} CAD to lock in your quote:`,
+        `Pay $${amountDue.toFixed(2)} CAD to lock in your quote:`,
         paymentUrl,
         ``,
         `Need changes? Reply to this email or call (306) 954-8688.`,
@@ -456,7 +478,7 @@ function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
   const etransferBlock = [
     ``,
     `--- PREFER E-TRANSFER? ---`,
-    `Send $${total.toFixed(2)} CAD to info@true-color.ca and put ${orderNumber} in the message.`,
+    `Send $${amountDue.toFixed(2)} CAD to info@true-color.ca and put ${orderNumber} in the message.`,
     `We'll confirm receipt and start production within 1 business day.`,
   ];
 
@@ -479,6 +501,12 @@ function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
     `  PST: $${pst.toFixed(2)}`,
     ...(pstExemptionNote ? [`  ${pstExemptionNote}`] : []),
     `  TOTAL:    $${total.toFixed(2)} CAD`,
+    ...(isPartial
+      ? [
+          `  Already paid: $${alreadyPaid.toFixed(2)}`,
+          `  BALANCE DUE NOW: $${amountDue.toFixed(2)} CAD`,
+        ]
+      : []),
     "",
     ...ctaBlock,
     ...etransferBlock,

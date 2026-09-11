@@ -8,7 +8,7 @@ import { PurchaseEvent } from "@/app/order-confirmed/PurchaseEvent";
 import { CloverPaymentWatcher } from "@/app/order-confirmed/CloverPaymentWatcher";
 import { REVIEW_COUNT } from "@/lib/reviews";
 import type { LatestPaymentAttempt } from "@/lib/payments/attempts";
-import { encodePaymentToken } from "@/lib/payment/token";
+import { resolveOrderPayLink } from "@/lib/orders/payLink";
 import { shouldTrackConfirmedPurchase } from "@/lib/analytics/purchase-readiness";
 import { isRevenueConversionType, pretaxConversionValue, type RevenueConversionType } from "@/lib/analytics/conversions";
 
@@ -83,15 +83,17 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
   let cardPayUrl = isEtransfer ? (orderSummary?.payment_reference ?? null) : null;
   if (!cardPayUrl && oid && orderSummary?.payment_method === "clover_card" && orderSummary.status === "pending_payment") {
     try {
+      // Ledger-aware: after a partial payment the customer still owes the
+      // balance, not the original total.
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
-      const token = encodePaymentToken(
-        Number(orderSummary.total),
-        `Order ${orderSummary.order_number}`,
-        customerEmail ?? undefined,
-        `${siteUrl}/order-confirmed?oid=${oid}`,
-        { orderId: oid },
-      );
-      cardPayUrl = `/pay/${token}`;
+      const resolved = await resolveOrderPayLink(createServiceClient(), {
+        orderId: oid,
+        orderNumber: orderSummary.order_number,
+        total: Number(orderSummary.total),
+        customerEmail: customerEmail ?? "",
+        siteUrl,
+      });
+      cardPayUrl = resolved.amountDueCents > 0 ? new URL(resolved.paymentUrl).pathname : null;
     } catch {
       cardPayUrl = null;
     }

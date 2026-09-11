@@ -12,7 +12,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireStaffUser, createServiceClient } from "@/lib/supabase/server";
-import { encodePaymentToken } from "@/lib/payment/token";
+import { resolveOrderPayLink, type ResolvedOrderPayLink } from "@/lib/orders/payLink";
 import { sendPaymentRequestEmail } from "@/lib/email/paymentRequest";
 import { sendEmail } from "@/lib/email/smtp";
 import { sanitizeError } from "@/lib/errors/sanitize";
@@ -230,9 +230,25 @@ export async function POST(req: NextRequest, { params }: Params) {
           ? `${items[0].product_name} + ${items.length - 1} more (Order ${order.order_number})`
           : `True Color Order ${order.order_number}`;
 
-    const redirectUrl = `${siteUrl}/order-confirmed?oid=${order.id}`;
-    const payToken = encodePaymentToken(newTotal, description, customer.email, redirectUrl, { orderId: order.id });
-    const paymentUrl = `${siteUrl}/pay/${payToken}`;
+    // Ledger-aware: the freshly discounted total is what the customer owes
+    // only if they haven't already paid part of the order.
+    let payLink: ResolvedOrderPayLink;
+    try {
+      payLink = await resolveOrderPayLink(supabase, {
+        orderId: order.id,
+        orderNumber: order.order_number,
+        total: newTotal,
+        customerEmail: customer.email,
+        siteUrl,
+      });
+    } catch (linkErr) {
+      console.error("[assign-discount] pay link resolution failed:", linkErr instanceof Error ? linkErr.message : linkErr);
+      return NextResponse.json(
+        { error: "Could not read the payment ledger — the updated invoice was not emailed" },
+        { status: 500 }
+      );
+    }
+    const paymentUrl = payLink.paymentUrl;
 
     // NOTE: do NOT update payment_reference — it is set to the order UUID by /pay/[token]
     // when the customer clicks, and the Clover webhook matches on it.
@@ -259,6 +275,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       gst: newGst,
       pst: newPst,
       total: newTotal,
+      balanceDue: payLink.amountDue,
       paymentUrl,
       paymentMethod: "clover",
       notes: order.notes as string | null,

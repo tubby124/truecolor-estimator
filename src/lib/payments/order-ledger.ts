@@ -81,6 +81,19 @@ export function nextPaymentAmount(orderTotal: number, payments: OrderPaymentLedg
   return summarizeOrderPayments(orderTotal, payments).balanceDue;
 }
 
+/**
+ * Remaining balance in cents — the single definition of what a /pay link may
+ * charge. A partial payment leaves the order in pending_payment without
+ * reducing orders.total, so the gateway must compare token amounts against
+ * this, never against the raw order total.
+ */
+export function remainingBalanceCents(
+  orderTotal: number,
+  payments: OrderPaymentLedgerEntry[]
+): number {
+  return toCents(summarizeOrderPayments(orderTotal, payments).balanceDue);
+}
+
 export function shouldMarkOrderPaid(summary: Pick<OrderPaymentSummary, "status">): boolean {
   return summary.status === "paid";
 }

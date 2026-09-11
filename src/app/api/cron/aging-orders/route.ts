@@ -20,7 +20,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/smtp";
 import { recordCronRun } from "@/lib/cron/heartbeat";
 import { escHtml } from "@/lib/email/components/escHtml";
-import { buildPayLink } from "@/lib/orders/payLink";
+import { buildPayLink, nextPaymentAmount } from "@/lib/orders/payLink";
 import type { OrderPaymentLedgerEntry } from "@/lib/payments/order-ledger";
 
 const FROM = "True Color Display Printing <hello@outreach.true-color.ca>";
@@ -41,7 +41,7 @@ interface AgingOrder {
   customers: { name: string; email: string } | { name: string; email: string }[] | null;
 }
 
-async function requiredQueryFailed(query: "stale-pending" | "stale-production") {
+async function requiredQueryFailed(query: "stale-pending" | "stale-production" | "payment-ledger") {
   console.error(`[aging-orders] required ${query} query failed`);
   await recordCronRun("aging-orders", false, `required_query_failed=${query}`);
   return NextResponse.json(
@@ -104,6 +104,41 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: true, stalePending: 0, staleProduction: 0 });
   }
 
+  // Payment ledger for the pending orders — a partially-paid customer must be
+  // offered a balance link, not the original total. Read failure is fatal for
+  // the digest: a full-total link would double-charge those customers.
+  const ledgerByOrder = new Map<string, OrderPaymentLedgerEntry[]>();
+  if (pending.length > 0) {
+    try {
+      const { data: ledgerRows, error: ledgerErr } = await supabase
+        .from("order_payments")
+        .select("order_id, amount, method, status")
+        .in("order_id", pending.map((o) => o.id));
+
+      if (ledgerErr) {
+        console.error("[aging-orders] payment ledger query failed:", ledgerErr.message);
+        return requiredQueryFailed("payment-ledger");
+      }
+
+      for (const row of (ledgerRows ?? []) as Array<{
+        order_id: string;
+        amount: number | string;
+        method: string;
+        status: string | null;
+      }>) {
+        const entries = ledgerByOrder.get(row.order_id) ?? [];
+        entries.push({
+          amount: Number(row.amount),
+          method: row.method as OrderPaymentLedgerEntry["method"],
+          status: (row.status ?? "recorded") as OrderPaymentLedgerEntry["status"],
+        });
+        ledgerByOrder.set(row.order_id, entries);
+      }
+    } catch {
+      return requiredQueryFailed("payment-ledger");
+    }
+  }
+
   // Split pending: still on the ladder vs ladder-exhausted (needs a human)
   const stillChasing = pending.filter((o) => (o.followup_count ?? 0) < 3 && !o.followup_paused_at);
   const exhausted = pending.filter((o) => (o.followup_count ?? 0) >= 3 && !o.followup_paused_at);
@@ -118,6 +153,10 @@ export async function GET(req: NextRequest) {
   function payLinkFor(o: AgingOrder): string | null {
     const customer = Array.isArray(o.customers) ? o.customers[0] : o.customers;
     if (!customer?.email) return null;
+    const ledger = ledgerByOrder.get(o.id) ?? [];
+    // Ledger already covers the order — there is nothing left to pay, so the
+    // digest should not offer a $0 checkout link.
+    if (nextPaymentAmount(Number(o.total), ledger) <= 0) return null;
     try {
       return buildPayLink({
         orderId: o.id,
@@ -125,7 +164,7 @@ export async function GET(req: NextRequest) {
         total: Number(o.total),
         customerEmail: customer.email,
         siteUrl: SITE_URL,
-        ledger: [] as OrderPaymentLedgerEntry[],
+        ledger,
       });
     } catch {
       return null;

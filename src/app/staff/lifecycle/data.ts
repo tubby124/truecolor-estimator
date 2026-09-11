@@ -6,7 +6,7 @@
  */
 
 import { createServiceClient } from "@/lib/supabase/server";
-import { encodePaymentToken } from "@/lib/payment/token";
+import { resolveOrderPayLink } from "@/lib/orders/payLink";
 import type { LifecycleRow } from "./LifecycleTable";
 import type { Heartbeat } from "./HeartbeatsPanel";
 import type { Orphan } from "./OrphanPanel";
@@ -431,12 +431,18 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     if (row.status !== "pending_payment") continue;
     if (row.age_hours < 1) continue;
     if (row.emails.pay_link) continue;
-    // Generate recovery URL
+    // Generate recovery URL — ledger-aware, so an order that already has part
+    // of its balance paid gets a balance link rather than the full total again.
     let payLinkUrl = "";
     try {
-      const redirectUrl = `${siteUrl}/order-confirmed?oid=${row.id}`;
-      const token = encodePaymentToken(row.total, `Order ${row.order_number}`, row.customer_email || undefined, redirectUrl, { orderId: row.id });
-      payLinkUrl = `${siteUrl}/pay/${token}`;
+      const resolved = await resolveOrderPayLink(supabase, {
+        orderId: row.id,
+        orderNumber: row.order_number,
+        total: row.total,
+        customerEmail: row.customer_email || "",
+        siteUrl,
+      });
+      payLinkUrl = resolved.amountDueCents > 0 ? resolved.paymentUrl : "";
     } catch {
       payLinkUrl = "";
     }
