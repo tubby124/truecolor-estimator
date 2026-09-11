@@ -24,6 +24,7 @@ Read the guide for your task; these preserve decisions and incident lessons, not
 
 - [Daily 7 p.m. evening creative: current plan and execution handoff](social/EVENING-LAUNCH-20260909.md)
 - [Gallery batch two: deployed assets and release evidence](operations/GALLERY-BATCH-TWO-20260909.md)
+- [Staff payment-link copy and balance-due link semantics: release receipt](operations/PAYMENT-LINK-BALANCE-AND-STAFF-COPY-20260911.md)
 
 - [Connected learning-to-render preparation before publication](social/CONNECTED-PREPARATION.md)
 - [Bounded harness batch to existing review and queue](social/HARNESS-BATCH-BRIDGE.md)
