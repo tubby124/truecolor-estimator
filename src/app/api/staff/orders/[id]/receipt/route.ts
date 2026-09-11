@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
 import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
+import { recordAuditEvent } from "@/lib/audit/record";
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -71,6 +72,14 @@ export async function POST(req: NextRequest, { params }: Params) {
       receiptToken: (order as { receipt_token?: string | null }).receipt_token ?? null,
     });
 
+    await recordAuditEvent({
+      actor_type: "staff",
+      actor_id: staffCheck.email ?? "staff",
+      event_type: "order.notification_outcome",
+      entity_type: "order",
+      entity_id: id,
+      detail: { order_number: order.order_number, status: "payment_received", outcome: "accepted" },
+    });
     console.log(`[staff/orders/receipt] sent → ${customer.email} | order ${order.order_number}`);
     return NextResponse.json({ ok: true });
   } catch (err) {

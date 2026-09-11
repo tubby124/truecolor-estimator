@@ -56,6 +56,8 @@ export interface SendEmailOptions {
   scheduledAt?: string;
   /** Fail after provider acceptance if the durable email_log row cannot be written. */
   requireEmailLog?: boolean;
+  /** Essential order notices are not subscription mail. Other callers retain existing headers. */
+  includeUnsubscribeHeaders?: boolean;
 }
 
 export interface SendEmailResult {
@@ -160,15 +162,12 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
   if (effectiveBcc) body.bcc = effectiveBcc;
   if (effectiveReplyTo) body.reply_to = effectiveReplyTo;
 
-  // RFC 8058 / Gmail Feb 2024 bulk-sender requirement.
-  // Without List-Unsubscribe + List-Unsubscribe-Post=One-Click headers, Gmail
-  // junks transactional + marketing email wholesale even when SPF/DKIM/DMARC
-  // pass. Identical fix shipped on hasansharif.ca commit e1f10d9 / 2026-05-14.
-  // Primary recipient's address is encoded into the one-click URL so the
-  // endpoint knows who to unsubscribe.
+  // Subscription mail keeps its one-click unsubscribe headers. Essential
+  // payment, receipt and status notices opt out; Gmail explicitly excludes
+  // transactional messages from the one-click unsubscribe requirement.
   const headers: Record<string, string> = {};
   const primaryRecipient = extractEmail(toAddresses[0] ?? "");
-  if (primaryRecipient) {
+  if (primaryRecipient && options.includeUnsubscribeHeaders !== false) {
     const siteUrl =
       process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
     const oneClickUrl =

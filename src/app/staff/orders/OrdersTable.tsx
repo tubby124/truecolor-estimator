@@ -406,12 +406,16 @@ export function OrdersTable({ initialOrders, initialDashboardOrders, newQuoteCou
         ok?: boolean;
         error?: string;
         reviewRequestWarning?: string;
+        notificationWarning?: string;
       };
       if (!res.ok) throw new Error(data.error ?? "Update failed");
       setOrders((prev) =>
         prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
       );
-      if (data.reviewRequestWarning) {
+      if (data.notificationWarning) {
+        showToast(`${orderNumber}: ${data.notificationWarning}`, "error");
+        setStatusError(`${orderNumber}: ${data.notificationWarning}`);
+      } else if (data.reviewRequestWarning) {
         showToast(
           `${orderNumber} completed. ${data.reviewRequestWarning}`,
           "error",

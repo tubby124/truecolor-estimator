@@ -4,6 +4,16 @@ import { sendEmail } from "../smtp";
 const fetchMock = vi.fn<typeof fetch>();
 
 describe("sendEmail", () => {
+  it("omits subscription headers only for essential notices while preserving reply routing", async () => {
+    vi.stubEnv("SMTP_REPLY_TO", "info@example.com");
+    for (const includeUnsubscribeHeaders of [false, true]) {
+      fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ id: "email-123" }), { status: 200 }));
+      await sendEmail({ to: "customer@example.com", subject: "Notice", html: "<p>Notice</p>", includeUnsubscribeHeaders });
+      const body = JSON.parse(String(fetchMock.mock.calls.at(-1)?.[1]?.body));
+      expect(Boolean(body.headers?.["List-Unsubscribe"])).toBe(includeUnsubscribeHeaders);
+      expect(body.reply_to).toBe("info@example.com");
+    }
+  });
   beforeEach(() => {
     fetchMock.mockReset();
     vi.stubGlobal("fetch", fetchMock);

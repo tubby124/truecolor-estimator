@@ -34,12 +34,14 @@ describe("sendPaymentReceipt", () => {
       total: 111,
       isRush: false,
       paymentMethod: "wave",
+      oid: "order-123",
       idempotencyKey: "wave-receipt/order-123",
     });
 
     expect(sendEmail).toHaveBeenCalledWith(
       expect.objectContaining({
         idempotencyKey: "wave-receipt/order-123",
+        orderId: "order-123",
       }),
     );
   });

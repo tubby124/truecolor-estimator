@@ -56,6 +56,9 @@ export interface QuoteDeliveryHealth {
 }
 
 export interface RollupInputs {
+  /** Staff transitions whose latest email attempt needs operator reconciliation. */
+  unconfirmedOrderNotifications?: number;
+  orderNotificationQueryFailed?: boolean;
   bookkeepingRisks: BookkeepingRiskRow[];
   webhookGroups: WebhookSourceGroup[];
   heartbeats: Heartbeat[];
@@ -138,6 +141,15 @@ const SEV1_CATEGORIES = new Set(["no_wave_invoice", "half_recorded"]);
 export function buildRollup(inputs: RollupInputs): StatusRollup {
   const reds: RollupIssue[] = [];
   const yellows: RollupIssue[] = [];
+  if (inputs.orderNotificationQueryFailed || (inputs.unconfirmedOrderNotifications ?? 0) > 0) {
+    yellows.push({
+      key: "order-notifications:unconfirmed",
+      panel: "panel-order-notifications",
+      label: inputs.orderNotificationQueryFailed
+        ? "Order email checks unavailable"
+        : `${inputs.unconfirmedOrderNotifications} order email outcome(s) need checking`,
+    });
+  }
 
   // ── Bookkeeping risk: severity-1 = red, 2-3 = yellow ───────────────────────
   const sev1Count = inputs.bookkeepingRisks.filter((r) => SEV1_CATEGORIES.has(r.category)).length;

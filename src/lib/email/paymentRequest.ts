@@ -40,6 +40,7 @@ export interface AccountInfo {
 }
 
 export interface PaymentRequestEmailParams {
+  orderId?: string;
   orderNumber: string;
   contact: { name: string; email: string; company?: string | null };
   items: PaymentRequestItem[];
@@ -49,7 +50,7 @@ export interface PaymentRequestEmailParams {
   total: number;
   paymentUrl: string;
   paymentMethod: "clover" | "wave";
-  /** True = customer reviews a quote; no payment URL, CTA invites reply to approve.
+  /** True = quote presentation with an approve-and-pay CTA and reply-for-changes option.
    *  Set by /api/staff/manual-order when the staff toggles "Send quote only". */
   quoteOnly?: boolean;
   notes?: string | null;
@@ -86,6 +87,8 @@ export async function sendPaymentRequestEmail(
     subject,
     html: buildPaymentRequestHtml(params),
     text: buildPaymentRequestText(params),
+    orderId: params.orderId,
+    includeUnsubscribeHeaders: false,
   });
 
   console.log(
@@ -218,7 +221,7 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
 
   const heroTitle = quoteOnly ? "Your Quote" : "Payment Request";
   const methodNote = quoteOnly
-    ? "Review the line items below and reply to this email — or call (306) 954-8688 — to approve. We'll send you the invoice once you confirm."
+    ? "Review the line items below, then use the payment button to approve and pay. Need changes first? Reply to this email or call (306) 954-8688."
     : paymentMethod === "wave"
       ? "You can view and pay your invoice online using the button below."
       : "Click the button below to pay securely by credit card via Clover.";

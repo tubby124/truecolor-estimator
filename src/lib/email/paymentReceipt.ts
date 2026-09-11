@@ -65,6 +65,8 @@ export async function sendPaymentReceipt(
     html,
     text,
     idempotencyKey: params.idempotencyKey,
+    orderId: params.oid,
+    includeUnsubscribeHeaders: false,
   });
 
   console.log(

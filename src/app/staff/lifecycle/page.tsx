@@ -146,7 +146,9 @@ export default async function LifecyclePage() {
             </div>
             <LifecycleTable rows={data.rows} />
             <StaffActionsPanel actions={data.staffActions} />
-            <ActivityFeedPanel events={data.activity} />
+            <div id="panel-order-notifications" className="scroll-mt-20">
+              <ActivityFeedPanel events={data.activity} />
+            </div>
             <QuotesPanel quotes={data.quotes} />
             <SignupsPanel signups={data.signups} />
             <PendingCouponsPanel rows={data.pendingCoupons} />
