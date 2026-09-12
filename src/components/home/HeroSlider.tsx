@@ -3,8 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, useCallback, useRef } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
+import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 const SLIDES = [
   {
     img: "/images/products/product/coroplast-yard-sign-800x600.webp",
@@ -64,195 +63,184 @@ const SLIDES = [
 
 export function HeroSlider() {
   const [current, setCurrent] = useState(0);
-  const [direction, setDirection] = useState(1); // 1 = forward, -1 = backward
-  const [paused, setPaused] = useState(false);
-  // Detect mobile after mount to choose animation type.
-  // SSR defaults to false (mobile-first) — client hydration sets the real value.
-  // On mobile we use opacity crossfade (no x-transform) to avoid iOS Safari's
-  // known bug where overflow:hidden doesn't clip absolutely-positioned children
-  // that use CSS transform-based animations.
-  const [isMobile, setIsMobile] = useState(false);
-  const touchStartX = useRef<number | null>(null);
-  const touchStartY = useRef<number | null>(null);
+  const [hoverPaused, setHoverPaused] = useState(false);
+  const [focusPaused, setFocusPaused] = useState(false);
+  const [userPaused, setUserPaused] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
-    const mql = window.matchMedia("(max-width: 767px)");
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrating from matchMedia on mount
-    setIsMobile(mql.matches);
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    mql.addEventListener("change", handler);
-    return () => mql.removeEventListener("change", handler);
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrate the browser motion preference
+    setReducedMotion(query.matches);
+    const update = (event: MediaQueryListEvent) => setReducedMotion(event.matches);
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
   }, []);
 
-  const next = useCallback(() => {
-    setDirection(1);
-    setCurrent((i) => (i + 1) % SLIDES.length);
-  }, []);
-
-  const prev = useCallback(() => {
-    setDirection(-1);
-    setCurrent((i) => (i - 1 + SLIDES.length) % SLIDES.length);
-  }, []);
+  const next = useCallback(() => setCurrent((index) => (index + 1) % SLIDES.length), []);
+  const previous = () => setCurrent((index) => (index - 1 + SLIDES.length) % SLIDES.length);
+  const autoplayPaused = hoverPaused || focusPaused || userPaused || reducedMotion;
 
   useEffect(() => {
-    if (paused) return;
+    if (autoplayPaused) return;
     const timer = setInterval(next, 5000);
     return () => clearInterval(timer);
-  }, [paused, next]);
+  }, [autoplayPaused, next]);
 
-  // Touch swipe — horizontal swipe changes slide, vertical scroll unaffected
-  function handleTouchStart(e: React.TouchEvent) {
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
+  function handleTouchStart(event: React.TouchEvent) {
+    if (event.touches.length !== 1) {
+      touchStart.current = null;
+      return;
+    }
+    touchStart.current = { x: event.touches[0].clientX, y: event.touches[0].clientY };
   }
 
-  function handleTouchEnd(e: React.TouchEvent) {
-    if (touchStartX.current === null || touchStartY.current === null) return;
-    const dx = e.changedTouches[0].clientX - touchStartX.current;
-    const dy = e.changedTouches[0].clientY - touchStartY.current;
+  function handleTouchEnd(event: React.TouchEvent) {
+    const start = touchStart.current;
+    touchStart.current = null;
+    if (!start || !event.changedTouches.length) return;
+    const dx = event.changedTouches[0].clientX - start.x;
+    const dy = event.changedTouches[0].clientY - start.y;
+    // A mostly vertical gesture always remains a normal page scroll.
     if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-      if (dx < 0) next(); else prev();
+      if (dx < 0) next(); else previous();
     }
-    touchStartX.current = null;
-    touchStartY.current = null;
   }
 
   const slide = SLIDES[current];
-
-  // Mobile: opacity crossfade — no x-transform, no Safari overflow:hidden bug
-  // Desktop: spring x-slide animation
-  const mobileVariants = {
-    enter: { opacity: 0 },
-    center: { opacity: 1 },
-    exit: { opacity: 0 },
-  };
-  const desktopVariants = {
-    enter: (d: number) => ({ x: `${d * 100}%` }),
-    center: { x: 0 },
-    exit: (d: number) => ({ x: `${d * -100}%` }),
-  };
+  const controlClass = "inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/20 text-white transition-colors hover:border-white/60 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#16C2F3]";
 
   return (
     <section
-      className="relative overflow-hidden bg-[#1c1712] min-h-[640px] md:min-h-[500px] isolate"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
+      data-home-hero
+      className="bg-[#1c1712] text-white"
+      aria-label="Printing offers"
+      aria-roledescription="carousel"
+      onMouseEnter={() => setHoverPaused(true)}
+      onMouseLeave={() => setHoverPaused(false)}
+      onFocusCapture={() => setFocusPaused(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocusPaused(false);
+      }}
     >
-      {/*
-        AnimatePresence: only 1–2 slides in the DOM at once.
-        Mobile: opacity crossfade (safe on iOS Safari — no transform overflow bug).
-        Desktop: x-axis spring slide (full animation).
-        The section's overflow:hidden + isolate clips entering/exiting slides.
-      */}
-      <AnimatePresence initial={false} custom={direction}>
-        <motion.div
-          key={current}
-          custom={direction}
-          variants={isMobile ? mobileVariants : desktopVariants}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          transition={
-            isMobile
-              ? { duration: 0.35, ease: "easeInOut" }
-              : { type: "spring", stiffness: 300, damping: 32, mass: 0.8 }
-          }
-          className="absolute inset-0 flex flex-col md:flex-row"
-        >
-          {/* Image side */}
-          <div className="relative w-full md:w-1/2 h-56 md:h-auto bg-[#13100c] flex items-center justify-center overflow-hidden shrink-0">
+      {/* The active slide stays in document flow: text can grow without clipping.
+          Reserved intro and description space keeps all six offers equally tall. */}
+      <div
+        id="home-offer-panel"
+        data-home-hero-slide={current}
+        role="group"
+        aria-roledescription="slide"
+        aria-label={`${current + 1} of ${SLIDES.length}`}
+        className="mx-auto grid max-w-6xl md:grid-cols-2"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={() => { touchStart.current = null; }}
+      >
+        <figure className="m-0 flex flex-col bg-[#f4efe9]">
+          <div className="relative h-48 sm:h-64 md:h-auto md:min-h-[440px] md:flex-1">
             <Image
               src={slide.img}
               alt={slide.imgAlt}
               fill
-              className="object-contain p-6 md:p-10"
-              priority
-              fetchPriority="high"
-              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-contain p-4 sm:p-7 md:p-10"
+              loading="eager"
+              fetchPriority={current === 0 ? "high" : "auto"}
+              sizes="(max-width: 767px) 100vw, (max-width: 1152px) 50vw, 576px"
             />
           </div>
+          <figcaption data-image-provenance="illustration" className="border-t border-[#1c1712]/10 px-6 py-2 text-xs font-medium text-[#5b5147]">
+            Product illustration
+          </figcaption>
+        </figure>
 
-          {/* Text side */}
-          <div className="w-full md:w-1/2 flex flex-col justify-center px-8 md:px-14 py-6 md:py-10 bg-[#1c1712]">
+        <div className="px-6 py-5 sm:px-8 sm:py-7 lg:px-12 lg:py-10">
+          <div className="mb-2 min-h-10 md:min-h-24 lg:min-h-16">
             {current === 0 && (
-              <p className="text-lg md:text-3xl font-black text-white tracking-tight leading-tight mb-3">
+              <p className="max-w-md text-sm font-semibold leading-5 text-white md:text-2xl md:leading-8">
                 Saskatoon Print Shop — Price it. Proof it. Pick it up today.
               </p>
             )}
-            <h2 className="text-[#16C2F3] font-bold text-base md:text-lg uppercase tracking-wide mb-3">
-              {slide.accentWord}
-            </h2>
-            <p className="text-4xl md:text-5xl font-black text-white tracking-tight leading-tight mb-5">
-              {slide.headline}
-            </p>
-            <p className="text-gray-300 text-base md:text-lg max-w-sm mb-5 md:mb-8 leading-relaxed">
-              {slide.sub}
-            </p>
-            <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2.5 sm:gap-3">
-              <Link
-                href={slide.ctaHref}
-                className="col-span-2 bg-[#16C2F3] text-white font-bold px-6 py-3 rounded-lg hover:bg-[#0fb0dd] transition-colors text-sm sm:text-base btn-shimmer text-center"
-              >
-                {slide.cta}
-              </Link>
-              <Link
-                href="/quote"
-                className="border border-white/40 text-white font-semibold px-3 py-2.5 sm:px-7 sm:py-3 rounded-lg hover:border-white transition-colors text-sm sm:text-base text-center"
-              >
-                Custom Quote
-              </Link>
-              <a
-                href="tel:+13069548688"
-                className="border border-white/40 text-white font-semibold px-3 py-2.5 sm:px-7 sm:py-3 rounded-lg hover:border-white transition-colors text-sm sm:text-base text-center"
-              >
-                <span className="sm:hidden">(306) 954-8688</span>
-                <span className="hidden sm:inline">Call (306) 954-8688</span>
-              </a>
-            </div>
           </div>
-        </motion.div>
-      </AnimatePresence>
+          <h2 className="mb-3 text-sm font-bold uppercase tracking-[0.12em] text-[#16C2F3] md:text-base">
+            {slide.accentWord}
+          </h2>
+          <p className="mb-4 text-[clamp(2rem,9vw,2.625rem)] font-black leading-[1.05] tracking-tight text-white md:text-[2rem] lg:text-5xl">
+            {slide.headline}
+          </p>
+          <p className="mb-4 min-h-11 max-w-sm text-sm leading-[1.375rem] text-gray-300 md:mb-6 md:min-h-14 md:text-base md:leading-7">
+            {slide.sub}
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            <Link
+              href={slide.ctaHref}
+              className="col-span-2 inline-flex min-h-12 items-center justify-center rounded-xl bg-[#16C2F3] px-5 py-3 text-center text-sm font-bold text-[#0f1d2a] transition-colors hover:bg-[#35cef5] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#16C2F3]"
+            >
+              {slide.cta}
+            </Link>
+            <Link
+              href="/quote"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/30 px-2 py-2 text-center text-sm font-semibold text-white transition-colors hover:border-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#16C2F3]"
+            >
+              Custom Quote
+            </Link>
+            <a
+              href="tel:+13069548688"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/30 px-2 py-2 text-center text-sm font-semibold text-white transition-colors hover:border-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#16C2F3]"
+            >
+              <span className="sm:hidden">(306) 954-8688</span>
+              <span className="hidden sm:inline">Call (306) 954-8688</span>
+            </a>
+          </div>
+        </div>
+      </div>
 
-      {/* Prev / Next arrows */}
-      <button
-        onClick={prev}
-        aria-label="Previous slide"
-        className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 bg-black/30 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition-colors"
-      >
-        <ChevronLeft className="w-4 h-4" />
-      </button>
-      <button
-        onClick={next}
-        aria-label="Next slide"
-        className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 bg-black/30 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition-colors"
-      >
-        <ChevronRight className="w-4 h-4" />
-      </button>
-
-      {/* Slide dot indicators */}
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
-        {SLIDES.map((_, i) => (
+      {/* Controls have their own space, never floating over the offer or artwork. */}
+      <div data-home-hero-controls className="mx-auto flex max-w-6xl flex-col items-center gap-1 border-t border-white/10 px-4 py-2 sm:flex-row sm:justify-between sm:px-8 sm:py-3">
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={previous} aria-label="Previous slide" aria-controls="home-offer-panel" className={controlClass}>
+            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+          </button>
           <button
-            key={i}
-            onClick={() => { setDirection(i > current ? 1 : -1); setCurrent(i); }}
-            aria-label={`Go to slide ${i + 1}`}
-            className={`h-2 rounded-full transition-all duration-300 ${
-              i === current ? "bg-[#16C2F3] w-4" : "bg-white/30 w-2 hover:bg-white/60"
-            }`}
-          />
-        ))}
+            type="button"
+            onClick={() => {
+              if (userPaused) {
+                // An explicit Play action resumes now, until a new hover/focus interaction.
+                setUserPaused(false);
+                setHoverPaused(false);
+                setFocusPaused(false);
+              } else {
+                setUserPaused(true);
+              }
+            }}
+            aria-pressed={userPaused || reducedMotion}
+            aria-controls="home-offer-panel"
+            disabled={reducedMotion}
+            className={`${controlClass} gap-2 px-4 text-xs font-semibold disabled:cursor-default disabled:opacity-60`}
+          >
+            {userPaused || reducedMotion ? <Play className="h-3.5 w-3.5" aria-hidden="true" /> : <Pause className="h-3.5 w-3.5" aria-hidden="true" />}
+            {reducedMotion ? "Autoplay off" : userPaused ? "Play offers" : "Pause offers"}
+          </button>
+          <button type="button" onClick={next} aria-label="Next slide" aria-controls="home-offer-panel" className={controlClass}>
+            <ChevronRight className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
+        <div className="flex items-center" role="group" aria-label="Choose an offer">
+          {SLIDES.map((_, index) => (
+            <button
+              key={index}
+              type="button"
+              onClick={() => setCurrent(index)}
+              aria-label={`Go to slide ${index + 1}`}
+              aria-current={index === current ? "true" : undefined}
+              aria-controls="home-offer-panel"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#16C2F3]"
+            >
+              <span aria-hidden="true" className={`h-1.5 rounded-full ${index === current ? "w-5 bg-[#16C2F3]" : "w-1.5 bg-white/40"}`} />
+            </button>
+          ))}
+        </div>
       </div>
-
-      {/* Slide progress bar */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 h-1 bg-white/10">
-        <div
-          key={current}
-          className="h-full bg-[#16C2F3] slide-progress-bar"
-        />
-      </div>
-
     </section>
   );
 }

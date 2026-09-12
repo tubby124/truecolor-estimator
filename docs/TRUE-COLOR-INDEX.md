@@ -22,6 +22,8 @@ Read the guide for your task; these preserve decisions and incident lessons, not
 
 ## Existing implementation runbooks
 
+- [Private mobile visual audit, current logo and bounded pilot](operations/MOBILE-VISUAL-MODERNIZATION-20260912.md)
+
 - [Platform audit continuation after account switch](operations/PLATFORM-AUDIT-HANDOFF-20260911.md)
 - [Order-email audit and verified release](operations/ORDER-EMAIL-AUDIT-20260911.md)
 

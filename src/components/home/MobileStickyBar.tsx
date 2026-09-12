@@ -20,10 +20,11 @@ export function MobileStickyBar() {
   if (hidden) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-[#1c1712] border-t border-white/10 px-4 py-3 flex gap-3">
+    <div data-home-mobile-bar
+      className="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-[#1c1712] border-t border-white/10 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-3">
       <Link
         href="/products"
-        className="flex-1 bg-[#16C2F3] text-white font-bold text-sm py-3 rounded-md text-center hover:bg-[#0fb0dd] transition-colors"
+        className="flex-1 bg-[#16C2F3] text-[#0f1d2a] font-bold text-sm py-3 rounded-md text-center hover:bg-[#0fb0dd] transition-colors"
       >
         Get a Price →
       </Link>

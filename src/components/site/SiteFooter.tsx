@@ -24,11 +24,11 @@ export function SiteFooter() {
           <div>
             <Link href="/">
               <Image
-                src="/truecolorlogo.webp"
+                src="/images/brand/truecolor-printing-ca-light-v3.png"
                 alt="True Color Display Printing"
-                width={140}
-                height={40}
-                className="h-8 w-auto object-contain mb-4"
+                width={684}
+                height={162}
+                className="h-auto w-40 object-contain mb-4"
               />
             </Link>
             <p className="text-sm leading-relaxed">

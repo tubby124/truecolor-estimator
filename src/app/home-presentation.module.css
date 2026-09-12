@@ -1,0 +1,11 @@
+/* Homepage-only pilot. Essential content stays visible even without JavaScript. */
+.home :global(.reveal-section) { opacity: 1; transform: none; pointer-events: auto; transition: none; }
+.home :global(.btn-shimmer)::before { display: none; }
+.home main { scroll-margin-top: 88px; }
+.home main:focus { outline: none; }
+.home main :is(a, button):focus-visible { outline: 3px solid #007ea7; outline-offset: 4px; }
+@media (max-width: 639px) {
+  .home { padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }
+  /* This component is a layout sibling; scope the correction to this homepage. */
+  :global(body):has(.home) :global(button[aria-label="Back to top"]) { bottom: calc(6rem + env(safe-area-inset-bottom)); }
+}

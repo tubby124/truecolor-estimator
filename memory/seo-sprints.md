@@ -1,5 +1,9 @@
 # SEO Sprint History — truecolorprinting.ca
 
+## September 12, 2026 — Private mobile visual pilot, not released
+
+The [audit and continuation record](../docs/operations/MOBILE-VISUAL-MODERNIZATION-20260912.md) owns the scoped homepage/picker presentation work and exact image-provenance labels. Fresh direct Google data is finalized only through September 10; Wall Graphics evidence is inconclusive and the September 10 promoted-image release has no complete finalized post-release day. Preserve experiment and five-thumbnail placement holds. Source metadata/copy/image bindings remain intact; new provenance/control labels are explicit body deltas. Five XML/text contracts match; hydrated homepage/picker metadata, headings, links and JSON-LD match. Private mobile controls/search/logo checks pass. Broad HTML coverage and full production/no-JS/performance checks remain open. No production change or ranking/conversion outcome is claimed.
+
 ---
 
 

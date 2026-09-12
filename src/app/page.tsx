@@ -1,3 +1,4 @@
+import styles from "./home-presentation.module.css";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -150,8 +151,9 @@ const INDUSTRIES = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-white pb-20 sm:pb-0">
+    <div className={`${styles.home} min-h-screen bg-white pb-20 sm:pb-0`}>
       <SiteNav />
+      <main id="main-content" tabIndex={-1}>
       <h1 className="sr-only">Saskatoon Print Shop — Signs, Banners &amp; Cards | True Color Display Printing</h1>
 
       {/* ── HERO SLIDER ──────────────────────────────────────────────────────── */}
@@ -487,6 +489,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      </main>
       <SiteFooter />
 
       {/* Mobile sticky bottom CTA bar */}

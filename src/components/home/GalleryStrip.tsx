@@ -65,11 +65,16 @@ const GALLERY_PHOTOS = [
 
 export function GalleryStrip() {
   return (
-    <section className="bg-[#1c1712] py-12 overflow-hidden">
+    <section data-home-gallery className="bg-[#1c1712] py-12 overflow-hidden">
       <div className="max-w-6xl mx-auto px-6">
-        <h2 className="text-3xl md:text-4xl font-bold text-white mb-8">
+        <p data-image-provenance="customer-work" className="mb-3 text-sm font-semibold text-[#16C2F3]">Real customer work &amp; our shop</p>
+        <h2 className="text-3xl md:text-4xl font-bold text-white mb-5">
           Our work speaks for itself
         </h2>
+        <label className="mb-6 inline-flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-white/30 px-4 text-sm font-semibold text-white">
+          <input data-gallery-pause type="checkbox" className="h-5 w-5 accent-[#16C2F3]" />
+          Pause gallery
+        </label>
       </div>
 
       {/* Auto-scrolling marquee — pure CSS, pauses on hover, static for reduced-motion */}
@@ -82,6 +87,8 @@ export function GalleryStrip() {
           animation: gallery-marquee 70s linear infinite;
           width: max-content;
         }
+        [data-home-gallery]:has([data-gallery-pause]:checked) .gallery-marquee-track,
+        [data-home-gallery]:focus-within .gallery-marquee-track,
         .gallery-marquee:hover .gallery-marquee-track {
           animation-play-state: paused;
         }
@@ -115,7 +122,7 @@ export function GalleryStrip() {
         <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6">
           <Link
             href="/gallery"
-            className="text-white font-semibold text-sm hover:underline"
+            className="inline-flex min-h-11 items-center text-white font-semibold text-sm hover:underline"
           >
             See full gallery →
           </Link>
@@ -123,7 +130,7 @@ export function GalleryStrip() {
             href="https://www.instagram.com/truecolorprint"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-400 text-sm hover:text-gray-200 transition-colors"
+            className="inline-flex min-h-11 items-center text-gray-300 text-sm hover:text-white transition-colors"
           >
             Follow @truecolorprint on Instagram
           </a>

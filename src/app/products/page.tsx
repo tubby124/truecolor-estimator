@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import styles from "./picker.module.css";
 import Link from "next/link";
 import Image from "next/image";
 import { MapPin, Search } from "lucide-react";
@@ -17,6 +18,14 @@ export const metadata: Metadata = {
 
 // Product categories for the picker
 const PICKER_PRODUCTS = PRODUCT_SLUGS.map((slug) => PRODUCTS[slug]).filter(Boolean);
+
+// Explicitly verified illustrative placements only; unresolved origins stay unlabelled.
+// Receipt: docs/operations/MOBILE-VISUAL-MODERNIZATION-20260912.md.
+const ILLUSTRATIVE_PICKER_SLUGS = new Set([
+  "vinyl-banners", "vehicle-magnets", "acp-signs", "flyers", "business-cards",
+  "foamboard-displays", "vinyl-lettering", "coroplast-signs", "retractable-banners",
+  "boat-registration-numbers",
+]);
 
 // Design services — genuinely not printed products, so they have no estimator.
 // These cards link out to the corresponding /[slug]-saskatoon SEO landing page.
@@ -81,23 +90,23 @@ export default async function ProductsPage({
   const hasResults = pickerProducts.length + seoOnlyCards.length > 0;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className={styles.picker}>
       <SiteNav />
 
-      <main id="main-content" className="max-w-5xl mx-auto px-6 py-14">
+      <main id="main-content" className="max-w-5xl mx-auto px-4 py-8 sm:px-6 sm:py-14">
         {/* Header */}
-        <div className="mb-12 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-[#1c1712] mb-4 leading-tight">
+        <div className="mb-7 text-left sm:mb-10">
+          <h1 className="text-3xl md:text-5xl font-bold text-[#1c1712] mb-3 leading-tight tracking-tight">
             What are you printing?
           </h1>
-          <p className="text-gray-500 text-lg">
+          <p className="text-gray-600 text-base sm:text-lg">
             Pick a product — see your exact price instantly. No forms. No callbacks.
           </p>
         </div>
 
         <form
           action="/products"
-          className="mb-8 flex flex-col gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm sm:flex-row"
+          className="mb-6 flex flex-col gap-2 rounded-xl border border-[#dedbd6] bg-white p-2 sm:flex-row"
         >
           <label htmlFor="product-search" className="sr-only">
             Search printing products
@@ -113,7 +122,7 @@ export default async function ProductsPage({
           <div className="flex gap-2">
             <button
               type="submit"
-              className="inline-flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl bg-[#16C2F3] px-5 font-bold text-white transition-colors hover:bg-[#0fb0dd] sm:flex-none"
+              className="inline-flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl bg-[#16C2F3] px-5 font-bold text-[#0f1d2a] transition-colors hover:bg-[#0fb0dd] sm:flex-none"
             >
               <Search size={18} aria-hidden="true" />
               Search
@@ -156,18 +165,18 @@ export default async function ProductsPage({
         </div>
 
         {/* Product picker grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-16">
+        <div className={`${styles.grid} mb-12`}>
           {pickerProducts.map((product) => {
             const img = PRODUCT_IMAGES[product.slug];
             return (
               <Link
                 key={product.slug}
                 href={`/products/${product.slug}`}
-                className="group relative flex flex-col border border-gray-100 rounded-2xl overflow-hidden hover:border-[#16C2F3] hover:shadow-md transition-all text-center"
+                className={styles.card}
               >
                 {product.comingSoon ? (
                   /* Coming soon: icon-only layout */
-                  <div className="flex flex-col items-center gap-3 p-6">
+                  <div className={styles.iconCard}>
                     <span className="absolute top-2 right-2 text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full uppercase tracking-wide">
                       Coming Soon
                     </span>
@@ -178,37 +187,42 @@ export default async function ProductsPage({
                       aria-hidden={true}
                     />
                     <div>
-                      <p className="font-bold text-[#1c1712] text-sm leading-tight">
+                      <p className="font-semibold text-[#1c1712] text-base leading-snug">
                         {product.name}
                       </p>
-                      <p className="text-xs font-semibold mt-1 text-gray-300">—</p>
+                      <p className="text-sm font-semibold mt-1 text-gray-500">—</p>
                     </div>
                   </div>
                 ) : img ? (
                   /* Photo-first card */
                   <>
-                    <div className="relative h-32 w-full">
+                    <div className={styles.image}>
                       <Image
                         src={img}
                         alt={`${product.name} — True Color Display Printing Saskatoon`}
                         fill
-                        className="object-cover"
+                        className="object-contain"
                         loading="lazy"
-                        sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+                        sizes="(max-width: 639px) 104px, (max-width: 767px) calc((100vw - 80px) / 3), (max-width: 1023px) calc((100vw - 96px) / 4), 232px"
                       />
                     </div>
-                    <div className="p-4">
-                      <p className="font-bold text-[#1c1712] text-sm leading-tight">
+                    <div className={styles.details}>
+                      <p className="font-semibold text-[#1c1712] text-base leading-snug">
                         {product.name}
                       </p>
-                      <p className="text-xs font-semibold mt-1 text-[#16C2F3]">
+                      <p className="text-base font-bold mt-2 text-[#006b8f]">
                         {product.fromPrice}
                       </p>
+                      {ILLUSTRATIVE_PICKER_SLUGS.has(product.slug) && (
+                        <span data-image-provenance="illustration" className="mt-2 block text-xs leading-4 text-[#655c53]">
+                          Product illustration
+                        </span>
+                      )}
                     </div>
                   </>
                 ) : (
                   /* Fallback: icon-only (slug has no image) */
-                  <div className="flex flex-col items-center gap-3 p-6">
+                  <div className={styles.iconCard}>
                     <PrintIcon
                       slug={product.slug}
                       size={36}
@@ -216,10 +230,10 @@ export default async function ProductsPage({
                       aria-hidden={true}
                     />
                     <div>
-                      <p className="font-bold text-[#1c1712] text-sm leading-tight">
+                      <p className="font-semibold text-[#1c1712] text-base leading-snug">
                         {product.name}
                       </p>
-                      <p className="text-xs font-semibold mt-1 text-[#16C2F3]">
+                      <p className="text-base font-bold mt-2 text-[#006b8f]">
                         {product.fromPrice}
                       </p>
                     </div>
@@ -233,34 +247,34 @@ export default async function ProductsPage({
         {/* Design services — not printed products, so no estimator. Link to SEO landing pages. */}
         {seoOnlyCards.length > 0 && (
           <div className="mb-12">
-            <h2 className="text-xl font-bold text-[#1c1712] mb-2 text-center">
+            <h2 className="text-xl font-bold text-[#1c1712] mb-2 text-left">
               Design services
             </h2>
-            <p className="text-gray-500 text-sm mb-6 text-center">
+            <p className="text-gray-600 text-sm mb-6 text-left">
               Artwork work, not printing — full details and pricing on each page.
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <div className={styles.grid}>
               {seoOnlyCards.map((card) => (
                 <Link
                   key={card.href}
                   href={card.href}
-                  className="group relative flex flex-col border border-gray-100 rounded-2xl overflow-hidden hover:border-[#16C2F3] hover:shadow-md transition-all text-center"
+                  className={styles.card}
                 >
-                  <div className="relative h-32 w-full bg-[#f8f4ef]">
+                  <div className={styles.image}>
                     <Image
                       src={card.image}
                       alt={`${card.name} — True Color Display Printing Saskatoon`}
                       fill
-                      className="object-cover"
+                      className="object-contain"
                       loading="lazy"
-                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+                      sizes="(max-width: 639px) 104px, (max-width: 767px) calc((100vw - 80px) / 3), (max-width: 1023px) calc((100vw - 96px) / 4), 232px"
                     />
                   </div>
-                  <div className="p-4">
-                    <p className="font-bold text-[#1c1712] text-sm leading-tight">
+                  <div className={styles.details}>
+                    <p className="font-semibold text-[#1c1712] text-base leading-snug">
                       {card.name}
                     </p>
-                    <p className="text-xs font-semibold mt-1 text-[#16C2F3]">
+                    <p className="text-base font-bold mt-2 text-[#006b8f]">
                       {card.fromPrice}
                     </p>
                   </div>

@@ -235,22 +235,22 @@ export function SiteNav() {
       <CallTracker />
       <PromoBanner />
       <header className="bg-[#1c1712] sticky top-0 z-50">
-        <div ref={navRef} className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div ref={navRef} className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
 
           {/* Logo */}
           <Link href="/" className="flex items-center shrink-0">
             <Image
-              src="/truecolorlogo.webp"
+              src="/images/brand/truecolor-printing-ca-light-v3.png"
               alt="True Color Display Printing"
-              width={140}
-              height={40}
-              className="h-9 w-auto object-contain"
+              width={684}
+              height={162}
+              className="h-auto w-32 sm:w-36 xl:w-32 object-contain"
               priority
             />
           </Link>
 
           {/* Desktop nav: dropdowns */}
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav className="hidden xl:flex items-center gap-1">
             {/* Products dropdown */}
             <div className="relative">
               <button
@@ -414,21 +414,21 @@ export function SiteNav() {
           </nav>
 
           {/* Right side: icons + CTA + hamburger */}
-          <div className="flex items-center gap-3 lg:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 xl:gap-4 [&>a]:min-h-11 [&>a]:min-w-11 [&>div>button]:min-h-11 [&>div>button]:min-w-11">
             <AccountIcon />
             <CartIcon />
-            <span className="hidden lg:block">
+            <span className="hidden xl:block">
               <StaffQuoteButton />
             </span>
             <Link
               href="/quote"
-              className="hidden lg:block border border-gray-600 text-gray-300 text-sm font-medium px-4 py-2.5 rounded-md hover:border-white hover:text-white transition-colors whitespace-nowrap"
+              className="hidden xl:block border border-gray-600 text-gray-300 text-sm font-medium px-4 py-2.5 rounded-md hover:border-white hover:text-white transition-colors whitespace-nowrap"
             >
               Custom Quote
             </Link>
             <Link
               href="/products"
-              className="bg-[#16C2F3] text-white text-sm font-bold px-5 py-2.5 rounded-md hover:bg-[#0fb0dd] transition-colors whitespace-nowrap hidden lg:block"
+              className="bg-[#16C2F3] text-white text-sm font-bold px-5 py-2.5 rounded-md hover:bg-[#0fb0dd] transition-colors whitespace-nowrap hidden xl:block"
             >
               Order Now →
             </Link>
@@ -436,7 +436,7 @@ export function SiteNav() {
             {/* Mobile quick-price CTA — 1-tap access, hidden on desktop */}
             <Link
               href="/products"
-              className="lg:hidden bg-[#16C2F3] text-white text-xs font-bold px-3 py-2 rounded-md whitespace-nowrap"
+              className="hidden min-[420px]:inline-flex xl:hidden items-center bg-[#16C2F3] text-[#0f1d2a] text-xs font-bold px-3 py-2 rounded-md whitespace-nowrap"
             >
               Order Now →
             </Link>
@@ -444,7 +444,7 @@ export function SiteNav() {
             {/* Hamburger — mobile only */}
             <button
               onClick={() => setDrawerOpen(true)}
-              className="lg:hidden min-w-[44px] min-h-[44px] flex items-center justify-center text-white"
+              className="xl:hidden min-w-[44px] min-h-[44px] flex items-center justify-center text-white"
               aria-label="Open menu"
               aria-expanded={drawerOpen}
             >
@@ -462,11 +462,11 @@ export function SiteNav() {
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
             <Link href="/" onClick={() => setDrawerOpen(false)}>
               <Image
-                src="/truecolorlogo.webp"
+                src="/images/brand/truecolor-printing-ca-light-v3.png"
                 alt="True Color Display Printing"
-                width={120}
-                height={34}
-                className="h-8 w-auto object-contain"
+                width={684}
+                height={162}
+                className="h-auto w-40 object-contain"
               />
             </Link>
             <button

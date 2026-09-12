@@ -3,6 +3,11 @@ import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // The private visual proxy deliberately blocks WebSockets. Next's development
+  // debug channel otherwise leaves hydration waiting for that connection.
+  ...(process.env.NODE_ENV === "development" && process.env.TRUECOLOR_PRIVATE_PREVIEW === "1"
+    ? { experimental: { reactDebugChannel: false } }
+    : {}),
   // Keep build tracing anchored to this checkout. Local worktrees otherwise
   // inherit an unrelated parent lockfile and emit an unusable nested server.
   outputFileTracingRoot: process.cwd(),
