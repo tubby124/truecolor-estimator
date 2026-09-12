@@ -184,3 +184,7 @@ Owner explicitly cancelled the one-year objective. Earlier year/annual statement
 ## Small harness batch bridge — September 9, 2026
 
 Owner cancelled annual content work and authorized a small-batch rehearsal through existing review/queue contracts. [Batch bridge](../social/HARNESS-BATCH-BRIDGE.md) prepares existing assets and captions as a compatible month-plan with stable creative IDs, source/recipe lineage and a required learned rendering policy. The builder now validates the exact white-backed logo rule and renders from bound raw sources, then carries final image/caption hashes into the existing review flow. Local simulated exact approval is tested; it is not live approval. Read-only live scheduler audit at 21:48:35 UTC found active sole posting/monitor timers, clean check state and exactly 48 existing base destinations; new monthly drafts do not enroll automatically. No live queue, approval, scheduler scope or published media changed. Exact owner review, authenticated import/readback and explicitly reconciled enrollment remain.
+
+## Private financial reconciliation — September 12, 2026
+
+A private management reconciliation has started using sales, bank, card, supplier, and owner-input evidence. It is deliberately kept out of this repository because it contains sensitive financial records. [Private financial reconciliation handoff](./PRIVATE-FINANCIAL-RECONCILIATION.md) records the boundary: no accountant-reviewed profit/loss result, product change, deployment, or customer-facing change is claimed here.
