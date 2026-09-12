@@ -6,5 +6,6 @@ Financial statements, account details, owner/related-party transfers, payroll ev
 
 The reconciliation currently distinguishes customer sales, collections, owner/related-party funding, inventory purchases, card settlements, debt, taxes, and operating costs. It has not produced an accountant-reviewed profit/loss result.
 
-For the private evidence register and next requested documents, see the Vault concept `true-color-2026-financial-reconciliation-2026-09`.
+Equipment acquisition is a private management decision gate, not a product or deployment task. Do not represent proposed equipment as approved, purchased, financed, or operational from this repository. It remains contingent on the private reconciliation, stable collected sales without recurring owner support, and documented incremental gross margin.
 
+For the private evidence register and next requested documents, see the Vault concept `true-color-2026-financial-reconciliation-2026-09`.
