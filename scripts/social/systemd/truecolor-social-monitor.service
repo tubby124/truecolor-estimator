@@ -13,6 +13,7 @@ UMask=0077
 LoadCredential=cron-secret:/etc/truecolor-social/cron-secret
 LoadCredential=telegram-bot-token:/etc/truecolor-social/telegram-bot-token
 LoadCredential=telegram-chat-id:/etc/truecolor-social/telegram-chat-id
+LoadCredential=slack-webhook:/etc/truecolor-social/slack-webhook
 ExecStart=/usr/bin/python3 /opt/truecolor-social/vps-monitor.py
 TimeoutStartSec=180
 NoNewPrivileges=yes

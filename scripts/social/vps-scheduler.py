@@ -102,7 +102,31 @@ def telegram(message):
     return result['result']['message_id']
 
 
-def notifications(path, config, result=None, alert=None, notify=telegram):
+def slack(message):
+    """Mirror an owner notification through the locked Slack system credential."""
+    directory = Path(os.environ['CREDENTIALS_DIRECTORY'])
+    webhook = (directory / 'slack-webhook').read_text().strip()
+    url = urllib.parse.urlsplit(webhook)
+    if (url.scheme, url.netloc, url.query, url.fragment) != ('https', 'hooks.slack.com', '', ''):
+        raise ValueError('Invalid Slack credential')
+    if not re.fullmatch(r'/services/[A-Za-z0-9]+/[A-Za-z0-9]+/[A-Za-z0-9]+', url.path):
+        raise ValueError('Invalid Slack credential')
+    body = json.dumps({'text': message, 'unfurl_links': False, 'unfurl_media': False}).encode()
+    req = urllib.request.Request(webhook, data=body, headers={'Content-Type': 'application/json'})
+    with urllib.request.build_opener(NoRedirect()).open(req, timeout=20) as response:
+        result = response.read(1025)
+    if result != b'ok':
+        raise ValueError('Slack delivery unconfirmed')
+
+
+def notify_owner(message):
+    """Preserve Telegram receipts while mirroring them to private Slack."""
+    message_id = telegram(message)
+    slack(message)
+    return message_id
+
+
+def notifications(path, config, result=None, alert=None, notify=notify_owner):
     """Separate durable outbox: failure here can never change provider dispatch state.
 
     Telegram has no idempotency key. An accepted message whose ACK was lost may

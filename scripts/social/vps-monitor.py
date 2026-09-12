@@ -157,7 +157,7 @@ def transitions(state, problems):
     state['problems'] = problems
 
 
-def flush_outbox(path, state, notify=runner.telegram, posted_only=False):
+def flush_outbox(path, state, notify=runner.notify_owner, posted_only=False):
     """At most one attempt per event. Lost ACK requires manual readback, not retry."""
     attempts = 0
     for event in state['outbox'].values():

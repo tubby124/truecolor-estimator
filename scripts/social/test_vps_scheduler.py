@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 spec = importlib.util.spec_from_file_location('runner', Path(__file__).with_name('vps-scheduler.py'))
 r = importlib.util.module_from_spec(spec)
@@ -96,6 +96,14 @@ class RunnerTest(unittest.TestCase):
         self.assertEqual(notify.call_count, 2)
         self.assertIn(receipt['publicUrl'], notify.call_args.args[0])
         self.assertTrue(all(e['sent'] for e in json.loads(self.path.with_name('notifications.json').read_text()).values()))
+
+    def test_rejects_non_slack_webhook_credential(self):
+        credentials = Path(self.tmp.name) / 'credentials'
+        credentials.mkdir()
+        (credentials / 'slack-webhook').write_text('https://example.com/not-slack\n')
+        with patch.dict(r.os.environ, {'CREDENTIALS_DIRECTORY': str(credentials)}):
+            with self.assertRaisesRegex(ValueError, 'Invalid Slack credential'):
+                r.slack('notification')
 
     def test_partial_success_notice_has_only_verified_link_and_hold(self):
         receipts = [
