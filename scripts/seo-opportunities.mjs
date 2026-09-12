@@ -80,7 +80,8 @@ function loadFrozenSlugs() {
     if (!line.startsWith("|") || /^\|\s*-+/.test(line)) continue;
     const cells = line.split("|").map((cell) => cell.trim());
     const slug = cells[1];
-    if (!slug || !/^[a-z0-9][a-z0-9-]+[a-z0-9]$/.test(slug)) continue;
+    const isHomepage = slug?.toLowerCase() === "homepage" || slug === "/";
+    if (!isHomepage && (!slug || !/^[a-z0-9][a-z0-9-]+[a-z0-9]$/.test(slug))) continue;
 
     const normalizedCells = cells.map((cell) =>
       cell
@@ -92,11 +93,12 @@ function loadFrozenSlugs() {
     const isLocked = normalizedCells.some(
       (cell) =>
         cell.includes("defend") ||
+        cell.includes("preserve") ||
         cell.includes("meta desc only") ||
         cell.includes("faq price fix only") ||
         cell.includes("frozen"),
     );
-    if (isLocked) frozen.add(slug);
+    if (isLocked) frozen.add(isHomepage ? "/" : slug);
   }
   return frozen;
 }
@@ -105,7 +107,13 @@ const existingSlugs = loadExistingPageSlugs();
 const frozenSlugs = loadFrozenSlugs();
 
 // === Pull aggregated data from Supabase ===
-const recentWindow = `CURRENT_DATE - INTERVAL '${DAYS} days'`;
+// GSC data arrives with a lag. Anchor every comparison window to the most
+// recent finalized snapshot, rather than the calendar date, so incomplete
+// trailing days cannot suppress or manufacture opportunities.
+const latestSnapshotDate = `(SELECT MAX(snapshot_date) FROM seo_gsc_snapshots)`;
+// `>=` is inclusive, so start 27 days before the finalized date for an exact
+// 28-date window (rather than accidentally including a 29th date).
+const recentWindow = `${latestSnapshotDate} - INTERVAL '${DAYS - 1} days'`;
 
 const aggregated = await runSql(`
   SELECT
@@ -123,6 +131,7 @@ const aggregated = await runSql(`
 
 // === Pull recent vs prior split for decay detection ===
 const splitDays = Math.floor(DAYS / 2);
+const recentDecayWindow = `${latestSnapshotDate} - INTERVAL '${splitDays - 1} days'`;
 const decay = await runSql(`
   WITH recent AS (
     SELECT query, page,
@@ -130,7 +139,7 @@ const decay = await runSql(`
            SUM(clicks)::int AS clk_recent,
            (SUM(position * impressions) / NULLIF(SUM(impressions), 0))::float AS pos_recent
     FROM seo_gsc_snapshots
-    WHERE snapshot_date >= CURRENT_DATE - INTERVAL '${splitDays} days'
+    WHERE snapshot_date >= ${recentDecayWindow}
     GROUP BY query, page
   ),
   prior AS (
@@ -139,8 +148,8 @@ const decay = await runSql(`
            SUM(clicks)::int AS clk_prior,
            (SUM(position * impressions) / NULLIF(SUM(impressions), 0))::float AS pos_prior
     FROM seo_gsc_snapshots
-    WHERE snapshot_date >= CURRENT_DATE - INTERVAL '${DAYS} days'
-      AND snapshot_date < CURRENT_DATE - INTERVAL '${splitDays} days'
+    WHERE snapshot_date >= ${recentWindow}
+      AND snapshot_date < ${recentDecayWindow}
     GROUP BY query, page
   )
   SELECT
