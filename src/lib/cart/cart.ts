@@ -6,7 +6,8 @@ export interface LineItem {
   qty: number;
   unit_price: number;
   line_total: number;
-  rule_id: string;
+  /** Internal rule IDs are present only for staff estimates. */
+  rule_id?: string;
 }
 
 export interface CartItem {

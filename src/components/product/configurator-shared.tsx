@@ -17,7 +17,7 @@
 
 import { useEffect, useState } from "react";
 import type { Category, DesignStatus } from "@/lib/data/types";
-import type { EstimateResponse } from "@/lib/engine/types";
+import type { PublicEstimateResponse } from "@/lib/engine/types";
 import type { LineItem } from "@/lib/cart/cart";
 import { computeTax } from "@/lib/pricing/tax";
 import type { PriceData } from "./ProductConfigurator";
@@ -43,7 +43,7 @@ interface EngineQuoteRequest {
 
 interface EngineQuoteResult {
   priceData: PriceData;
-  rawResponse: EstimateResponse | null;
+  rawResponse: PublicEstimateResponse | null;
 }
 
 /**
@@ -57,7 +57,7 @@ interface EngineQuoteResult {
  */
 export function useEngineQuote(req: EngineQuoteRequest): EngineQuoteResult {
   const [priceData, setPriceData] = useState<PriceData>(EMPTY_PRICE);
-  const [rawResponse, setRawResponse] = useState<EstimateResponse | null>(null);
+  const [rawResponse, setRawResponse] = useState<PublicEstimateResponse | null>(null);
 
   useEffect(() => {
     // No sync setState on the invalid path — the returned value already
@@ -87,7 +87,7 @@ export function useEngineQuote(req: EngineQuoteRequest): EngineQuoteResult {
           if (!cancelled) { setPriceData({ ...EMPTY_PRICE }); setRawResponse(null); }
           return;
         }
-        const data = (await res.json()) as EstimateResponse;
+        const data = (await res.json()) as PublicEstimateResponse;
         if (cancelled) return;
         if (data.status !== "QUOTED" || data.sell_price == null) {
           setPriceData({ ...EMPTY_PRICE, loading: false });
@@ -122,7 +122,6 @@ export function useEngineQuote(req: EngineQuoteRequest): EngineQuoteResult {
             qty: li.qty,
             unit_price: li.unit_price,
             line_total: li.line_total,
-            rule_id: li.rule_id,
           })),
         });
         setRawResponse(data);

@@ -8,9 +8,14 @@
  * estimator — so tightening validation can't silently break the configurator.
  */
 
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "../route";
 import type { NextRequest } from "next/server";
+import { estimate } from "@/lib/engine";
+import type { EstimateRequest } from "@/lib/engine/types";
+
+const mocks = vi.hoisted(() => ({ rateLimit: vi.fn() }));
+vi.mock("@/lib/estimate/rate-limit", () => ({ claimPublicEstimateRateLimit: mocks.rateLimit }));
 
 function postJson(body: unknown): Promise<Response> {
   const request = new Request("http://localhost/api/estimate", {
@@ -31,7 +36,7 @@ function postRaw(body: string): Promise<Response> {
 }
 
 /** Mirrors UnifiedConfigurator.tsx's debounced /api/estimate body for STICKER. */
-const VALID_STICKER = {
+const VALID_STICKER: EstimateRequest = {
   category: "STICKER",
   material_code: "ARLPMF7008",
   width_in: 4,
@@ -48,6 +53,7 @@ describe("POST /api/estimate — valid bodies still price", () => {
   // vitest does not load .env.local; production runs V2 on.
   beforeAll(() => { vi.stubEnv("NEXT_PUBLIC_USE_STICKER_PRICING_V2", "true"); });
   afterAll(() => { vi.unstubAllEnvs(); });
+  beforeEach(() => { mocks.rateLimit.mockResolvedValue(true); });
 
   it("quotes a valid sticker body", async () => {
     const res = await postJson(VALID_STICKER);
@@ -56,6 +62,22 @@ describe("POST /api/estimate — valid bodies still price", () => {
     expect(body.status).toBe("QUOTED");
     expect(typeof body.sell_price).toBe("number");
     expect(body.sell_price).toBeGreaterThan(0);
+    expect(body.sell_price).toBe(estimate(VALID_STICKER).sell_price);
+    expect(res.headers.get("Cache-Control")).toBe("no-store");
+  });
+
+  it("returns only the customer-safe response projection while preserving price", async () => {
+    const res = await postJson(VALID_STICKER);
+    const body = await res.json();
+    expect(body.sell_price).toBeGreaterThan(0);
+    expect(body.line_items.every((item: Record<string, unknown>) => !("rule_id" in item))).toBe(true);
+    for (const privateKey of [
+      "cost", "rules_fired", "estimate_request", "wave_line_name",
+      "has_placeholder", "placeholder_materials", "margin_green_threshold",
+      "margin_yellow_threshold", "tier_applied", "min_charge_skipped",
+    ]) {
+      expect(body).not.toHaveProperty(privateKey);
+    }
   });
 
   it("ignores an unknown top-level field instead of rejecting it", async () => {
@@ -83,10 +105,23 @@ describe("POST /api/estimate — valid bodies still price", () => {
       design_status: "PRINT_READY",
     });
     expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.status).toBe("QUOTED");
+    expect(typeof body.sell_price).toBe("number");
+    expect(body.sell_price).toBeGreaterThan(0);
+    expect(body.sell_price).toBe(estimate({
+      category: "DESIGN",
+      material_code: "SVC-DESIGN-LOGO",
+      width_in: 0,
+      height_in: 0,
+      sides: 1,
+      qty: 1,
+      design_status: "PRINT_READY",
+    }).sell_price);
   });
 
-  it("accepts the staff estimator body (addons + skip_min_charge)", async () => {
-    const res = await postJson({
+  it("keeps square-foot sign/addon pricing available to a customer", async () => {
+    const input: EstimateRequest = {
       category: "BANNER",
       material_code: "RMBF004",
       width_in: 24,
@@ -98,15 +133,53 @@ describe("POST /api/estimate — valid bodies still price", () => {
       design_status: "PRINT_READY",
       pricing_version: "v1_2026-02-19",
       skip_min_charge: true,
-    });
+    };
+    const res = await postJson(input);
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.status).toBe("QUOTED");
     expect(body.sell_price).toBeGreaterThan(0);
+    expect(body.sell_price).toBe(estimate({ ...input, skip_min_charge: false }).sell_price);
+    expect(body.line_items).toEqual(expect.arrayContaining([
+      expect.objectContaining({ description: expect.any(String) }),
+    ]));
+  });
+
+  it("does not let a public skip_min_charge request bypass the checkout floor", async () => {
+    const input = {
+      category: "BANNER",
+      material_code: "RMBF004",
+      width_in: 1,
+      height_in: 1,
+      sides: 1,
+      qty: 1,
+      design_status: "PRINT_READY",
+      skip_min_charge: true,
+    };
+    const res = await postJson(input);
+    expect(res.status).toBe(200);
+    const skipped = await res.json();
+    const standard = await (await postJson({ ...input, skip_min_charge: false })).json();
+    expect(skipped).toMatchObject({ status: "QUOTED", min_charge_value: expect.any(Number) });
+    expect(skipped.sell_price).toBe(standard.sell_price);
+    expect(skipped.min_charge_applied).toBe(standard.min_charge_applied);
+  });
+});
+
+describe("POST /api/estimate — shared rate-limit boundary", () => {
+  beforeEach(() => { mocks.rateLimit.mockResolvedValue(true); });
+
+  it("returns no-store 429 before parsing a throttled request", async () => {
+    mocks.rateLimit.mockResolvedValueOnce(false);
+    const res = await postJson(VALID_STICKER);
+    expect(res.status).toBe(429);
+    expect(res.headers.get("Cache-Control")).toBe("no-store");
+    await expect(res.json()).resolves.toMatchObject({ status: "BLOCKED" });
   });
 });
 
 describe("POST /api/estimate — malformed bodies are rejected", () => {
+  beforeEach(() => { mocks.rateLimit.mockResolvedValue(true); });
   async function expectRejected(body: unknown) {
     const res = await postJson(body);
     expect(res.status).toBe(400);

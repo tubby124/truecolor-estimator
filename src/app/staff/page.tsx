@@ -11,6 +11,7 @@ import { UnifiedConfigurator } from "@/components/product/UnifiedConfigurator";
 import type { Category, DesignStatus } from "@/lib/data/types";
 import type { Addon } from "@/lib/data/types";
 import type { EstimateResponse } from "@/lib/engine/types";
+import { estimateEndpoint } from "@/lib/estimate/endpoint";
 import type { QuoteEmailData } from "@/lib/email/quoteTemplate";
 import type { CartItem } from "@/lib/types/cart";
 import { LOGO_PATH } from "@/lib/config";
@@ -125,7 +126,7 @@ export default function StaffPage() {
   }, []);
 
   // Wave 1 — when STICKER is picked AND the staff flag is on, the
-  // UnifiedConfigurator owns the estimate flow (calls /api/estimate itself,
+  // UnifiedConfigurator owns the estimate flow (calls the staff estimate API,
   // emits the raw EstimateResponse via onResponse). Skip the parent effect to
   // avoid double-fetching. Default (flag off) keeps the legacy estimate flow.
   const useUnifiedStickerStaff =
@@ -165,7 +166,7 @@ export default function StaffPage() {
           pricing_version: "v1_2026-02-19",
           skip_min_charge: skipMinCharge || undefined,
         };
-        const res = await fetch("/api/estimate", {
+        const res = await fetch(estimateEndpoint("staff"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
