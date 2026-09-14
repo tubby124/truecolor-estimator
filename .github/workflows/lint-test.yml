@@ -95,6 +95,10 @@ jobs:
           --username postgres
           --dbname postgres
           --file scripts/google-ads/sql/monitor-evidence-regression.sql
+      - name: Shared public estimate rate-limit migration regression
+        env:
+          PGPASSWORD: ${{ github.run_id }}
+        run: bash scripts/db/estimate-rate-limit-concurrency-regression.sh
 
   lint-test:
     runs-on: ubuntu-latest

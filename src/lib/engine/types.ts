@@ -73,3 +73,36 @@ export interface EstimateResponse {
   // NOTE: this is the TOTAL for the whole job (per-unit price × qty), not per-unit.
   pre_min_subtotal: number | null;
 }
+
+/**
+ * The customer-facing projection of an estimate. Keep this deliberately
+ * separate from EstimateResponse: the engine result includes supplier costs,
+ * margins and rule identifiers that staff need but a public caller must never
+ * receive. Add a public field here only when a customer surface needs it.
+ */
+export interface PublicEstimateLineItem {
+  description: string;
+  qty: number;
+  unit_price: number;
+  line_total: number;
+}
+
+export interface PublicEstimateResponse {
+  status: EstimateResponse["status"];
+  sell_price: number | null;
+  design_fee?: number;
+  rush_fee?: number;
+  pst_exempt?: boolean;
+  pst_rate?: number;
+  gst_rate?: number;
+  line_items: PublicEstimateLineItem[];
+  min_charge_applied: boolean;
+  min_charge_value: number | null;
+  qty_discount_pct: number | null;
+  qty_discount_applied: boolean;
+  price_per_unit: number | null;
+  pre_min_subtotal: number | null;
+  needs_clarification: boolean;
+  clarification_notes: string[];
+  pricing_version: string;
+}

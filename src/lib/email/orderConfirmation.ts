@@ -29,7 +29,7 @@ export interface OrderConfirmationParams {
     sides: number;
     design_status: string;
     line_total: number;
-    line_items?: Array<{ description: string; qty: number; unit_price: number; line_total: number; rule_id: string }>;
+    line_items?: Array<{ description: string; qty: number; unit_price: number; line_total: number; rule_id?: string }>;
   }>;
   subtotal: number;
   gst: number;

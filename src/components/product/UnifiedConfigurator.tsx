@@ -22,8 +22,9 @@
 
 import { useState, useEffect } from "react";
 import type { Category, DesignStatus } from "@/lib/data/types";
-import type { EstimateResponse } from "@/lib/engine/types";
+import type { EstimateResponse, PublicEstimateResponse } from "@/lib/engine/types";
 import type { LineItem } from "@/lib/cart/cart";
+import { estimateEndpoint } from "@/lib/estimate/endpoint";
 import { trackPriceCalculated } from "@/lib/analytics";
 import { computeTax } from "@/lib/pricing/tax";
 import {
@@ -176,7 +177,7 @@ export function UnifiedConfigurator({
     onResponse?.(null, true);
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch("/api/estimate", {
+        const res = await fetch(estimateEndpoint(mode === "staff" ? "staff" : "public"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -201,12 +202,12 @@ export function UnifiedConfigurator({
           }
           return;
         }
-        const data = (await res.json()) as EstimateResponse;
+        const data = (await res.json()) as EstimateResponse | PublicEstimateResponse;
         if (cancelled) return;
         if (data.status !== "QUOTED" || data.sell_price == null) {
           onPriceError?.("invalid_configuration");
           setPriceData({ ...EMPTY_PRICE, loading: false });
-          onResponse?.(data, false);
+          if (mode === "staff") onResponse?.(data as EstimateResponse, false);
           return;
         }
         const tax = computeTax({
@@ -237,7 +238,7 @@ export function UnifiedConfigurator({
             qty: li.qty,
             unit_price: li.unit_price,
             line_total: li.line_total,
-            rule_id: li.rule_id,
+            ...(mode === "staff" && "rule_id" in li ? { rule_id: li.rule_id } : {}),
           })),
         });
         // GA4: price_calculated — fires every time a valid price is returned.
@@ -254,7 +255,7 @@ export function UnifiedConfigurator({
             quantity: effectiveQty,
           });
         }
-        onResponse?.(data, false);
+        if (mode === "staff") onResponse?.(data as EstimateResponse, false);
       } catch (error) {
         if (!cancelled) {
           onPriceError?.(error instanceof TypeError ? "network" : "server");
