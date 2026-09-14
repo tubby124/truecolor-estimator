@@ -10,6 +10,8 @@ The shared work home is [tubby124/truecolor-estimator](https://github.com/tubby1
 - [SEO operating standard](operations/SEO-STANDARD.md)
 - [Search-skill consolidation and routing decisions](seo/SEO-SKILL-CONSOLIDATION-20260914.md)
 - [Current local, organic, Generative AI and analytics baseline](seo/LOCAL-SEARCH-BASELINE-20260914.md)
+- [Agentic web and SEO readiness audit](../CODEBASE_AUDIT_20260914.md)
+- [Agent-ready commerce implementation brief](../CODEBASE_PROMPT_20260914.md)
 - [Cloud setup, verification and handoff](operations/CLOUD-PLAYBOOK.md)
 - [Source registry and migration disposition](operations/SOURCE-REGISTRY.md)
 - [Completion/release evidence](operations/MIGRATION-RECEIPT.md)
