@@ -1,3 +1,13 @@
+# Current work state
+
+## Search-growth operating loop prepared — September 14, 2026
+
+The SEO audit now has an executable [90-day operating plan](../seo/SEARCH-GROWTH-OPERATING-PLAN.md), an [append-only weekly scorecard](../seo/SEARCH-GROWTH-WEEKLY-LOG.md), and a point-level Maps evidence schema. Git remains the sanitized source of truth; a targeted local Vault activity receipt was prepared for private continuity, not as a second queue. Because the pre-existing Vault checkout was dirty and divergent, that receipt remains local/uncommitted and no pull, rebase, commit, or sync was attempted. The loop separates Maps, GSC Web, GSC Generative AI, GBP, GA4, commercial results, citations, Merchant, and the active organic experiment so an interaction or visibility change is never silently relabelled a sale.
+
+The measurement clock has not started. A current official-tool comparison recommends owner-approved Whitespark signup and a 25-credit one-query free validation. Before every validation or baseline attempt, the actual balance must fund the full 25 or 75 credits; with no retries, paid continuation would be needed before baseline scan three, but failures can move that decision earlier. Day 0 still requires owner acceptance of signup/terms, collector, exact centre, fixed 5x5/1 km method, result depth/account state, and weekly slot. The proposed centre is the verified GBP map pin and the proposed slot is Tuesday 10:00 America/Regina. Baseline scans run on Days 7, 14, 21, and 28; each requires all 75 observations, while a failed Maps scan never blocks the other weekly lanes from being recorded. One action is then tested at a time. Wall Graphics and Merchant retain their existing separate gates. No account, scan, schedule, purchase, webpage, image, provider setting, profile, citation, Analytics setting, Merchant object, campaign, spend, review request, or publication was changed.
+
+Next gate: accept the signup/terms, collector/cost path and centre; prove the 25-point validation export and append its Day 0 acceptance record; then run the first 75-observation baseline scan and append the first baseline-review entry. A scheduler is considered only after that manual loop works end to end.
+
 ## Agentic commerce and SEO readiness — September 14, 2026
 
 A read-only architecture, code, security, SEO, historical-plan, and public-surface audit found that roughly 70% of the earlier discovery/commerce foundation landed, while genuine end-to-end agent readiness is about 40% as an architecture heuristic. AI/search discovery is strong and current provider records show real Generative AI visibility and assistant referrals; neither proves orders. The missing middle is a supported machine contract and a safe `prepare -> approve -> confirm -> status` transaction boundary. Current blockers include public estimate responses exposing internal cost/rule fields, ambiguous checkout retries abandoning their idempotency key, UUID-only order-confirmation access, a direct-order GET that can create/resume payment state, unsafe artwork assumptions, non-atomic coupon limits, and quote routes that are either unfinished or immediately side-effecting.
@@ -56,7 +66,7 @@ The first ongoing September pair, scheduled for 9 a.m. Regina, is independently 
 
 The exact-scope VPS runner and independent monitor remain the owners of routine scheduled posting. The launch verification follow-up can be paused after this Git closeout; it does not disable those VPS timers. Existing September scope and staggered morning times remain unchanged. October remains excluded. The API-first workflow and AISA collaboration learnings are already recorded; no duplicate capture is needed.
 
-# Current work state
+## Current work board
 
 ## Weekly storyboard preparation — September 9, 2026
 
@@ -147,7 +157,7 @@ The owner's latest direction preserves tonight's 7 p.m. Regina pilot and sets Se
 The exact 48-destination app allowlist is configured, and Railway configuration deployment `a79fdaef-50ef-4070-b1a0-c372859498c4` is verified SUCCESS. At 23:51:39 UTC both scoped check and receipt reads returned 200, with publishing enabled, held=false, zero due work, stale=false and pending=false. This establishes the scoped app configuration; the installed VPS posting service still runs tonight's original pilot. Its four completed destinations and final two due at 7 p.m. remain unchanged. Ongoing VPS installation and the independent Telegram monitor remain pending all-six provider reconciliation. The launch task's 7:05 p.m. Regina heartbeat is assigned to reconcile tonight's final pair and perform the guarded cutover, preserving journals and the existing sole posting timer. A scheduled task wakeup is not completed cutover or publication proof.
 
 Detailed evidence and remaining cutover gates: [integration record](../social/INTEGRATION-20260906.md#september-morning-schedule-and-scoped-runtime--september-6-2026).
-# Latest social launch state — September 7, 01:12 UTC
+## Latest social launch state — September 7, 01:12 UTC
 
 All six original Sunday pilot destinations are independently reconciled as posted once. The exact 48-destination September morning schedule remains approved and unchanged. The VPS cutover is complete: one posting timer runs the scoped ongoing runner, and a separate read-only monitor timer is active. Both scheduled ticks passed; heartbeat exit zero, waiting runner journal, no monitor problems or pending notifications. Pilot journals and credentials are preserved. Routine posting now runs on the VPS without requiring the Mac to remain awake.
 

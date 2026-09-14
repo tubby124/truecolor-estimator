@@ -2,7 +2,7 @@
 name: true-color-local-search
 description: Routes evidence-led True Color search work involving Google Maps and Business Profile, GSC organic or Generative AI, GA4 attribution, citations, technical SEO, schema, sitemap, search-facing content or images, Merchant search visibility, or GBP/search campaigns. It keeps measurement lanes separate, defaults to read-only, and requires exact authorization for production or provider mutations.
 metadata:
-  version: 2.0.0
+  version: 2.1.0
 ---
 
 # True Color search growth router
@@ -11,7 +11,7 @@ Use this project-local skill before selecting a generic SEO skill for True Color
 
 ## Authority, scope, and default
 
-Resolve the canonical checkout and read `AGENTS.md`, `docs/TRUE-COLOR-INDEX.md`, `docs/operations/CURRENT-STATE.md`, `docs/operations/SEO-STANDARD.md`, and the latest dated baseline before interpreting older material.
+Resolve the canonical checkout and read `AGENTS.md`, `docs/TRUE-COLOR-INDEX.md`, `docs/operations/CURRENT-STATE.md`, `docs/operations/SEO-STANDARD.md`, and the latest dated baseline before interpreting older material. For next-step, Maps-baseline, monitoring, or recurring-review work, also read `docs/seo/SEARCH-GROWTH-OPERATING-PLAN.md` and `docs/seo/SEARCH-GROWTH-WEEKLY-LOG.md`.
 
 Use this authority order:
 
@@ -56,7 +56,9 @@ Google describes local ranking as relevance, distance, and prominence; no workfl
 
 For an approved rank baseline, use the exact queries `print shop saskatoon`, `banner printing saskatoon`, and `sticker printing saskatoon`. Only after the owner accepts the collector and centre, collect a neutral 5x5 grid at 1 km spacing. Record scan date/time, collector and account state, centre coordinates, zoom, all 25 points, visible rank or not-in-pack, and first-pack competitors.
 
-The working 90-day target is rank #1 at 15 or more of 25 points for each query across four consecutive valid weekly scans. It is a measurement target, not a ranking promise. A scan with missing, ambiguous, or non-comparable points is invalid and must be repeated with the same method.
+The operating plan recommends an owner-approved Whitespark free-method validation, not automatic signup or purchase. Day 0 uses one exact query across the final 25-point grid and never counts as baseline; append its method, acceptance, evidence, and result as `SG-YYYY-D0` in the weekly log. After it passes, baseline scans run on Days 7, 14, 21, and 28. Each scan uses all three queries and must produce 75 valid point/query observations under the same method. Before every attempt, read the actual credit balance and do not start unless it funds the complete 25- or 75-credit run; retries can move the separately approved paid-continuation point earlier. Preserve a normalized sanitized receipt using `docs/seo/evidence/maps/README.md`; raw vendor exports and account screenshots stay in the private Vault.
+
+The working 90-day target is rank #1 at 15 or more of 25 points for each query across four consecutive valid weekly scans. It is a measurement target, not a ranking promise. A scan with missing, ambiguous, or non-comparable points is invalid and must be repeated with the same method. Still append the weekly review and record the other lanes when Maps fails; only the Maps scan remains non-comparable.
 
 Report Business Profile calls as call-button clicks, directions as route requests, and website clicks as profile-link clicks; none alone proves a lead or sale. See [Business Profile performance](https://support.google.com/business/answer/9918094).
 
@@ -102,6 +104,15 @@ Adjacent project material has narrower roles: `seo-content-price-auditor` is a r
 
 If generic `seo` material refers to `seo-performance` or `seo-visual`, do not invent a missing route: use the relevant live technical, browser, GA4, and field-CWV evidence under this router instead.
 
+## Tracking cadence and record ownership
+
+- **Daily:** check only for collection failures, overdue dependencies, or genuine new evidence. Do not interpret daily rank noise or make daily SEO changes.
+- **Weekly:** run/read the fixed Maps scan and completed/finalized GSC Web, GSC AI, GBP, GA4, commercial, citation, Merchant, and organic-experiment lanes; append the sanitized scorecard even if one lane failed.
+- **Every 14 completed days:** classify the one active action or experiment positive, negative, or inconclusive against its written hypothesis and guardrails.
+- **Monthly:** refresh protected-page, indexing/technical, Merchant, attribution-quality, and priority evidence.
+
+Git owns the sanitized operating plan, scorecard, point receipts, state, and decisions. Existing runbooks retain organic, citation, Merchant, and analytics-specific state. The Vault holds raw/private receipts and exact Git revision pointers, never a competing editable queue. Do not claim a Vault sync or commit when its checkout is only locally updated.
+
 ## Rules deliberately not adopted
 
 Do not make a pass/fail gate from fixed word counts, keyword density, internal-link ratios, metadata character counts, 134–167 word AI passages, AI citation percentages, Domain Authority/Rating, or any blended 0–100 score. Do not require every route in nav/footer, automatic city pages, automatic GBP weekday/five-day/hashtag/cross-channel posts, manufactured Wikipedia/Reddit/YouTube mentions, or special `llms.txt`/RSL work.
@@ -122,4 +133,4 @@ For pagination, use self-canonicals on distinct useful pages; Google ignores `re
 
 ## Output format
 
-Return: scope and freshness; facts; hypotheses; unknowns; the relevant separated lanes; up to three prioritized actions with owner, evidence, authorization class, and review date; explicit non-actions; and the next review date. Keep account exports, customer records, private identifiers, and credentials out of the repository.
+Return: scope and freshness; facts; hypotheses; unknowns; the relevant separated lanes; up to three prioritized actions with owner, evidence, authorization class, and review date; explicit non-actions; and the next review date. For a completed recurring review, append the Git weekly scorecard, update only the existing owning runbooks, and preserve/link the private receipt. Keep account exports, customer records, private identifiers, and credentials out of the repository.
