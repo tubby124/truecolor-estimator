@@ -166,3 +166,32 @@ The September 14 signed-in, single-centre browser observations remain directiona
 - **Decision:** prepare Day 0; do not change pages, images, profiles, citations, Analytics settings, Merchant, spend, or public content from this entry.
 - **Unknowns:** accepted collector/centre and any paid continuation, current Wall Graphics verdict, fresh Merchant state, clean GA4 analysis comparison, and source-supported order attribution.
 - **Next actions:** accept Whitespark signup/terms plus the proposed GBP-pin centre (or record a different method); validate the 25-point one-query Day 0 collection; then run the first 75-observation baseline scan while reconciling the dated Wall Graphics and Merchant gates separately.
+
+## SG-2026-D0 — Maps method acceptance and validation, 2026-09-14
+
+**Completed:** 2026-09-14 15:11 America/Regina
+**Owner acceptance reference:** 2026-09-14 Codex continuation delegation authorizing the free Day-0 validation
+**Private evidence label:** `TC-SEARCH-2026-D0`
+**Baseline status:** not started
+
+| Decision/evidence | Accepted value |
+|---|---|
+| Collector and version | Whitespark Local Ranking Grids free trial; `SG-MAPS-v1`. |
+| Signup/trial terms accepted | Pre-existing authenticated account; current task authorized this free validation. No paid plan, card, upgrade, or payment action was used. |
+| Current free/paid credit terms and cancellation readback | 200 free credits before run; UI displayed a trial data-retention warning requiring upgrade before 2026-12-13. The 25-point run used 25 credits and left 175. |
+| Exact centre and reason | `52.1440618, -106.6728328`; the selected public GBP is True Color Display Printing Ltd., 216 33rd St W, Saskatoon SK S7L 0V1. Google Maps showed Plus Code `48VG+JV`; this matched the grid centre. |
+| Grid / distance meaning | 5x5 / 25 points. Whitespark labels the `1 km` field as **Distance between points**. |
+| Search surface / locale / device / depth / account state | Whitespark Google Maps collector; authenticated free-trial account; one query; no recurring schedule. The creation/result UI did not expose a selectable or reportable language, device, or result-depth field. |
+| Method version / weekly slot | `SG-MAPS-v1`; manual-only Day 0. The plan's Tuesday 10:00 America/Regina slot remains a proposed baseline collection slot, not a schedule created by this run. |
+| Validation query | `print shop saskatoon` |
+| Sanitized 25-row receipt | `evidence/maps/SG-MAPS-v1-D0-2026-09-14.csv` |
+| Private raw export SHA-256 | Vendor grid-point export completed in the private account at 2026-09-14 15:11 America/Regina and expires after 14 days. This environment did not expose a local downloaded file for hashing; retrieve that existing account export before expiry and append a correction with its SHA-256. |
+| Credit use / remaining | 25 / 175 actual. |
+| Validation result | **Pass:** 25/25 ranked points, no collection errors, and the selected GBP was found at every point. True Color ranked #1 at 1/25 points, top three at 3/25 points, with median rank 7. |
+
+- **Facts:** the grid's centre matches the public GBP pin; the current account remained free/trial-only; and all 25 point results completed. The vendor's grid-point export is account-private and generated, while its local file hash remains pending retrieval.
+- **Interpretation:** this verifies the selected collector, listing, centre, 5x5 geometry, point spacing, one-query cost, and manual-only scheduling path. It does not establish a Maps baseline or a citywide rank claim.
+- **Hypothesis:** a fixed 75-observation weekly method using this collector and centre can produce comparable baseline scans once its three-query, 75-credit gate is met.
+- **Decision:** retain this as a successful Day-0 validation only; do not re-run it. Start baseline Day 7 only after the full three-query method and credit balance are read back.
+- **Unknowns:** collector language/device/result-depth dimensions not exposed by its UI; local SHA-256 of the already-generated private export; fresh GSC/GBP/GA4/Merchant lanes; and source-supported search-to-order attribution.
+- **Next actions (maximum three):** retrieve and hash the existing private vendor export before its 14-day expiry; on Day 7, read the balance and run all three exact queries only if 75 credits are available; append the separate weekly lanes even if a later Maps attempt fails.
