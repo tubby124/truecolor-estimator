@@ -343,7 +343,7 @@ describe("Clover webhook durable identity", () => {
     const harness = createHarness();
     mocks.createServiceClient.mockReturnValue(harness.supabase);
     mocks.fetchAmount.mockResolvedValue(500);
-    expect((await POST(request(captured({ id: "payment-partial-late" })))).status).toBe(200);
+    expect((await POST(request(captured({ id: "payment-partial-late", amount: 500 })))).status).toBe(200);
     expect(harness.orderUpdates).toBe(0);
     expect(mocks.recordWavePayment).not.toHaveBeenCalled();
     expect(harness.webhookEvents).toContainEqual(expect.objectContaining({ ok: false, detail: expect.stringContaining("partial ambiguity") }));
