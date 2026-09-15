@@ -1,8 +1,8 @@
 /**
  * Payment follow-up copy variants — one per ladder tier.
  *
- * T1 keeps the legacy recovery copy verbatim (branches on latest payment
- * attempt status). T2 opens the "need changes?" and "already paid?" doors.
+ * T1 branches on the latest payment attempt while keeping partial-payment
+ * balances visible. T2 opens the "need changes?" and "already paid?" doors.
  * T3 is the final reminder before the order is released.
  *
  * All strings are escaped by the caller (route) via escHtml at render.
@@ -40,15 +40,17 @@ export interface FollowupCopyResult {
 const ETRANSFER_LINE =
   "Paying by e-Transfer? Send it to info@true-color.ca with your order number in the message.";
 
-/** T1 — legacy recovery copy, unchanged behavior. */
+/** T1 — initial recovery copy, with ledger-aware partial-payment context. */
 function tier1Copy(ctx: FollowupCopyContext): FollowupCopyResult {
   const { orderNumber, paymentMethod, latestAttempt } = ctx;
+  const partial = partialLine(ctx);
+  const hasPartialPayment = Boolean(ctx.paidSoFar && ctx.balanceDue);
   if (latestAttempt?.status === "card_declined") {
     const reason = latestAttempt.failure_label ?? "Payment did not complete";
     return {
       subject: `Card payment did not complete — ${orderNumber}`,
       headline: "Your card payment did not complete",
-      body: `${reason}. You can try the card payment again, or send an e-Transfer instead.`,
+      body: `${reason}. You can try the card payment again, or send an e-Transfer instead.${partial}`,
       cta: "Try card again",
       foot: "If you prefer e-Transfer, send it to info@true-color.ca and include your order number in the message.",
     };
@@ -57,7 +59,7 @@ function tier1Copy(ctx: FollowupCopyContext): FollowupCopyResult {
     return {
       subject: `Finish payment for ${orderNumber}`,
       headline: "Your checkout did not finish",
-      body: "Your order is saved, but payment has not been confirmed yet. Your card was not charged by the unfinished attempt.",
+      body: `Your order is saved, but ${hasPartialPayment ? "your remaining payment has not been completed yet." : "payment has not been confirmed yet."} Your card was not charged by the unfinished attempt.${partial}`,
       cta: "Resume card payment",
       foot: "You can also pay by e-Transfer to info@true-color.ca. Please include your order number in the message.",
     };
@@ -66,7 +68,7 @@ function tier1Copy(ctx: FollowupCopyContext): FollowupCopyResult {
     return {
       subject: `e-Transfer reminder — ${orderNumber}`,
       headline: "Your order is waiting for e-Transfer",
-      body: "Your order is saved. Send an e-Transfer when you are ready and we will confirm receipt before production.",
+      body: `Your order is saved. Send an e-Transfer when you are ready and we will confirm receipt before production.${partial}`,
       cta: "Switch to card payment",
       foot: "Send e-Transfer to info@true-color.ca and include your order number in the message.",
     };
@@ -74,7 +76,7 @@ function tier1Copy(ctx: FollowupCopyContext): FollowupCopyResult {
   return {
     subject: `Your True Color order ${orderNumber} is waiting`,
     headline: "Your order is waiting",
-    body: "Your order is saved and waiting for payment.",
+    body: `Your order is saved and waiting for payment.${partial}`,
     cta: "Complete payment",
     foot: "Paying by card? Click the button above — it only takes 30 seconds. Prefer e-Transfer? Send it to info@true-color.ca.",
   };

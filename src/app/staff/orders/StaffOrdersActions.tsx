@@ -208,7 +208,7 @@ interface FormState {
   phone: string;
   items: OrderItem[];
   payment_method: "clover";
-  quote_only: boolean; // true = no payment link / Wave draft only
+  quote_only: boolean; // true = quote email with a Clover Pay Now link
   notes: string;
   customMessage: string;
   customSubject: string;
@@ -272,8 +272,8 @@ function toggleInList(current: string, value: string): string {
   return parts.join(" / ");
 }
 
-// Default is quote_only=true. Safer for staff: customer reviews the price first,
-// nobody gets surprise-billed. Staff flips to "Send Invoice Now" when they're sure.
+// Default is quote_only=true. Staff can send the price for review; the quote
+// email also includes a Pay Now link when the customer is ready to proceed.
 const EMPTY_FORM: FormState = {
   name: "", email: "", company: "", phone: "",
   items: [makeItem()],
@@ -356,7 +356,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
 
   // Auto-open the modal when arriving from another staff page with:
   //   ?manual=1     → invoice mode (immediate payment link)
-  //   ?manual=quote → quote-only mode (no payment link until customer approves)
+  //   ?manual=quote → quote email mode (Pay Now link included)
   useEffect(() => {
     const manual = searchParams?.get("manual") ?? null;
     const isManualOpen = manual === "1" || manual === "quote";
@@ -910,7 +910,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                     </h2>
                     <p className="text-xs text-gray-400 mt-0.5">
                       {form.quote_only
-                        ? "Emails the customer a quote — no payment link until you approve it"
+                        ? "Emails the customer a quote with a Pay Now link"
                         : "Creates an order and emails the customer a payment link"}
                     </p>
                   </div>
@@ -1018,7 +1018,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                             <div className="flex-1">
                               <p className="text-sm font-bold text-gray-800 leading-tight">📝 Send Quote</p>
                               <p className="text-[11px] text-gray-500 leading-snug mt-1">
-                                Customer reviews the price. No payment link yet. <strong className="text-emerald-700">Safest — use this first.</strong>
+                                Customer reviews the price and can use the Clover Pay Now link when ready. <strong className="text-emerald-700">Safest — use this first.</strong>
                               </p>
                             </div>
                           </div>

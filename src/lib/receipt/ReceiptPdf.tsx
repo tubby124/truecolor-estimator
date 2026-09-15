@@ -13,8 +13,11 @@ import {
   View,
   Text,
   StyleSheet,
-  Font,
 } from "@react-pdf/renderer";
+import {
+  receiptPaymentSourceLabel,
+  type ReceiptPaymentSource,
+} from "@/lib/payment/receipt-payment-sources";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -35,7 +38,8 @@ export interface ReceiptPdfData {
   customerName: string;
   customerEmail: string;
   customerCompany: string | null;
-  paymentMethod: string;   // e.g. "clover_card"
+  paymentSources: ReceiptPaymentSource[];
+  paymentPending: boolean;
   items: ReceiptPdfItem[];
   subtotal: number;
   gst: number;
@@ -318,12 +322,6 @@ const s = StyleSheet.create({
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function paymentLabel(method: string): string {
-  if (method === "clover_card") return "Credit / debit card";
-  if (method === "wave") return "Wave Invoice";
-  return "Interac e-Transfer";
-}
-
 function itemDescription(item: ReceiptPdfItem): string {
   const size = item.width_in && item.height_in ? ` — ${item.width_in}×${item.height_in}"` : "";
   const sides = item.category !== "BOOKLET" && item.sides === 2 ? " · 2-sided" : "";
@@ -386,7 +384,9 @@ export function ReceiptPdf({ data }: { data: ReceiptPdfData }) {
           </View>
           <View style={s.metaLine}>
             <Text style={s.metaLabel}>Payment:</Text>
-            <Text style={s.metaValue}>{paymentLabel(data.paymentMethod)}</Text>
+            <Text style={s.metaValue}>
+              {data.paymentPending ? "Payment pending" : receiptPaymentSourceLabel(data.paymentSources)}
+            </Text>
           </View>
         </View>
 

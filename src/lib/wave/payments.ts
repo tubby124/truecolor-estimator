@@ -177,10 +177,29 @@ export function verifiedWaveProviderPayments(
   return verified.sort((a, b) => a.paidAt.localeCompare(b.paidAt) || a.paymentId.localeCompare(b.paymentId));
 }
 
+// Polling on Starter is a live payment source. Limit customer effects to recent
+// captures so an old missed payment can be reconciled without replaying mail.
+export const LIVE_WAVE_CUSTOMER_EFFECT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+const PAYMENT_CLOCK_SKEW_MS = 5 * 60 * 1000;
+
+interface WaveReconciliationOptions {
+  enqueueCustomerEffects: boolean;
+  enqueueStaffEffect: boolean;
+  customerEffectMaxAgeMs?: number;
+}
+
+function customerEffectsAllowed(paidAt: string, options: WaveReconciliationOptions): boolean {
+  if (!options.enqueueCustomerEffects) return false;
+  if (options.customerEffectMaxAgeMs === undefined) return true;
+  const age = Date.now() - new Date(paidAt).getTime();
+  return Number.isFinite(options.customerEffectMaxAgeMs) && options.customerEffectMaxAgeMs >= 0 &&
+    Number.isFinite(age) && age >= -PAYMENT_CLOCK_SKEW_MS && age <= options.customerEffectMaxAgeMs;
+}
+
 export async function reconcileWaveInvoicePaymentSnapshot(
   supabase: SupabaseClient,
   snapshot: WaveInvoicePaymentSnapshot,
-  options: { enqueueCustomerEffects: boolean; enqueueStaffEffect: boolean },
+  options: WaveReconciliationOptions,
 ): Promise<WaveInvoiceReconciliation> {
   const verifiedPayments = verifiedWaveProviderPayments(snapshot);
   const acceptances: WavePaymentAcceptance[] = [];
@@ -195,7 +214,7 @@ export async function reconcileWaveInvoicePaymentSnapshot(
       p_state: payment.state,
       p_payment_provider: payment.paymentProvider,
       p_transaction_type: payment.transactionType,
-      p_enqueue_customer_effects: options.enqueueCustomerEffects,
+      p_enqueue_customer_effects: customerEffectsAllowed(payment.paidAt, options),
       p_enqueue_staff_effect: options.enqueueStaffEffect,
     });
     if (error) throw new Error(error.message || "Wave provider payment acceptance failed");
@@ -217,7 +236,7 @@ export async function reconcileWaveInvoicePaymentSnapshot(
 export async function reconcileWaveInvoicePayments(
   supabase: SupabaseClient,
   invoiceId: string,
-  options: { enqueueCustomerEffects: boolean; enqueueStaffEffect: boolean },
+  options: WaveReconciliationOptions,
 ): Promise<WaveInvoiceReconciliation> {
   return reconcileWaveInvoicePaymentSnapshot(
     supabase,

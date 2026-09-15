@@ -14,23 +14,27 @@ function source(relativePath: string): string {
 describe("pay link charges the remaining balance", () => {
   it("gates the gateway on the ledger balance instead of the raw order total", () => {
     const gateway = source("src/app/pay/[token]/page.tsx");
+    const preflight = source("src/lib/payment/wave-click-preflight.ts");
 
-    expect(gateway).toContain("remainingBalanceCents(");
-    expect(gateway).toContain("fetchOrderLedger(");
-    expect(gateway).not.toContain("const dbAmountCents = Math.round(Number(orderCheck.total) * 100)");
+    expect(gateway).toContain("preflightWaveBeforeCloverCheckout(");
+    expect(preflight).toContain("remainingBalanceCents(");
+    expect(preflight).toContain("fetchOrderLedger(");
+    expect(preflight).not.toContain("const dbAmountCents = Math.round(Number(orderCheck.total) * 100)");
   });
 
   it("keeps the gateway closed when the ledger read fails", () => {
     const gateway = source("src/app/pay/[token]/page.tsx");
+    const preflight = source("src/lib/payment/wave-click-preflight.ts");
     const guard = gateway.slice(
-      gateway.indexOf("remainingBalanceCents("),
-      gateway.indexOf("let createdSessionId"),
+      gateway.indexOf("preflightWaveBeforeCloverCheckout("),
+      gateway.indexOf("reserveOrderCheckout("),
     );
 
     // An unreadable ledger must never fall through to a Clover session.
     expect(guard).toContain("return <ErrorPage />");
-    expect(guard).toContain("catch (ledgerError)");
+    expect(guard).toContain("catch (preflightError)");
     expect(guard).toContain("return <UpdatedLinkPage />");
+    expect(preflight).toContain("await fetchOrderLedger");
   });
 
   it("mints through the ledger-aware resolver on every staff and customer path", () => {

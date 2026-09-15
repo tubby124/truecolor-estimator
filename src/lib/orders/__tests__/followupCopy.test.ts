@@ -17,6 +17,7 @@ describe("followupCopy", () => {
     const c = followupCopy(1, baseCtx)!;
     expect(c.subject).toBe("Your True Color order TC-2026-0319 is waiting");
     expect(c.cta).toBe("Complete payment");
+    expect(c.body).toBe("Your order is saved and waiting for payment.");
   });
 
   it("T1 card_declined branch keeps legacy copy", () => {
@@ -66,6 +67,24 @@ describe("followupCopy", () => {
     expect(c2.body).toContain("remaining $604.90");
     const c3 = followupCopy(3, { ...baseCtx, paidSoFar: "50.00", balanceDue: "604.90" })!;
     expect(c3.body).toContain("remaining $604.90");
+  });
+
+  it("shows the paid amount and remaining balance in T1 when the order is partially paid", () => {
+    const c = followupCopy(1, { ...baseCtx, paidSoFar: "50.00", balanceDue: "604.90" })!;
+    expect(c.body).toContain("paid $50.00 so far");
+    expect(c.body).toContain("remaining $604.90");
+  });
+
+  it.each(["abandoned", "checkout_opened"] as const)("uses remaining-payment wording for a partially paid %s checkout", (status) => {
+    const c = followupCopy(1, {
+      ...baseCtx,
+      latestAttempt: { order_id: "x", status, failure_label: null, customer_message: null },
+      paidSoFar: "50.00",
+      balanceDue: "604.90",
+    })!;
+    expect(c.body).toContain("your remaining payment has not been completed yet");
+    expect(c.body).toContain("Your card was not charged by the unfinished attempt");
+    expect(c.body).not.toContain("payment has not been confirmed yet");
   });
 
   it("no partial line when fully unpaid", () => {

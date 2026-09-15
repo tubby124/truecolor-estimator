@@ -50,6 +50,7 @@ import { mapAttributionToDb, mapLatestPaidAttributionToDb } from "@/lib/analytic
 import { getMetaCapiRequestContext } from "@/lib/analytics/metaCapi";
 import { recordAuditEvent, extractRequestContext } from "@/lib/audit/record";
 import { parseGa4ClientContext } from "@/lib/analytics/ga4-client-context";
+import { preflightWaveBeforeCloverCheckout } from "@/lib/payment/wave-click-preflight";
 
 // `LatestPaidHintPayload` contributes the optional `latest_paid_*` fields the
 // checkout submit sends when localStorage still holds a paid touch that the
@@ -836,6 +837,47 @@ export async function POST(req: NextRequest) {
         { status: 503 },
       );
     }
+    if (!waveInvoiceId) {
+      return NextResponse.json(
+        { error: "Order accounting setup could not be confirmed. No payment was started.", orderId: order.id },
+        { status: 503 },
+      );
+    }
+
+    // Only an idempotently resumed order can have a payment land between its
+    // original checkout attempt and this request. Reconcile authenticated Wave
+    // payment evidence before resuming or creating any Clover session.
+    if (resumedOrder && payment_method === "clover_card") {
+      const totalCents = Math.round(total * 100);
+      try {
+        const preflight = await preflightWaveBeforeCloverCheckout(supabase, {
+          orderId: order.id,
+          waveInvoiceId,
+          requestedAmountCents: totalCents,
+        });
+        if (preflight.action === "already_paid") {
+          const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
+          return NextResponse.json({
+            orderId: order.id,
+            orderNumber: order.order_number,
+            checkoutUrl: `${siteUrl}/order-confirmed?oid=${order.id}`,
+            waveInvoiceId: null,
+          });
+        }
+        if (preflight.action === "updated_link") {
+          return NextResponse.json(
+            { error: "This checkout amount is no longer payable. No payment was started.", orderId: order.id },
+            { status: 409 },
+          );
+        }
+      } catch (preflightError) {
+        console.error("[orders] Wave click-time payment preflight failed:", preflightError);
+        return NextResponse.json(
+          { error: "Payment verification could not be confirmed. No payment was started.", orderId: order.id },
+          { status: 503 },
+        );
+      }
+    }
 
     // 6. Clover Hosted Checkout (card) or /pay/{token} fallback URL (eTransfer)
     let checkoutUrl: string | null = null;
@@ -1013,7 +1055,7 @@ export async function POST(req: NextRequest) {
         discount_code: validatedDiscountCode ?? undefined,
         discount_amount: discount > 0 ? discount : undefined,
         is_rush,
-        payment_method,
+        payment_method: payment_method === "clover_card" ? "clover_pending" : payment_method,
         notes: notes ?? null,
         filePaths: file_storage_paths ?? [],
         siteUrl: siteUrlForEmail,

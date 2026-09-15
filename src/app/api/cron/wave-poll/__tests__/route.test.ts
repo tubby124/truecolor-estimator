@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/lib/supabase/server", () => ({ createServiceClient: mocks.createServiceClient }));
 vi.mock("@/lib/wave/payments", () => ({
+  LIVE_WAVE_CUSTOMER_EFFECT_MAX_AGE_MS: 86_400_000,
   getWaveInvoicePaymentSnapshot: mocks.getWaveInvoicePaymentSnapshot,
   reconcileWaveInvoicePaymentSnapshot: mocks.reconcileWaveInvoicePaymentSnapshot,
 }));
@@ -88,7 +89,7 @@ describe("Wave poll verified recovery", () => {
     vi.restoreAllMocks();
   });
 
-  it("recovers the retained invoice and suppresses customer effects during polling", async () => {
+  it("recovers the retained invoice and requests effects only for recent verified captures", async () => {
     const db = database();
     mocks.createServiceClient.mockReturnValue(db);
     const response = await GET(request());
@@ -97,13 +98,13 @@ describe("Wave poll verified recovery", () => {
     expect(mocks.reconcileWaveInvoicePaymentSnapshot).toHaveBeenCalledWith(
       db,
       expect.objectContaining({ id: "invoice-1" }),
-      { enqueueCustomerEffects: false, enqueueStaffEffect: true },
+      { enqueueCustomerEffects: true, customerEffectMaxAgeMs: 86_400_000, enqueueStaffEffect: true },
     );
     expect(await response.json()).toMatchObject({
       approved_recovered: 1,
       provider_payments_accepted: 1,
       manual_payments_ignored: 1,
-      customer_effects_suppressed: true,
+      customer_effect_policy: "verified_capture_within_24_hours",
     });
   });
 

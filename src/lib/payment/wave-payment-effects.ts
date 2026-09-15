@@ -1,6 +1,7 @@
 import { buildPurchaseAmounts } from "@/lib/analytics/purchase-amounts";
 import { sendMeasurementProtocolPurchase } from "@/lib/analytics/measurementProtocol";
 import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
+import { loadReceiptPaymentSources } from "@/lib/payment/receipt-payment-sources";
 import { escapeTelegramHtml, sendTelegramNotification } from "@/lib/notifications/telegram";
 import { createServiceClient } from "@/lib/supabase/server";
 
@@ -110,6 +111,7 @@ async function loadOrder(
 export async function performWavePaymentEffect(
   job: WavePaymentEffectJob,
   order: WavePaymentOrder,
+  supabase?: ServiceClient,
 ): Promise<void> {
   const customer = singleCustomer(order);
   const items = Array.isArray(order.order_items) ? order.order_items : [];
@@ -148,7 +150,7 @@ export async function performWavePaymentEffect(
       discountCode: order.discount_code,
       discountAmount:
         order.discount_amount === null ? null : Number(order.discount_amount),
-      paymentMethod: "wave",
+      paymentSources: await loadReceiptPaymentSources(supabase ?? createServiceClient(), order.id),
       oid: order.id,
       receiptToken: order.receipt_token,
       idempotencyKey: `wave-receipt/${order.id}`,
@@ -221,7 +223,7 @@ export async function processWavePaymentEffects(options: {
 
     try {
       const order = await loadOrder(supabase, job.order_id);
-      await performWavePaymentEffect(job, order);
+      await performWavePaymentEffect(job, order, supabase);
     } catch (effectError) {
       const { data: retryStatus, error: retryError } = await supabase.rpc(
         "retry_wave_payment_effect",

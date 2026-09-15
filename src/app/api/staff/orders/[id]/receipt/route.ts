@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
 import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
+import { loadReceiptPaymentSources } from "@/lib/payment/receipt-payment-sources";
 import { recordAuditEvent } from "@/lib/audit/record";
 
 interface Params {
@@ -87,7 +88,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       isRush: Boolean(order.is_rush),
       discountCode: order.discount_code,
       discountAmount: order.discount_amount ? Number(order.discount_amount) : null,
-      paymentMethod: order.payment_method,
+      paymentSources: await loadReceiptPaymentSources(supabase, order.id),
       oid: order.id,
       receiptToken: (order as { receipt_token?: string | null }).receipt_token ?? null,
     });
