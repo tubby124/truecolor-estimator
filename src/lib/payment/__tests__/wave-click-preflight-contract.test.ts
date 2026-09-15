@@ -17,31 +17,23 @@ describe("existing-order Wave click-time checkout contract", () => {
     expect(preflight).toContain("Wave provider payment acceptance did not complete");
   });
 
-  it("gates both /pay resume/create paths before Clover reservation", () => {
+  it("routes /pay through the shared Wave resolver without Clover fallback", () => {
     const route = source("src/app/pay/[token]/page.tsx");
-    const preflight = route.indexOf("preflightWaveBeforeCloverCheckout(");
-    const reserve = route.indexOf("reserveOrderCheckout(");
-    const clover = route.indexOf("createCloverCheckout(");
-
-    expect(preflight).toBeGreaterThan(0);
-    expect(reserve).toBeGreaterThan(preflight);
-    expect(clover).toBeGreaterThan(preflight);
-    expect(route.slice(preflight, reserve)).toContain("return <AlreadyPaidPage />");
-    expect(route.slice(preflight, reserve)).toContain("return <UpdatedLinkPage />");
-    expect(route.slice(preflight, reserve)).toContain("return <ErrorPage />");
+    expect(route).toContain("resolveWaveOnlineCheckout(");
+    expect(route).toContain('checkout.action === "already_paid"');
+    expect(route).toContain('checkout.action === "updated_link"');
+    expect(route).not.toContain("createCloverCheckout(");
+    expect(route).not.toContain("reserveOrderCheckout(");
   });
 
-  it("gates quote resume/create and releases a created reservation when Wave blocks checkout", () => {
+  it("releases only a fresh unused quote reservation and then resolves Wave", () => {
     const route = source("src/app/api/pay/quote/route.ts");
-    const preflight = route.indexOf("preflightWaveBeforeCloverCheckout(");
-    const resume = route.indexOf("quoteOrder.checkoutAction === \"resume\"");
-    const clover = route.indexOf("createCloverCheckout(");
-
-    expect(preflight).toBeGreaterThan(0);
-    expect(resume).toBeGreaterThan(preflight);
-    expect(clover).toBeGreaterThan(preflight);
-    expect(route.slice(preflight, resume)).toContain("releaseQuoteCheckoutForWavePreflight(");
+    const release = route.indexOf("releaseUnusedQuoteCheckoutReservation(");
+    const resolve = route.indexOf("resolveWaveOnlineCheckout(");
+    expect(release).toBeGreaterThan(0);
+    expect(resolve).toBeGreaterThan(release);
     expect(route).toContain("failQuoteCheckoutReservation(");
+    expect(route).not.toContain("createCloverCheckout(");
   });
 
   it("gates only resumed /api/orders checkout before Clover reservation", () => {

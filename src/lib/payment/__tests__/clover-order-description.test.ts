@@ -107,12 +107,10 @@ describe("Clover order descriptions", () => {
     expect(eq).toHaveBeenCalledWith("id", "order-id");
   });
 
-  it("wires the persisted label into the unchanged Clover checkout call", () => {
+  it("does not reopen Clover from an online signed payment link", () => {
     const page = readFileSync(path.join(process.cwd(), "src/app/pay/[token]/page.tsx"), "utf8");
-    expect(page).toContain("description = await loadCloverOrderDescription(");
-    expect(page.indexOf("remainingCents !== amountCents")).toBeLessThan(
-      page.indexOf("description = await loadCloverOrderDescription("),
-    );
-    expect(page).toContain("amountCents, description, customerEmail, redirectUrl, orderId");
+    expect(page).toContain("resolveWaveOnlineCheckout(");
+    expect(page).not.toContain("loadCloverOrderDescription(");
+    expect(page).not.toContain("createCloverCheckout(");
   });
 });

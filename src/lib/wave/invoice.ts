@@ -418,6 +418,18 @@ export interface WaveInvoiceFinancials {
   totalCents: number;
 }
 
+export interface WaveOnlineInvoiceSnapshot extends WaveInvoiceFinancials {
+  id: string;
+  invoiceNumber: string;
+  status: string;
+  viewUrl: string;
+  customerEmail: string;
+  amountDueCents: number;
+  amountPaidCents: number;
+  disableCreditCardPayments: boolean;
+  disableBankPayments: boolean;
+}
+
 /** Parse Wave Money.minorUnitValue without going through floating point.
  * Wave documents this as the exact minor-currency unit and deprecates raw.
  */
@@ -468,4 +480,100 @@ export async function getWaveInvoiceFinancials(invoiceId: string): Promise<WaveI
     throw new Error("Wave invoice financial readback does not reconcile");
   }
   return { subtotalCents, gstCents, pstCents, totalCents };
+}
+
+/** Complete provider readback used immediately before an online redirect. */
+export async function getWaveOnlineInvoiceSnapshot(
+  invoiceId: string,
+): Promise<WaveOnlineInvoiceSnapshot> {
+  type Money = { minorUnitValue: string };
+  const data = await waveQuery<{ business: { invoice: {
+    id: string;
+    invoiceNumber: string;
+    status: string;
+    viewUrl: string | null;
+    customer: { email: string | null } | null;
+    currency: { code: string };
+    total: Money;
+    amountDue: Money;
+    amountPaid: Money;
+    taxTotal: Money;
+    disableCreditCardPayments: boolean;
+    disableBankPayments: boolean;
+    items: { subtotal: Money; taxes: { salesTax: { id: string }; amount: Money | null }[] }[];
+  } | null } | null }>(
+    `query WaveOnlineInvoice($businessId: ID!, $invoiceId: ID!) {
+      business(id: $businessId) {
+        invoice(id: $invoiceId) {
+          id invoiceNumber status viewUrl
+          customer { email }
+          currency { code }
+          total { minorUnitValue }
+          amountDue { minorUnitValue }
+          amountPaid { minorUnitValue }
+          taxTotal { minorUnitValue }
+          disableCreditCardPayments
+          disableBankPayments
+          items {
+            subtotal { minorUnitValue }
+            taxes { salesTax { id } amount { minorUnitValue } }
+          }
+        }
+      }
+    }`,
+    { businessId: WAVE_BUSINESS_ID, invoiceId },
+  );
+  const invoice = data.business?.invoice;
+  if (
+    !invoice || invoice.id !== invoiceId || invoice.currency?.code !== "CAD" ||
+    !invoice.items?.length || typeof invoice.invoiceNumber !== "string" || !invoice.invoiceNumber.trim() ||
+    typeof invoice.customer?.email !== "string" || !invoice.customer.email.trim() ||
+    typeof invoice.viewUrl !== "string" || !invoice.viewUrl.trim() ||
+    typeof invoice.disableCreditCardPayments !== "boolean" ||
+    typeof invoice.disableBankPayments !== "boolean"
+  ) {
+    throw new Error("Wave online invoice readback is incomplete or not CAD");
+  }
+
+  let subtotalCents = 0;
+  let gstCents = 0;
+  let pstCents = 0;
+  for (const item of invoice.items) {
+    subtotalCents += parseWaveMinorUnitValue(item.subtotal?.minorUnitValue);
+    for (const tax of item.taxes ?? []) {
+      const amount = parseWaveMinorUnitValue(tax.amount?.minorUnitValue);
+      if (tax.salesTax.id === WAVE_GST_TAX_ID) gstCents += amount;
+      else if (tax.salesTax.id === WAVE_PST_TAX_ID) pstCents += amount;
+      else throw new Error("Wave invoice contains an unexpected tax");
+    }
+  }
+  const totalCents = parseWaveMinorUnitValue(invoice.total?.minorUnitValue);
+  const amountDueCents = parseWaveMinorUnitValue(invoice.amountDue?.minorUnitValue);
+  const amountPaidCents = parseWaveMinorUnitValue(invoice.amountPaid?.minorUnitValue);
+  const taxTotalCents = parseWaveMinorUnitValue(invoice.taxTotal?.minorUnitValue);
+  if (
+    [subtotalCents, gstCents, pstCents, totalCents, amountDueCents, amountPaidCents]
+      .some((value) => value < 0) ||
+    gstCents + pstCents !== taxTotalCents ||
+    subtotalCents + taxTotalCents !== totalCents ||
+    Math.max(totalCents - amountPaidCents, 0) !== amountDueCents
+  ) {
+    throw new Error("Wave online invoice amounts do not reconcile");
+  }
+
+  return {
+    id: invoice.id,
+    invoiceNumber: invoice.invoiceNumber,
+    status: invoice.status,
+    viewUrl: invoice.viewUrl,
+    customerEmail: invoice.customer.email,
+    subtotalCents,
+    gstCents,
+    pstCents,
+    totalCents,
+    amountDueCents,
+    amountPaidCents,
+    disableCreditCardPayments: invoice.disableCreditCardPayments,
+    disableBankPayments: invoice.disableBankPayments,
+  };
 }

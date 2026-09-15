@@ -43,18 +43,16 @@ describe("quote Wave provisioning contract", () => {
     expect(failure).toContain("THEN 'ambiguous'");
   });
 
-  it("gates both fresh and resumed Clover checkout on durable Wave readiness", () => {
+  it("provisions and verifies Wave without creating Clover checkout", () => {
     const route = source("src/app/api/pay/quote/route.ts");
     const materialize = route.indexOf("materializeQuoteOrder(");
     const provision = route.indexOf("provisionQuoteWaveInvoice(");
-    const resume = route.indexOf('quoteOrder.checkoutAction === "resume"');
-    const clover = route.indexOf("createCloverCheckout(");
+    const resolve = route.indexOf("resolveWaveOnlineCheckout(");
     expect(materialize).toBeGreaterThan(0);
     expect(provision).toBeGreaterThan(materialize);
-    expect(resume).toBeGreaterThan(provision);
-    expect(clover).toBeGreaterThan(provision);
-    expect(route.slice(provision, clover)).toContain('wave.action === "wait"');
-    expect(route.slice(provision, clover)).toContain("failQuoteCheckoutReservation");
+    expect(resolve).toBeGreaterThan(provision);
+    expect(route.slice(provision, resolve)).toContain('wave.action === "wait"');
+    expect(route).not.toContain("createCloverCheckout(");
   });
 
   it("gates catalog checkout and retry links on the same durable Wave state", () => {
@@ -69,13 +67,10 @@ describe("quote Wave provisioning contract", () => {
     expect(ordersRoute).not.toContain("approveWaveInvoice(");
 
     const retryGateway = source("src/app/pay/[token]/page.tsx");
-    const readiness = retryGateway.indexOf("hasDurablyApprovedWaveInvoice(orderCheck)");
-    const retryClover = retryGateway.indexOf("createCloverCheckout(");
+    const readiness = retryGateway.indexOf("resolveWaveOnlineCheckout(");
     expect(readiness).toBeGreaterThan(0);
-    expect(retryClover).toBeGreaterThan(readiness);
-    expect(retryGateway.slice(readiness, retryClover)).toContain("return <ErrorPage />");
-    expect(retryGateway).toContain("hasDurablyApprovedWaveInvoice(orderCheck)");
-    expect(retryGateway).toContain("reserveOrderCheckout(supabase, orderId)");
+    expect(retryGateway).not.toContain("createCloverCheckout(");
+    expect(retryGateway).not.toContain("reserveOrderCheckout(");
     expect(retryGateway).not.toContain("redirectOrderId");
   });
 

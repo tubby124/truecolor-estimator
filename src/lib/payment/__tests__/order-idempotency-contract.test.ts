@@ -70,16 +70,17 @@ describe("one Clover session per catalog checkout reservation", () => {
   it("gates the initial POST and durable pay link on the same reservation", () => {
     const route = source("src/app/api/orders/route.ts");
     const gateway = source("src/app/pay/[token]/page.tsx");
-    for (const code of [route, gateway]) {
-      const reserve = code.indexOf("reserveOrderCheckout(");
-      const clover = code.indexOf("createCloverCheckout(");
-      const complete = code.indexOf("completeOrderCheckout(");
-      expect(reserve).toBeGreaterThan(0);
-      expect(clover).toBeGreaterThan(reserve);
-      expect(complete).toBeGreaterThan(clover);
-      expect(code.slice(reserve, clover)).toContain('action === "resume"');
-      expect(code.slice(reserve, clover)).toContain('action === "wait"');
-    }
+    const reserve = route.indexOf("reserveOrderCheckout(");
+    const clover = route.indexOf("createCloverCheckout(");
+    const complete = route.indexOf("completeOrderCheckout(");
+    expect(reserve).toBeGreaterThan(0);
+    expect(clover).toBeGreaterThan(reserve);
+    expect(complete).toBeGreaterThan(clover);
+    expect(route.slice(reserve, clover)).toContain('action === "resume"');
+    expect(route.slice(reserve, clover)).toContain('action === "wait"');
+    expect(gateway).toContain("resolveWaveOnlineCheckout(");
+    expect(gateway).not.toContain("createCloverCheckout(");
+    expect(gateway).not.toContain("reserveOrderCheckout(");
     expect(route).toContain("emailCheckoutUrl = `${siteUrl}/pay/${payToken}`");
     expect(route).not.toContain("checkoutUrl = `${siteUrl}/pay/${payToken}`;\n      } catch {\n        emailCheckoutUrl");
   });

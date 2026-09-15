@@ -1,20 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { decodePaymentToken } from "@/lib/payment/token";
 import {
-  completeQuoteCheckoutReservation,
   failQuoteCheckoutReservation,
   materializeQuoteOrder,
 } from "@/lib/payment/quote-order";
-import { CloverCheckoutError, createCloverCheckout } from "@/lib/payment/clover";
 import {
   provisionQuoteWaveInvoice,
   QuoteWaveProvisioningError,
 } from "@/lib/payment/quote-wave";
 import { createServiceClient } from "@/lib/supabase/server";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
-import { recordPaymentAttempt } from "@/lib/payments/attempts";
 import { recordAuditEvent } from "@/lib/audit/record";
-import { preflightWaveBeforeCloverCheckout } from "@/lib/payment/wave-click-preflight";
+import { resolveWaveOnlineCheckout } from "@/lib/payment/wave-online-checkout";
 
 const PAID_STATUSES = new Set(["payment_received", "in_production", "ready_for_pickup", "complete"]);
 
@@ -36,22 +33,18 @@ function hasValidOrigin(req: NextRequest): boolean {
   return allowed.has(origin);
 }
 
-async function releaseQuoteCheckoutForWavePreflight(
+async function releaseUnusedQuoteCheckoutReservation(
   supabase: ReturnType<typeof createServiceClient>,
   quoteOrder: Awaited<ReturnType<typeof materializeQuoteOrder>>,
   error: string,
 ): Promise<void> {
   if (!quoteOrder.checkoutReservationId) return;
-  try {
-    await failQuoteCheckoutReservation(supabase, {
-      orderId: quoteOrder.orderId,
-      reservationId: quoteOrder.checkoutReservationId,
-      ambiguous: false,
-      error,
-    });
-  } catch (reservationError) {
-    console.error("[api/pay/quote] Clover reservation release failed:", reservationError);
-  }
+  await failQuoteCheckoutReservation(supabase, {
+    orderId: quoteOrder.orderId,
+    reservationId: quoteOrder.checkoutReservationId,
+    ambiguous: false,
+    error,
+  });
 }
 
 export async function POST(req: NextRequest) {
@@ -110,27 +103,31 @@ export async function POST(req: NextRequest) {
   if (quoteOrder.status !== "pending_payment" || quoteOrder.totalCents !== payload.amountCents) {
     return quotePage(req, token, "stale");
   }
-  if (quoteOrder.checkoutAction === "wait") {
-    return quotePage(req, token, "opened");
-  }
   if (quoteOrder.checkoutAction === "create" && !quoteOrder.checkoutReservationId) {
     return quotePage(req, token, "error");
+  }
+
+  // materializeQuoteOrder predates Wave-online routing and reserves a Clover
+  // slot transactionally. Release a fresh, never-used reservation before any
+  // provider work. Existing resumed/ambiguous Clover state is left intact and
+  // the shared resolver blocks it until its provider expiry.
+  if (quoteOrder.checkoutAction === "create") {
+    try {
+      await releaseUnusedQuoteCheckoutReservation(
+        supabase,
+        quoteOrder,
+        "Clover checkout was not used because online payment is routed through Wave",
+      );
+    } catch (reservationError) {
+      console.error("[api/pay/quote] unused Clover reservation release failed:", reservationError);
+      return quotePage(req, token, "error");
+    }
   }
 
   let waveInvoiceId: string | null = null;
   try {
     const wave = await provisionQuoteWaveInvoice(supabase, quoteOrder.orderId);
     if (wave.action === "wait") {
-      if (quoteOrder.checkoutReservationId) {
-        await failQuoteCheckoutReservation(supabase, {
-          orderId: quoteOrder.orderId,
-          reservationId: quoteOrder.checkoutReservationId,
-          ambiguous: false,
-          error: "Clover checkout held while Wave provisioning is unresolved",
-        }).catch((reservationError) => {
-          console.error("[api/pay/quote] Clover reservation release failed:", reservationError);
-        });
-      }
       return quotePage(req, token, "opened");
     }
     if (!wave.invoiceId) throw new Error("Wave provisioning returned no invoice ID");
@@ -139,19 +136,6 @@ export async function POST(req: NextRequest) {
     const message = error instanceof Error ? error.message : "Unknown Wave provisioning error";
     const ambiguous = error instanceof QuoteWaveProvisioningError ? error.ambiguous : true;
     console.error("[api/pay/quote] Wave provisioning failed:", message);
-
-    let cloverReservationReleased = true;
-    if (quoteOrder.checkoutReservationId) {
-      await failQuoteCheckoutReservation(supabase, {
-        orderId: quoteOrder.orderId,
-        reservationId: quoteOrder.checkoutReservationId,
-        ambiguous: false,
-        error: "Clover checkout was not called because Wave provisioning failed",
-      }).catch((reservationError) => {
-        cloverReservationReleased = false;
-        console.error("[api/pay/quote] Clover reservation release failed:", reservationError);
-      });
-    }
 
     await recordAuditEvent({
       actor_type: "system",
@@ -162,109 +146,40 @@ export async function POST(req: NextRequest) {
       detail: {
         quote_id: payload.quoteId,
         ambiguous,
-        clover_reservation_released: cloverReservationReleased,
         error: message.slice(0, 1000),
       },
     });
-    return quotePage(req, token, ambiguous || !cloverReservationReleased ? "opened" : "retry");
+    return quotePage(req, token, ambiguous ? "opened" : "retry");
   }
   if (!waveInvoiceId) return quotePage(req, token, "error");
 
   try {
-    const preflight = await preflightWaveBeforeCloverCheckout(supabase, {
+    const checkout = await resolveWaveOnlineCheckout(supabase, {
       orderId: quoteOrder.orderId,
-      waveInvoiceId,
       requestedAmountCents: payload.amountCents,
     });
-    if (preflight.action === "already_paid") {
-      await releaseQuoteCheckoutForWavePreflight(
-        supabase,
-        quoteOrder,
-        "Clover checkout was released because verified Wave payment already settled the order",
-      );
+    if (checkout.action === "already_paid") {
       return NextResponse.redirect(redirectUrl, 303);
     }
-    if (preflight.action === "updated_link") {
-      await releaseQuoteCheckoutForWavePreflight(
-        supabase,
-        quoteOrder,
-        "Clover checkout was released because verified Wave payment changed the balance due",
-      );
+    if (checkout.action === "updated_link") {
       return quotePage(req, token, "stale");
     }
-  } catch (preflightError) {
-    console.error("[api/pay/quote] Wave click-time payment preflight failed:", preflightError);
-    await releaseQuoteCheckoutForWavePreflight(
-      supabase,
-      quoteOrder,
-      "Clover checkout was released because Wave payment verification could not be confirmed",
-    );
-    return quotePage(req, token, "error");
-  }
-
-  if (quoteOrder.checkoutAction === "resume" && quoteOrder.checkoutUrl) {
-    return NextResponse.redirect(quoteOrder.checkoutUrl, 303);
-  }
-  if (!quoteOrder.checkoutReservationId) {
-    return quotePage(req, token, "error");
-  }
-
-  try {
-    const result = await createCloverCheckout(
-      payload.amountCents,
-      payload.description,
-      payload.customerEmail,
-      redirectUrl,
-      quoteOrder.orderId,
-    );
-    await completeQuoteCheckoutReservation(supabase, {
-      orderId: quoteOrder.orderId,
-      reservationId: quoteOrder.checkoutReservationId,
-      checkoutUrl: result.checkoutUrl,
-      sessionId: result.sessionId,
-      expiresAt: result.expiresAt,
-    });
-    await recordPaymentAttempt(supabase, {
-      order_id: quoteOrder.orderId,
-      status: "checkout_opened",
-      amount: payload.amountCents / 100,
-      clover_checkout_session_id: result.sessionId || null,
-      customer_message: "Secure Clover checkout opened. We are waiting for payment confirmation.",
-    }).catch((attemptError) => {
-      console.error("[api/pay/quote] checkout attempt log failed:", attemptError);
-    });
     void recordAuditEvent({
       actor_type: "customer",
       actor_id: payload.customerEmail ?? null,
       event_type: "order.pay_link_clicked",
       entity_type: "order",
       entity_id: quoteOrder.orderId,
-      detail: { amount_cents: payload.amountCents, quote_id: payload.quoteId },
+      detail: {
+        amount_cents: payload.amountCents,
+        quote_id: payload.quoteId,
+        provider: "wave",
+        invoice_number: checkout.invoiceNumber,
+      },
     });
-    return NextResponse.redirect(result.checkoutUrl, 303);
+    return NextResponse.redirect(checkout.checkoutUrl, 303);
   } catch (error) {
-    console.error("[api/pay/quote] Clover checkout failed:", error);
-    const ambiguous = !(error instanceof CloverCheckoutError) || error.outcome === "ambiguous";
-    await failQuoteCheckoutReservation(supabase, {
-      orderId: quoteOrder.orderId,
-      reservationId: quoteOrder.checkoutReservationId,
-      ambiguous,
-      error: error instanceof Error ? error.message : "Unknown Clover checkout error",
-    }).catch((reservationError) => {
-      console.error("[api/pay/quote] reservation failure update failed:", reservationError);
-    });
-    if (ambiguous) {
-      await recordPaymentAttempt(supabase, {
-        order_id: quoteOrder.orderId,
-        status: "ambiguous",
-        amount: payload.amountCents / 100,
-        failure_label: "Checkout session could not be confirmed",
-        failure_detail: error instanceof Error ? error.message : "Unknown Clover checkout error",
-        customer_message: "We could not confirm whether Clover opened checkout. Please wait before trying again.",
-      }).catch((attemptError) => {
-        console.error("[api/pay/quote] ambiguous attempt log failed:", attemptError);
-      });
-    }
-    return quotePage(req, token, ambiguous ? "opened" : "retry");
+    console.error("[api/pay/quote] Wave online checkout verification failed:", error);
+    return quotePage(req, token, "error");
   }
 }
