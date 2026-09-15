@@ -14,6 +14,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
 import { recordPaymentAttempt } from "@/lib/payments/attempts";
 import { recordAuditEvent } from "@/lib/audit/record";
+import { preflightWaveBeforeCloverCheckout } from "@/lib/payment/wave-click-preflight";
 
 const PAID_STATUSES = new Set(["payment_received", "in_production", "ready_for_pickup", "complete"]);
 
@@ -33,6 +34,26 @@ function hasValidOrigin(req: NextRequest): boolean {
     try { allowed.add(new URL(configured).origin); } catch { /* invalid config is not an allowed origin */ }
   }
   return allowed.has(origin);
+}
+
+async function releaseQuoteCheckoutForWavePreflight(
+  supabase: ReturnType<typeof createServiceClient>,
+  quoteOrder: Awaited<ReturnType<typeof materializeQuoteOrder>>,
+  error: string,
+): Promise<boolean> {
+  if (!quoteOrder.checkoutReservationId) return true;
+  try {
+    await failQuoteCheckoutReservation(supabase, {
+      orderId: quoteOrder.orderId,
+      reservationId: quoteOrder.checkoutReservationId,
+      ambiguous: false,
+      error,
+    });
+    return true;
+  } catch (reservationError) {
+    console.error("[api/pay/quote] Clover reservation release failed:", reservationError);
+    return false;
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -98,6 +119,7 @@ export async function POST(req: NextRequest) {
     return quotePage(req, token, "error");
   }
 
+  let waveInvoiceId: string | null = null;
   try {
     const wave = await provisionQuoteWaveInvoice(supabase, quoteOrder.orderId);
     if (wave.action === "wait") {
@@ -113,6 +135,8 @@ export async function POST(req: NextRequest) {
       }
       return quotePage(req, token, "opened");
     }
+    if (!wave.invoiceId) throw new Error("Wave provisioning returned no invoice ID");
+    waveInvoiceId = wave.invoiceId;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown Wave provisioning error";
     const ambiguous = error instanceof QuoteWaveProvisioningError ? error.ambiguous : true;
@@ -145,6 +169,39 @@ export async function POST(req: NextRequest) {
       },
     });
     return quotePage(req, token, ambiguous || !cloverReservationReleased ? "opened" : "retry");
+  }
+  if (!waveInvoiceId) return quotePage(req, token, "error");
+
+  try {
+    const preflight = await preflightWaveBeforeCloverCheckout(supabase, {
+      orderId: quoteOrder.orderId,
+      waveInvoiceId,
+      requestedAmountCents: payload.amountCents,
+    });
+    if (preflight.action === "already_paid") {
+      const released = await releaseQuoteCheckoutForWavePreflight(
+        supabase,
+        quoteOrder,
+        "Clover checkout was released because verified Wave payment already settled the order",
+      );
+      return released ? NextResponse.redirect(redirectUrl, 303) : quotePage(req, token, "opened");
+    }
+    if (preflight.action === "updated_link") {
+      const released = await releaseQuoteCheckoutForWavePreflight(
+        supabase,
+        quoteOrder,
+        "Clover checkout was released because verified Wave payment changed the balance due",
+      );
+      return quotePage(req, token, released ? "stale" : "opened");
+    }
+  } catch (preflightError) {
+    console.error("[api/pay/quote] Wave click-time payment preflight failed:", preflightError);
+    const released = await releaseQuoteCheckoutForWavePreflight(
+      supabase,
+      quoteOrder,
+      "Clover checkout was released because Wave payment verification could not be confirmed",
+    );
+    return quotePage(req, token, released ? "error" : "opened");
   }
 
   if (quoteOrder.checkoutAction === "resume" && quoteOrder.checkoutUrl) {

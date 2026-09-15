@@ -11,7 +11,7 @@ import { CallTracker } from "@/components/site/CallTracker";
 import { createServiceClient } from "@/lib/supabase/server";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { recordPaymentAttempt } from "@/lib/payments/attempts";
-import { fetchOrderLedger, remainingBalanceCents } from "@/lib/orders/payLink";
+import { preflightWaveBeforeCloverCheckout } from "@/lib/payment/wave-click-preflight";
 import {
   resolveStoredQuotePaymentBreakdown,
   type QuotePaymentBreakdown,
@@ -124,32 +124,27 @@ export default async function PaymentGatewayPage({ params, searchParams }: Props
       }
       // Orders are never allowed to create or resume Clover unless the
       // approved Wave invoice is durably linked by the locked provisioning RPC.
-      if (!hasDurablyApprovedWaveInvoice(orderCheck)) {
+      const waveInvoiceId = typeof orderCheck.wave_invoice_id === "string" ? orderCheck.wave_invoice_id : null;
+      if (!waveInvoiceId || !hasDurablyApprovedWaveInvoice(orderCheck)) {
         console.error("[pay/token] Clover blocked: Wave invoice is not durably ready", { orderId });
         return <ErrorPage />;
       }
-      if (orderCheck?.status === "pending_payment") {
-        // The link must charge exactly what is still owed. A partial payment
-        // leaves orders.total untouched, so this compares against the remaining
-        // balance: comparing against the raw total would reject a valid balance
-        // link, and accepting a full-total link would charge the customer twice
-        // for the part they already paid.
-        let remainingCents: number;
-        try {
-          remainingCents = remainingBalanceCents(
-            Number(orderCheck.total),
-            await fetchOrderLedger(supabase, orderId),
-          );
-        } catch (ledgerError) {
-          // Fail closed: an unreadable ledger means we cannot know what this
-          // customer already paid.
-          console.error("[pay/token] payment ledger lookup failed:", ledgerError);
-          return <ErrorPage />;
-        }
-        if (remainingCents !== amountCents) {
-          return <UpdatedLinkPage />;
-        }
-        isPartialBalance = remainingCents < Math.round(Number(orderCheck.total) * 100);
+      // A Wave invoice can have been paid after this link was emailed but
+      // before its local poll notices. Read authenticated provider payment
+      // evidence and atomically accept it before any Clover reservation can
+      // resume or create a card checkout.
+      try {
+        const preflight = await preflightWaveBeforeCloverCheckout(supabase, {
+          orderId,
+          waveInvoiceId,
+          requestedAmountCents: amountCents,
+        });
+        if (preflight.action === "already_paid") return <AlreadyPaidPage />;
+        if (preflight.action === "updated_link") return <UpdatedLinkPage />;
+        isPartialBalance = preflight.isPartialBalance;
+      } catch (preflightError) {
+        console.error("[pay/token] Wave click-time payment preflight failed:", preflightError);
+        return <ErrorPage />;
       }
     }
 

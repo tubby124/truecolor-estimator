@@ -74,7 +74,7 @@ describe("quote Wave provisioning contract", () => {
     expect(readiness).toBeGreaterThan(0);
     expect(retryClover).toBeGreaterThan(readiness);
     expect(retryGateway.slice(readiness, retryClover)).toContain("return <ErrorPage />");
-    expect(retryGateway).toContain("if (!hasDurablyApprovedWaveInvoice(orderCheck))");
+    expect(retryGateway).toContain("hasDurablyApprovedWaveInvoice(orderCheck)");
     expect(retryGateway).toContain("reserveOrderCheckout(supabase, orderId)");
     expect(retryGateway).not.toContain("redirectOrderId");
   });
