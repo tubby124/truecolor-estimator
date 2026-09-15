@@ -342,6 +342,8 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [loading, setLoading] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [emailPreview, setEmailPreview] = useState<{ subject: string; html: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{ orderNumber: string; email: string; quoteOnly: boolean; deliveryWarning?: string } | null>(null);
   const [totalOverrideOpen, setTotalOverrideOpen] = useState(false);
@@ -526,10 +528,10 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
     const amountCents = parseMoneyCents(it.amount);
     return !it.taxClassificationRequired && it.product.trim() !== "" && !!amountCents && amountCents > 0;
   });
-  const defaultSubject = form.quote_only
-    ? `Your Quote — $${total.toFixed(2)} CAD | True Color Display Printing`
-    : `Payment Request — $${total.toFixed(2)} CAD | True Color Display Printing`;
+  const defaultSubject = `Your quote & payment link — $${total.toFixed(2)} CAD`;
   const canSubmit = !!taxRates && hasValidAmount && allItemsValid && !overrideValidationError && !preview.error;
+
+  useEffect(() => { setEmailPreview(null); }, [form, taxRates?.gstRate, taxRates?.pstRate]);
 
   function openModal() {
     submissionIdRef.current = null;
@@ -677,10 +679,45 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
     return () => window.removeEventListener("tc:recreate-order", recreateFromHistory);
   }, []);
 
+  async function handleEmailPreview() {
+    if (!taxRates || !canSubmit || !form.name.trim() || !form.email.trim()) {
+      setError("Complete the customer and pricing details before previewing.");
+      return;
+    }
+    setPreviewLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/staff/manual-order/preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contact: { name: form.name.trim(), email: form.email.trim(), company: form.company.trim() || undefined },
+          items: form.items.map((it) => ({
+            kind: it.kind, taxClass: it.taxClass ?? "printed_good", standaloneService: it.standaloneService === true,
+            title: it.lineDescription.trim() || it.title.trim() || undefined, product: it.product.trim(), material: it.material.trim() || undefined,
+            sides: it.sides.trim() || undefined, size: it.size.trim() || undefined, process: it.process.trim() || undefined,
+            qty: parseInt(it.qty) || 1, details: it.details.trim() || undefined, unitPrice: it.unitPrice.trim() ? parseFloat(it.unitPrice) : undefined,
+            amount: parseFloat(it.amount), proofPath: it.proofPath.trim() || undefined,
+          })),
+          overrideTotal: overrideRequested && overrideTotalCents ? overrideTotalCents / 100 : undefined,
+          pstExemption: form.pstExemption, notes: form.notes.trim() || undefined, customMessage: form.customMessage.trim() || undefined,
+        }),
+      });
+      const data = await res.json() as { subject?: string; html?: string; error?: string };
+      if (!res.ok || !data.subject || !data.html) throw new Error(data.error ?? "Could not render email preview.");
+      setEmailPreview({ subject: data.subject, html: data.html });
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not render email preview.");
+    } finally {
+      setPreviewLoading(false);
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (loading) return;
     if (!taxRates) { setError(taxRatesError ?? "Wait for canonical tax rates before submitting."); return; }
+    if (!emailPreview) { setError("Preview the customer email before sending."); return; }
 
     if (!form.name.trim()) { setError("Customer name is required"); return; }
     if (!form.email.trim()) { setError("Customer email is required"); return; }
@@ -729,7 +766,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
           })),
           overrideTotal: overrideRequested && overrideTotalCents ? overrideTotalCents / 100 : undefined,
           payment_method: form.payment_method,
-          quote_only: form.quote_only,
+          quote_only: true,
           quote_request_id: form.quote_request_id.trim() || undefined,
           acquisition_source: form.acquisition_source || undefined,
           notes: form.notes.trim() || undefined,
@@ -747,12 +784,10 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
         return;
       }
 
-      setSuccess({ orderNumber: data.orderNumber!, email: form.email.trim(), quoteOnly: form.quote_only, deliveryWarning: data.deliveryWarning });
+      setSuccess({ orderNumber: data.orderNumber!, email: form.email.trim(), quoteOnly: true, deliveryWarning: data.deliveryWarning });
       if (data.deliveryWarning) { showToast(data.deliveryWarning, "info"); return; }
       showToast(
-        form.quote_only
-          ? `Quote sent to ${form.email.trim()}`
-          : `Payment request sent to ${form.email.trim()}`,
+        `Email accepted by mail service for ${form.email.trim()}`,
         "success"
       );
     } catch {
@@ -906,12 +941,10 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                 <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
                   <div>
                     <h2 className="text-lg font-bold text-[#1c1712]" data-testid="modal-title">
-                      {form.quote_only ? "Custom Quote" : "Manual Order"}
+                      Send quote & payment link
                     </h2>
                     <p className="text-xs text-gray-400 mt-0.5">
-                      {form.quote_only
-                        ? "Emails the customer a quote with a Pay Now link"
-                        : "Creates an order and emails the customer a payment link"}
+                      Customer can pay to accept this quote, or reply with changes.
                     </p>
                   </div>
                   <button
@@ -965,10 +998,10 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                       </svg>
                     </div>
                     <h3 className="text-xl font-bold text-[#1c1712] mb-2">
-                      {success.deliveryWarning ? "Order saved — email needs attention" : success.quoteOnly ? "Quote sent!" : "Payment request sent!"}
+                      {success.deliveryWarning ? "Order saved — email failed" : "Email accepted by mail service"}
                     </h3>
                     <p className="text-sm text-gray-500 mb-1">
-                      {success.deliveryWarning ?? <>Email sent to <span className="font-semibold text-gray-700">{success.email}</span></>}
+                      {success.deliveryWarning ?? <>The mail service accepted the quote & payment link for <span className="font-semibold text-gray-700">{success.email}</span>.</>}
                     </p>
                     <p className="text-xs text-gray-400 mb-6">
                       Order <span className="font-mono font-bold text-gray-600">{success.orderNumber}</span> created — now visible in the orders list below.
@@ -993,64 +1026,9 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                 ) : (
                   <form onSubmit={(e) => void handleSubmit(e)} className="px-6 py-5 space-y-5">
 
-                    {/* ── MODE PICKER — big two-card chooser. Default: Quote. ── */}
-                    <div>
-                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Step 1 · Pick what to send</p>
-                      <div className="grid grid-cols-2 gap-2.5">
-                        {/* QUOTE CARD */}
-                        <button
-                          type="button"
-                          onClick={() => setForm((prev) => ({ ...prev, quote_only: true }))}
-                          aria-pressed={form.quote_only}
-                          data-testid="mode-quote"
-                          className={`text-left p-3.5 rounded-xl border-2 transition-all ${
-                            form.quote_only
-                              ? "border-emerald-500 bg-emerald-50 shadow-sm"
-                              : "border-gray-200 bg-white hover:border-gray-300"
-                          }`}
-                        >
-                          <div className="flex items-start gap-2.5">
-                            <div className={`mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                              form.quote_only ? "border-emerald-500" : "border-gray-300"
-                            }`}>
-                              {form.quote_only && <div className="w-2 h-2 rounded-full bg-emerald-500" />}
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm font-bold text-gray-800 leading-tight">📝 Send Quote</p>
-                              <p className="text-[11px] text-gray-500 leading-snug mt-1">
-                                Customer reviews the price and can use the Wave Pay Now link when ready. <strong className="text-emerald-700">Safest — use this first.</strong>
-                              </p>
-                            </div>
-                          </div>
-                        </button>
-
-                        {/* INVOICE CARD */}
-                        <button
-                          type="button"
-                          onClick={() => setForm((prev) => ({ ...prev, quote_only: false }))}
-                          aria-pressed={!form.quote_only}
-                          data-testid="mode-invoice"
-                          className={`text-left p-3.5 rounded-xl border-2 transition-all ${
-                            !form.quote_only
-                              ? "border-emerald-500 bg-emerald-50 shadow-sm"
-                              : "border-gray-200 bg-white hover:border-gray-300"
-                          }`}
-                        >
-                          <div className="flex items-start gap-2.5">
-                            <div className={`mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                              !form.quote_only ? "border-emerald-500" : "border-gray-300"
-                            }`}>
-                              {!form.quote_only && <div className="w-2 h-2 rounded-full bg-emerald-500" />}
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm font-bold text-gray-800 leading-tight">💳 Send Invoice</p>
-                              <p className="text-[11px] text-gray-500 leading-snug mt-1">
-                                Customer pays now. Sends a Wave Pay Now link (or e-Transfer fallback). <strong className="text-gray-700">Use after price is agreed.</strong>
-                              </p>
-                            </div>
-                          </div>
-                        </button>
-                      </div>
+                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                      <p className="text-sm font-bold text-emerald-900">Quote & payment link</p>
+                      <p className="mt-1 text-xs leading-5 text-emerald-800">One customer email with a secure Wave payment button. They can pay to accept or reply with changes.</p>
                     </div>
 
                     {/* ── CUSTOMER ── */}
@@ -1708,31 +1686,18 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                     {/* ── PAYMENT METHOD (info only — Wave Pay Now is the only path) ── */}
                     <div>
                       <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
-                        Step 4 · How it&apos;s billed
+                        Step 4 · Payment email
                       </p>
                       <div className="rounded-xl border-2 border-emerald-500 bg-emerald-50 px-4 py-3">
-                        <p className="text-sm font-semibold text-gray-800">Wave Pay Now</p>
+                        <p className="text-sm font-semibold text-gray-800">Wave online payment</p>
                         <p className="text-[11px] text-gray-600 leading-snug mt-0.5">
-                          {form.quote_only
-                            ? "Customer gets a quote email with a Wave Pay Now button (e-Transfer to info@true-color.ca shown as fallback). They can pay to confirm or reply with changes. Your books are updated automatically when payment is confirmed."
-                            : "Customer gets a branded invoice email with a Wave Pay Now button (e-Transfer to info@true-color.ca shown as fallback). Your books are updated automatically after Wave payment is verified."}
+                          Customer gets one quote email with a secure Wave payment button. e-Transfer appears as a short fallback below it.
                         </p>
                       </div>
                     </div>
 
-                    {/* Customer email copy */}
-                    <div>
-                      <label htmlFor="pr-subject" className="block text-xs font-semibold text-gray-600 mb-1.5">
-                        Email subject <span className="text-gray-300 font-normal">(optional)</span>
-                      </label>
-                      <input
-                        id="pr-subject"
-                        type="text"
-                        value={form.customSubject || defaultSubject}
-                        onChange={(e) => set("customSubject", e.target.value)}
-                        maxLength={120}
-                        className={inputClass}
-                      />
+                    <div className="rounded-lg bg-gray-50 border border-gray-200 px-3 py-2 text-xs text-gray-600">
+                      Subject: <span className="font-semibold text-gray-800">{defaultSubject}</span>
                     </div>
 
                     <div>
@@ -1771,6 +1736,16 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                       </div>
                     )}
 
+                    {emailPreview && (
+                      <div className="rounded-xl border border-sky-200 overflow-hidden bg-sky-50">
+                        <div className="px-4 py-3 border-b border-sky-200">
+                          <p className="text-sm font-bold text-sky-950">Email preview</p>
+                          <p className="text-xs text-sky-800 mt-1">To: {form.email} · Subject: {emailPreview.subject}</p>
+                        </div>
+                        <iframe title="Customer email preview" sandbox="" srcDoc={emailPreview.html} className="block h-[440px] w-full bg-white" />
+                      </div>
+                    )}
+
                     {/* Footer buttons */}
                     <div className="flex items-center justify-end gap-3 pt-1">
                       <button
@@ -1782,8 +1757,16 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                         Cancel
                       </button>
                       <button
+                        type="button"
+                        onClick={() => void handleEmailPreview()}
+                        disabled={loading || previewLoading || !canSubmit}
+                        className="px-5 py-2.5 rounded-lg border border-sky-400 text-sm font-semibold text-sky-700 hover:bg-sky-50 disabled:opacity-50 transition-colors"
+                      >
+                        {previewLoading ? "Rendering…" : emailPreview ? "Refresh preview" : "Preview email"}
+                      </button>
+                      <button
                         type="submit"
-                        disabled={loading || !canSubmit}
+                        disabled={loading || !canSubmit || !emailPreview}
                         aria-busy={loading}
                         className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold transition-colors"
                       >
@@ -1797,7 +1780,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                           </>
                         ) : (
                           <>
-                            {form.quote_only ? "Send Quote" : "Send Invoice"}
+                            Email payment link
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                             </svg>

@@ -896,10 +896,10 @@ export function StaffOrderCard({
                   ? "Sending…"
                   : resendSuccess
                   ? "✓ Resent!"
-                  : "↩ Resend payment link"}
+                  : "↩ Email payment link"}
               </button>
               <p className="text-xs text-gray-400 mt-1">
-                Re-emails the customer a fresh payment link
+                Sends a fresh payment-link email to the customer
               </p>
 
               {/* Copy/paste the link — builds it without emailing anything */}
@@ -910,13 +910,13 @@ export function StaffOrderCard({
                     disabled={loadingPayLink}
                     className="text-sm font-semibold px-4 py-2 rounded-lg border border-sky-400 text-sky-700 hover:bg-sky-50 disabled:opacity-50 transition-colors"
                   >
-                    {loadingPayLink ? "Building…" : "🔗 Get payment link"}
+                    {loadingPayLink ? "Building…" : "🔗 Copy payment link"}
                   </button>
                 ) : (
                   <div className="rounded-lg border border-sky-200 bg-sky-50/60 p-3">
                     <div className="flex items-center justify-between gap-2 mb-2">
                       <p className="text-[11px] font-bold text-sky-900 uppercase tracking-widest">
-                        Payment link — nothing emailed
+                        Copy only — nothing emailed
                       </p>
                       <button
                         onClick={() => {

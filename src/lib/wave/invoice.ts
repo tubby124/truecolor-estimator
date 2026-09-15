@@ -350,15 +350,16 @@ export async function approveWaveInvoice(invoiceId: string): Promise<void> {
 }
 
 // --------------------------------------------------------------------------
-// Void a Wave invoice (DRAFT or APPROVED — not already PAID)
+// Delete an unpaid Wave invoice. Wave's public GraphQL schema exposes
+// `invoiceDelete`; it does not expose the legacy `invoiceVoid` mutation.
 // --------------------------------------------------------------------------
 
 export async function voidWaveInvoice(invoiceId: string): Promise<void> {
   const data = await waveQuery<{
-    invoiceVoid: { didSucceed: boolean; inputErrors: { message: string }[] };
+    invoiceDelete: { didSucceed: boolean; inputErrors: { message: string }[] };
   }>(
-    `mutation($input: InvoiceVoidInput!) {
-      invoiceVoid(input: $input) {
+    `mutation($input: InvoiceDeleteInput!) {
+      invoiceDelete(input: $input) {
         didSucceed
         inputErrors { path message }
       }
@@ -366,9 +367,9 @@ export async function voidWaveInvoice(invoiceId: string): Promise<void> {
     { input: { invoiceId } }
   );
 
-  if (!data.invoiceVoid.didSucceed) {
-    const errs = data.invoiceVoid.inputErrors?.map((e) => e.message).join(", ");
-    throw new Error(`Wave invoiceVoid failed: ${errs}`);
+  if (!data.invoiceDelete.didSucceed) {
+    const errs = data.invoiceDelete.inputErrors?.map((e) => e.message).join(", ");
+    throw new Error(`Wave invoiceDelete failed: ${errs}`);
   }
 }
 

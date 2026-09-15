@@ -439,6 +439,7 @@ export async function POST(req: NextRequest) {
       conversion_type: string | null;
       quote_request_id: string | null;
       checkout_request_fingerprint: string | null;
+      voided_at: string | null;
     };
     type OrderInsertError = { code?: string; message?: string; details?: string; hint?: string } | null;
     let order: OrderRow | null = null;
@@ -515,7 +516,7 @@ export async function POST(req: NextRequest) {
           ga_session_number: ga4Context?.ga_session_number ?? null,
           ga_context_captured_at: ga4Context ? new Date().toISOString() : null,
         })
-        .select("id, order_number, customer_id, status, paid_at, total, payment_method, conversion_type, quote_request_id, checkout_request_fingerprint")
+        .select("id, order_number, customer_id, status, paid_at, total, payment_method, conversion_type, quote_request_id, checkout_request_fingerprint, voided_at")
         .single();
 
       order = data as OrderRow | null;
@@ -527,7 +528,7 @@ export async function POST(req: NextRequest) {
       // order_number collision, which still retries with a fresh number.
       const { data: existingAttempt, error: existingAttemptError } = await supabase
         .from("orders")
-        .select("id, order_number, customer_id, status, paid_at, total, payment_method, conversion_type, quote_request_id, checkout_request_fingerprint")
+        .select("id, order_number, customer_id, status, paid_at, total, payment_method, conversion_type, quote_request_id, checkout_request_fingerprint, voided_at")
         .eq("checkout_submission_id", checkout_submission_id)
         .maybeSingle();
       if (existingAttemptError) {
@@ -561,6 +562,12 @@ export async function POST(req: NextRequest) {
       if (!sameAttempt) {
         return NextResponse.json(
           { error: "This checkout attempt no longer matches the saved order. No payment was started." },
+          { status: 409 },
+        );
+      }
+      if (order.voided_at !== null) {
+        return NextResponse.json(
+          { code: "CHECKOUT_RETRY_AVAILABLE", error: "That earlier checkout was cancelled. Please try again to create a fresh payment link." },
           { status: 409 },
         );
       }
