@@ -1,3 +1,4 @@
+import { buildCloverOrderDescription } from "@/lib/payment/clover-order-description";
 /**
  * POST /api/orders
  *
@@ -731,7 +732,7 @@ export async function POST(req: NextRequest) {
 
     const { data: persistedItems, error: persistedItemsError } = await supabase
       .from("order_items")
-      .select("checkout_line_key, line_total")
+      .select("checkout_line_key, line_total, product_name, qty, width_in, height_in, sides, addons")
       .eq("order_id", order.id);
     if (persistedItemsError) {
       return NextResponse.json(
@@ -841,10 +842,11 @@ export async function POST(req: NextRequest) {
     let emailCheckoutUrl: string | null = null;
     if (payment_method === "clover_card") {
       const totalCents = Math.round(total * 100);
-      const description =
-        items.length === 1
-          ? `True Color Order ${order.order_number} — ${items[0].product_name}`
-          : `True Color Order ${order.order_number} (${items.length} items)`;
+      const description = buildCloverOrderDescription({
+        orderNumber: order.order_number,
+        items: persistedItems,
+        isPartialBalance: false,
+      });
 
       const siteUrl =
         process.env.NEXT_PUBLIC_SITE_URL ??
