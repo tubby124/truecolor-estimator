@@ -584,15 +584,15 @@ export async function POST(req: NextRequest) {
           // accounting, receipt, or analytics effects from this path.
           if (pendingOrder.status !== "pending_payment") {
             const captureKind = ledgerAlreadyRecorded ? "duplicate Clover payment" : "Clover payment recorded";
-            const detail = ledgerSummary.status === "overpaid"
-              ? `${captureKind} on already ${pendingOrder.status}; overpaid ambiguity: ledger=$${ledgerSummary.amountPaid.toFixed(2)}/$${orderTotalDollars.toFixed(2)}; manual review required; order effects suppressed`
+            const detail = ledgerSummary.status !== "paid"
+              ? `${captureKind} on already ${pendingOrder.status}; ${ledgerSummary.status} ambiguity: ledger=$${ledgerSummary.amountPaid.toFixed(2)}/$${orderTotalDollars.toFixed(2)}; manual review required; order effects suppressed`
               : `${captureKind} on already ${pendingOrder.status}; ledger=$${ledgerSummary.amountPaid.toFixed(2)}/$${orderTotalDollars.toFixed(2)}; order effects suppressed`;
             console.log(`[clover-webhook] ${detail}`);
             await logWebhookEvent({
               eventType: eventTypeStr,
               resourceId: paymentId,
               matchedOrderId: pendingOrder.id,
-              ok: ledgerSummary.status !== "overpaid",
+              ok: ledgerSummary.status === "paid",
               detail,
             });
             return NextResponse.json({ ok: true });

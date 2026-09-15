@@ -339,6 +339,16 @@ describe("Clover webhook durable identity", () => {
     }));
   });
 
+  it("flags a partial ledger on an already-paid order for manual reconciliation", async () => {
+    const harness = createHarness();
+    mocks.createServiceClient.mockReturnValue(harness.supabase);
+    mocks.fetchAmount.mockResolvedValue(500);
+    expect((await POST(request(captured({ id: "payment-partial-late" })))).status).toBe(200);
+    expect(harness.orderUpdates).toBe(0);
+    expect(mocks.recordWavePayment).not.toHaveBeenCalled();
+    expect(harness.webhookEvents).toContainEqual(expect.objectContaining({ ok: false, detail: expect.stringContaining("partial ambiguity") }));
+  });
+
   it("returns retryable unresolved processing for a missing amount until a later retry verifies it", async () => {
     const harness = createHarness();
     mocks.createServiceClient.mockReturnValue(harness.supabase);
