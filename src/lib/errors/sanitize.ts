@@ -16,6 +16,8 @@ const ERROR_MAP: Record<string, string> = {
   DUPLICATE_ORDER: "It looks like this order was already submitted. Check your email for confirmation.",
   CHECKOUT_RETRY_AVAILABLE:
     "We could not confirm this checkout. Try again to start a fresh checkout, pay by e-transfer to info@true-color.ca, or call (306) 954-8688.",
+  CHECKOUT_ACCOUNTING_PENDING:
+    "We are confirming this order's accounting setup. Please do not retry or pay again; call (306) 954-8688 if you need help.",
 };
 
 const FALLBACK_MESSAGE =

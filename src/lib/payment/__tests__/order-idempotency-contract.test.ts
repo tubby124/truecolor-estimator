@@ -15,6 +15,8 @@ describe("catalog order submission idempotency contract", () => {
     expect(checkout).toContain('CHECKOUT_SUBMISSION_KEY = "tc_checkout_submission_id"');
     expect(checkout).toContain("crypto.randomUUID()");
     expect(checkout).toContain("checkout_submission_id: getOrCreateCheckoutSubmissionId()");
+    expect(checkout).toContain("buildCatalogWaveInvoicePlan");
+    expect(route).toContain("buildCatalogWaveInvoicePlan");
     expect(route).toContain("checkout_submission_id,");
     expect(route).toContain("checkout_request_fingerprint:");
     expect(route).toContain("createHash(\"sha256\")");
@@ -31,10 +33,14 @@ describe("catalog order submission idempotency contract", () => {
     expect(route).toContain("checkout_line_key: `${checkout_submission_id}:${index}`");
     expect(route).toContain('.upsert(orderItems, { onConflict: "checkout_line_key", ignoreDuplicates: true })');
     expect(route).toMatch(/\.select\("checkout_line_key, line_total(?:, [^"]+)?"\)/);
-    expect(checkout).toContain("res.status === 409 || res.status === 503");
+    expect(checkout).toContain("if (res.status === 503)");
+    expect(checkout).toContain('throw new Error("CHECKOUT_ACCOUNTING_PENDING")');
+    expect(checkout).toContain("if (res.status === 409)");
     expect(checkout).toContain("sessionStorage.removeItem(CHECKOUT_SUBMISSION_KEY)");
     expect(checkout).toContain('throw new Error("CHECKOUT_RETRY_AVAILABLE")');
-    expect(source("src/lib/errors/sanitize.ts")).toContain("pay by e-transfer to info@true-color.ca");
+    const errors = source("src/lib/errors/sanitize.ts");
+    expect(errors).toContain("CHECKOUT_ACCOUNTING_PENDING");
+    expect(errors).toContain("Please do not retry or pay again");
   });
 
   it("reuses stored order data after a duplicate POST and never starts Wave for a new order", () => {
@@ -49,39 +55,25 @@ describe("catalog order submission idempotency contract", () => {
   });
 });
 
-describe("one Clover session per catalog checkout reservation", () => {
-  it("uses locked create/resume/wait transitions and never recycles ambiguous creation", () => {
-    const migration = source("supabase/migrations/20260720120000_quote_wave_provisioning.sql");
-    const reserve = migration.slice(
-      migration.indexOf("CREATE OR REPLACE FUNCTION public.reserve_order_checkout"),
-      migration.indexOf("CREATE OR REPLACE FUNCTION public.complete_order_checkout"),
-    );
-    expect(reserve).toContain("FOR UPDATE;");
-    expect(reserve).toContain("'resume'::text");
-    expect(reserve).toContain("'wait'::text");
-    expect(reserve).toContain("quote_checkout_state = 'ambiguous'");
-    expect(reserve).not.toContain("quote_checkout_state = 'ambiguous' AND");
-    expect(reserve).toContain("v_order.status <> 'pending_payment'");
-    expect(reserve).toContain("v_order.paid_at IS NOT NULL");
-    expect(reserve).toContain("ORDER_WAVE_NOT_READY");
-    expect(reserve).toContain("v_order.wave_invoice_approved_at IS NULL");
-  });
-
-  it("gates the initial POST and durable pay link on the same reservation", () => {
+describe("catalog online payment routing", () => {
+  it("returns only an authenticated Wave payment URL after invoice provisioning", () => {
     const route = source("src/app/api/orders/route.ts");
+    const checkout = source("src/app/checkout/page.tsx");
+    const provision = route.indexOf("provisionOrderWaveInvoice(");
+    const resolve = route.indexOf("resolveWaveOnlineCheckout(");
+    expect(provision).toBeGreaterThan(0);
+    expect(resolve).toBeGreaterThan(provision);
+    expect(route).toContain('payment_method: "wave" | "etransfer"');
+    expect(route).toContain('payment_method !== "wave" && payment_method !== "etransfer"');
+    expect(route).toContain('payment_method === "wave"');
+    expect(route).not.toContain("createCloverCheckout(");
+    expect(route).not.toContain("reserveOrderCheckout(");
+    expect(checkout).toContain('useState<"wave" | "etransfer">("wave")');
+    expect(checkout).toContain('if (payMethod === "wave" && data.checkoutUrl)');
+    expect(checkout).not.toContain("Clover's secure checkout");
     const gateway = source("src/app/pay/[token]/page.tsx");
-    const reserve = route.indexOf("reserveOrderCheckout(");
-    const clover = route.indexOf("createCloverCheckout(");
-    const complete = route.indexOf("completeOrderCheckout(");
-    expect(reserve).toBeGreaterThan(0);
-    expect(clover).toBeGreaterThan(reserve);
-    expect(complete).toBeGreaterThan(clover);
-    expect(route.slice(reserve, clover)).toContain('action === "resume"');
-    expect(route.slice(reserve, clover)).toContain('action === "wait"');
     expect(gateway).toContain("resolveWaveOnlineCheckout(");
     expect(gateway).not.toContain("createCloverCheckout(");
     expect(gateway).not.toContain("reserveOrderCheckout(");
-    expect(route).toContain("emailCheckoutUrl = `${siteUrl}/pay/${payToken}`");
-    expect(route).not.toContain("checkoutUrl = `${siteUrl}/pay/${payToken}`;\n      } catch {\n        emailCheckoutUrl");
   });
 });
