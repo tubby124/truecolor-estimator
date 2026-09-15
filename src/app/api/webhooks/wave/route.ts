@@ -3,24 +3,16 @@
  *
  * Receives signed Wave invoice-paid events. Payment truth, the accounting
  * ledger, and all downstream work are committed together by
- * accept_wave_paid_invoice. External effects are processed from the durable
+ * accept_wave_provider_payment. External effects are processed from the durable
  * queue here for low latency and by the cron worker for crash recovery.
  */
 
-import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { processWavePaymentEffects } from "@/lib/payment/wave-payment-effects";
 import { createServiceClient } from "@/lib/supabase/server";
 import { reconcileWaveInvoicePayments } from "@/lib/wave/payments";
-
-function safeSignatureEqual(signature: string, expected: string): boolean {
-  const signatureBytes = Buffer.from(signature);
-  const expectedBytes = Buffer.from(expected);
-  return (
-    signatureBytes.length === expectedBytes.length &&
-    timingSafeEqual(signatureBytes, expectedBytes)
-  );
-}
+import { WAVE_BUSINESS_ID } from "@/lib/wave/client";
+import { verifyWaveWebhookSignature, wavePaymentEventInvoice } from "@/lib/wave/webhook-protocol";
 
 export async function POST(req: NextRequest) {
   let bodyText: string;
@@ -36,11 +28,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Webhook not configured" }, { status: 503 });
   }
 
-  const signature = req.headers.get("x-wave-signature") ?? "";
-  const expected =
-    "sha256=" +
-    createHmac("sha256", webhookSecret).update(bodyText).digest("hex");
-  if (!signature || !safeSignatureEqual(signature, expected)) {
+  if (!verifyWaveWebhookSignature(req.headers.get("x-wave-signature") ?? "", req.headers.get("x-wave-timestamp") ?? "", bodyText, webhookSecret)) {
     console.warn("[wave-webhook] Invalid or missing signature");
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
@@ -52,8 +40,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const eventData = event.data as Record<string, unknown> | undefined;
-  const resource = eventData?.resource as Record<string, unknown> | undefined;
+  let paymentEvent;
+  try {
+    paymentEvent = wavePaymentEventInvoice(event, WAVE_BUSINESS_ID);
+  } catch {
+    return NextResponse.json({ error: "Invalid payment event identity" }, { status: 400 });
+  }
   const supabase = createServiceClient();
 
   async function logWebhookEvent(options: {
@@ -77,26 +69,12 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  if (
-    eventData?.resourceType !== "invoice" ||
-    resource?.status !== "paid" ||
-    typeof resource.id !== "string" ||
-    !resource.id
-  ) {
-    const eventType = eventData?.resourceType
-      ? `${eventData.resourceType}.${resource?.status ?? "unknown"}`
-      : "unknown";
-    await logWebhookEvent({
-      eventType,
-      resourceId: typeof resource?.id === "string" ? resource.id : null,
-      matchedOrderId: null,
-      ok: true,
-      detail: "unhandled event type — no action taken",
-    });
-    return NextResponse.json({ ok: true, skipped: eventType });
+  if (!paymentEvent) {
+    await logWebhookEvent({ eventType: typeof event.event_type === "string" ? event.event_type : "unknown", resourceId: null, matchedOrderId: null, ok: true, detail: "unhandled event type — no action taken" });
+    return NextResponse.json({ ok: true, skipped: true });
   }
 
-  const waveInvoiceId = resource.id;
+  const waveInvoiceId = paymentEvent.invoiceId;
   let reconciliation;
   try {
     // The signed event is only a prompt to read Wave. Provider payment fields,
@@ -111,7 +89,7 @@ export async function POST(req: NextRequest) {
       error instanceof Error ? error.message : "unknown error",
     );
     await logWebhookEvent({
-      eventType: "invoice.paid",
+      eventType: paymentEvent.eventType,
       resourceId: waveInvoiceId,
       matchedOrderId: null,
       ok: false,
@@ -125,7 +103,7 @@ export async function POST(req: NextRequest) {
 
   if (reconciliation.verifiedPayments.length === 0) {
     await logWebhookEvent({
-      eventType: "invoice.paid",
+      eventType: paymentEvent.eventType,
       resourceId: waveInvoiceId,
       matchedOrderId: null,
       ok: true,
@@ -138,7 +116,7 @@ export async function POST(req: NextRequest) {
   if (!acceptance) return NextResponse.json({ ok: false, error: "Payment acceptance returned no result" }, { status: 503 });
   const accepted = ["transitioned", "partial", "overpaid", "already_processed"].includes(acceptance.outcome);
   await logWebhookEvent({
-    eventType: "invoice.paid",
+    eventType: paymentEvent.eventType,
     resourceId: waveInvoiceId,
     matchedOrderId: acceptance.order_id,
     ok: acceptance.outcome !== "not_found",

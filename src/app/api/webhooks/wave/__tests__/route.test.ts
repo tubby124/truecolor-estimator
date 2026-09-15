@@ -19,15 +19,17 @@ vi.mock("@/lib/wave/payments", () => ({
 import { POST } from "../route";
 
 const SECRET = "wave-test-secret";
-const INVOICE_ID = "wave-invoice-123";
+import { WAVE_BUSINESS_ID } from "@/lib/wave/client";
+const RAW_BUSINESS_ID = Buffer.from(WAVE_BUSINESS_ID, "base64").toString().slice(9);
+const INVOICE_ID = Buffer.from(`Business:${RAW_BUSINESS_ID};Invoice:123`).toString("base64");
 
-function signedRequest(signatureOverride?: string, resource = { id: INVOICE_ID, status: "paid" }) {
-  const body = JSON.stringify({ data: { resourceType: "invoice", resource } });
-  const signature = signatureOverride ?? `sha256=${createHmac("sha256", SECRET).update(body).digest("hex")}`;
+function signedRequest(signatureOverride?: string, eventType = "invoice.paid", businessId = RAW_BUSINESS_ID) {
+  const body = JSON.stringify({ event_id: "fixture-event", event_type: eventType, business_id: businessId, data: { invoice_id: "123", amount_paid: "111.00", currency_code: "CAD" } });
+  const timestamp = String(Math.floor(Date.now() / 1000));
+  const signature = signatureOverride ?? `t=${timestamp},v1=${createHmac("sha256", SECRET).update(`${timestamp}.${body}`).digest("hex")}`;
   return new NextRequest("https://truecolorprinting.ca/api/webhooks/wave", {
-    method: "POST",
-    body,
-    headers: { "content-type": "application/json", "x-wave-signature": signature },
+    method: "POST", body,
+    headers: { "content-type": "application/json", "x-wave-signature": signature, "x-wave-timestamp": timestamp },
   });
 }
 
@@ -145,4 +147,14 @@ describe("Wave paid-invoice verified readback", () => {
     expect(mocks.createServiceClient).not.toHaveBeenCalled();
     expect(mocks.reconcileWaveInvoicePayments).not.toHaveBeenCalled();
   });
+  it.each(["invoice.partially_paid", "invoice.overpaid"])("reads provider truth for documented %s events", async type => {
+    const h = harness(); mocks.createServiceClient.mockReturnValue(h.supabase); mocks.reconcileWaveInvoicePayments.mockResolvedValue(result("partial", 0));
+    expect((await POST(signedRequest(undefined, type))).status).toBe(200);
+    expect(mocks.reconcileWaveInvoicePayments).toHaveBeenCalledWith(h.supabase, INVOICE_ID, expect.any(Object));
+  });
+  it("rejects a correctly signed event for another business before provider access", async () => {
+    expect((await POST(signedRequest(undefined, "invoice.paid", "other-business"))).status).toBe(400);
+    expect(mocks.reconcileWaveInvoicePayments).not.toHaveBeenCalled();
+  });
+
 });
