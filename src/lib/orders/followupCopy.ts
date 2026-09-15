@@ -44,6 +44,7 @@ const ETRANSFER_LINE =
 function tier1Copy(ctx: FollowupCopyContext): FollowupCopyResult {
   const { orderNumber, paymentMethod, latestAttempt } = ctx;
   const partial = partialLine(ctx);
+  const hasPartialPayment = Boolean(ctx.paidSoFar && ctx.balanceDue);
   if (latestAttempt?.status === "card_declined") {
     const reason = latestAttempt.failure_label ?? "Payment did not complete";
     return {
@@ -58,7 +59,7 @@ function tier1Copy(ctx: FollowupCopyContext): FollowupCopyResult {
     return {
       subject: `Finish payment for ${orderNumber}`,
       headline: "Your checkout did not finish",
-      body: `Your order is saved, but payment has not been confirmed yet. Your card was not charged by the unfinished attempt.${partial}`,
+      body: `Your order is saved, but ${hasPartialPayment ? "your remaining payment has not been completed yet." : "payment has not been confirmed yet."} Your card was not charged by the unfinished attempt.${partial}`,
       cta: "Resume card payment",
       foot: "You can also pay by e-Transfer to info@true-color.ca. Please include your order number in the message.",
     };

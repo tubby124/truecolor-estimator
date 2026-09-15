@@ -75,6 +75,18 @@ describe("followupCopy", () => {
     expect(c.body).toContain("remaining $604.90");
   });
 
+  it.each(["abandoned", "checkout_opened"] as const)("uses remaining-payment wording for a partially paid %s checkout", (status) => {
+    const c = followupCopy(1, {
+      ...baseCtx,
+      latestAttempt: { order_id: "x", status, failure_label: null, customer_message: null },
+      paidSoFar: "50.00",
+      balanceDue: "604.90",
+    })!;
+    expect(c.body).toContain("your remaining payment has not been completed yet");
+    expect(c.body).toContain("Your card was not charged by the unfinished attempt");
+    expect(c.body).not.toContain("payment has not been confirmed yet");
+  });
+
   it("no partial line when fully unpaid", () => {
     const c = followupCopy(2, baseCtx)!;
     expect(c.body).not.toContain("so far");
