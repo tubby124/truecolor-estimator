@@ -343,7 +343,7 @@ export async function recoverProvisionalOrderWaveInvoice(
   const snapshot = await getWaveInvoicePaymentSnapshot(data.wave_invoice_id);
   if (snapshot.status === "DRAFT") {
     await approveWaveInvoice(data.wave_invoice_id);
-  } else if (!["SAVED", "UNPAID", "OVERDUE", "PARTIAL", "PAID", "OVERPAID"].includes(snapshot.status)) {
+  } else if (!["SAVED", "SENT", "VIEWED", "UNPAID", "OVERDUE", "PARTIAL", "PAID", "OVERPAID"].includes(snapshot.status)) {
     throw new Error(`Wave invoice ${data.wave_invoice_id} cannot be recovered from status ${snapshot.status}`);
   }
   await completeQuoteWaveProvisioning(supabase, {

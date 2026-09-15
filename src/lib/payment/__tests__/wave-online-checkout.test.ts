@@ -91,6 +91,15 @@ describe("Wave online checkout resolver", () => {
     });
   });
 
+  it.each(["SENT", "VIEWED"])('keeps a Wave invoice in the payable %s state usable', async (status) => {
+    mocks.snapshot.mockResolvedValue(snapshot({ status }));
+
+    await expect(resolveWaveOnlineCheckout(client(), {
+      orderId: ORDER_ID,
+      requestedAmountCents: 11_100,
+    })).resolves.toMatchObject({ action: "ready", invoiceNumber: "123" });
+  });
+
   it.each(["already_paid", "updated_link"] as const)("preserves the %s preflight outcome", async (action) => {
     mocks.preflight.mockResolvedValue({ action });
     await expect(resolveWaveOnlineCheckout(client(), {
