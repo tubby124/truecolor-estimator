@@ -5,13 +5,19 @@ import type {
 } from "../wave-payment-effects";
 
 const mocks = vi.hoisted(() => ({
-  sendPaymentReceipt: vi.fn(),
+  sendOrderStatusEmail: vi.fn(),
   sendMeasurementProtocolPurchase: vi.fn(),
   sendTelegramNotification: vi.fn(),
+  getWaveInvoicePaymentSnapshot: vi.fn(),
 }));
 
-vi.mock("@/lib/email/paymentReceipt", () => ({
-  sendPaymentReceipt: mocks.sendPaymentReceipt,
+vi.mock("@/lib/email/statusUpdate", () => ({
+  sendOrderStatusEmail: mocks.sendOrderStatusEmail,
+}));
+
+vi.mock("@/lib/wave/payments", () => ({
+  getWaveInvoicePaymentSnapshot: mocks.getWaveInvoicePaymentSnapshot,
+  parseWaveMinorUnitValue: (value: string) => Number(value),
 }));
 
 vi.mock("@/lib/analytics/measurementProtocol", () => ({
@@ -42,6 +48,7 @@ const ORDER: WavePaymentOrder = {
   created_at: "2026-07-24T12:00:00.000Z",
   paid_at: "2026-07-24T12:05:00.000Z",
   receipt_token: "receipt-token",
+  wave_invoice_id: "wave-invoice-123",
   ga_client_id: "1234567890.1234567890",
   ga_session_id: "1234567890",
   ga_session_number: "2",
@@ -109,7 +116,7 @@ function paymentQuery() {
 describe("Wave payment effect worker", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.sendPaymentReceipt.mockResolvedValue(undefined);
+    mocks.sendOrderStatusEmail.mockResolvedValue(undefined);
     mocks.sendMeasurementProtocolPurchase.mockResolvedValue(true);
     mocks.sendTelegramNotification.mockResolvedValue(true);
   });
@@ -174,7 +181,7 @@ describe("Wave payment effect worker", () => {
     ]);
   });
 
-  it("reuses one stable receipt idempotency key after an acknowledgement crash", async () => {
+  it("reuses one stable payment-update idempotency key after an acknowledgement crash", async () => {
     const claims: WavePaymentEffectJob[][] = [
       [job("receipt", 1)],
       [job("receipt", 2)],
@@ -199,6 +206,7 @@ describe("Wave payment effect worker", () => {
         throw new Error(`Unexpected table: ${table}`);
       },
     };
+    mocks.getWaveInvoicePaymentSnapshot.mockResolvedValue({ amountDue: { minorUnitValue: "0" } });
 
     await expect(
       processWavePaymentEffects({
@@ -213,16 +221,23 @@ describe("Wave payment effect worker", () => {
       }),
     ).resolves.toEqual({ claimed: 1, sent: 1, retried: 0, dead: 0 });
 
-    expect(mocks.sendPaymentReceipt).toHaveBeenCalledTimes(2);
-    for (const [receipt] of mocks.sendPaymentReceipt.mock.calls) {
-      expect(receipt).toEqual(
+    expect(mocks.sendOrderStatusEmail).toHaveBeenCalledTimes(2);
+    for (const [update] of mocks.sendOrderStatusEmail.mock.calls) {
+      expect(update).toEqual(
         expect.objectContaining({
           orderNumber: "TC-0123",
-          idempotencyKey: "wave-receipt/order-123",
-          paymentSources: ["wave", "clover"],
+          status: "payment_received",
+          paymentMethod: "wave",
+          idempotencyKey: "payment-confirmation:order-123:v1",
         }),
       );
     }
+  });
+
+  it("does not send a customer update until Wave confirms the invoice is paid in full", async () => {
+    mocks.getWaveInvoicePaymentSnapshot.mockResolvedValue({ amountDue: { minorUnitValue: "1" } });
+    await expect(performWavePaymentEffect(job("receipt"), ORDER)).rejects.toThrow("not paid in full");
+    expect(mocks.sendOrderStatusEmail).not.toHaveBeenCalled();
   });
 
   it("uses the paid date for an idempotent Brevo contact update", async () => {

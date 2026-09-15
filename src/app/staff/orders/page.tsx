@@ -181,13 +181,13 @@ async function fetchOrders() {
   if (orders.length === 0) return orders;
 
   const ids = orders.map(o => o.id);
-  const [paymentRows, receiptRows] = await Promise.all([
+  const [paymentRows, paymentConfirmationRows] = await Promise.all([
     supabase.from("order_payments").select("order_id,method,status,amount").in("order_id", ids),
-    supabase.from("email_log").select("order_id,sent_at,status").in("order_id", ids).like("subject", "Receipt —%").in("status", ["sent", "delivered", "opened", "clicked"]).order("sent_at", { ascending: false }),
+    supabase.from("email_log").select("order_id,sent_at,status").in("order_id", ids).like("subject", "Payment confirmed —%").in("status", ["sent", "delivered", "opened", "clicked"]).order("sent_at", { ascending: false }),
   ]);
   orders = orders.map(o => ({ ...o,
     actual_payment_label: paymentRows.error ? null : actualPaymentLabel((paymentRows.data ?? []).filter(p => p.order_id === o.id), o.total),
-    receipt_sent_at: receiptRows.error ? null : (receiptRows.data ?? []).find(p => p.order_id === o.id)?.sent_at ?? null,
+    payment_confirmation_sent_at: paymentConfirmationRows.error ? null : (paymentConfirmationRows.data ?? []).find(p => p.order_id === o.id)?.sent_at ?? null,
   }));
 
   const latestAttemptByOrder = new Map<string, LatestPaymentAttempt>();

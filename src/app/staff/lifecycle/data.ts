@@ -800,7 +800,14 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
   const auditTypeMap: Record<string, { type: ActivityEvent["type"]; label: (d: Record<string, unknown> | null) => string }> = {
     "order.notification_outcome": {
       type: "email_notification",
-      label: (d) => `${d?.status ?? "order"} email: ${d?.outcome === "accepted" ? "accepted by sender" : "unconfirmed — check delivery before resending"}`,
+      label: (d) => {
+        const channel = d?.channel === "wave" ? "Wave" : d?.channel === "truecolor_payment_update" ? "True Color" : "sender";
+        return `${d?.status ?? "order"} email: ${d?.outcome === "accepted" ? `accepted by ${channel}` : "unconfirmed — check delivery before resending"}`;
+      },
+    },
+    "order.wave_document_opened": {
+      type: "email_notification",
+      label: (d) => `Wave paid invoice opened for print${d?.wave_invoice_number ? ` · ${d.wave_invoice_number}` : ""}`,
     },
     "order.created": {
       type: "order_placed",

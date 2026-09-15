@@ -6,7 +6,6 @@ const ORDER_ID = "11111111-1111-4111-8111-111111111111";
 
 vi.mock("@/lib/email/reviewRequest", () => ({ sendReviewRequestEmail: harness.sendReview }));
 vi.mock("@/lib/email/statusUpdate", () => ({ sendOrderStatusEmail: harness.sendStatus }));
-vi.mock("@/lib/email/paymentReceipt", () => ({ sendPaymentReceipt: vi.fn() }));
 vi.mock("@/lib/customers/incrementOrderStats", () => ({ incrementCustomerOrderStats: vi.fn() }));
 vi.mock("@/lib/notifications/telegram", () => ({ sendTelegramNotification: vi.fn(), escapeTelegramHtml: (value: string) => value }));
 vi.mock("@/lib/audit/record", () => ({ recordAuditEvent: harness.audit }));
@@ -55,5 +54,20 @@ describe("complete-order review lifecycle", () => {
     harness.sendStatus.mockResolvedValue(undefined);
     const response = await PATCH(new NextRequest(`http://localhost/api/staff/orders/${ORDER_ID}/status`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "ready_for_pickup" }) }), { params: Promise.resolve({ id: ORDER_ID }) });
     expect(await response.json()).toEqual({ ok: true, status: "ready_for_pickup" });
+  });
+
+  it("sends one work-started update on the real transition to in production", async () => {
+    harness.currentStatus = "payment_received";
+    harness.sendStatus.mockResolvedValue(undefined);
+    const first = await PATCH(new NextRequest(`http://localhost/api/staff/orders/${ORDER_ID}/status`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "in_production" }) }), { params: Promise.resolve({ id: ORDER_ID }) });
+    const retry = await PATCH(new NextRequest(`http://localhost/api/staff/orders/${ORDER_ID}/status`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "in_production" }) }), { params: Promise.resolve({ id: ORDER_ID }) });
+    expect(first.status).toBe(200);
+    expect(await retry.json()).toEqual({ ok: true, status: "in_production", alreadyApplied: true });
+    expect(harness.sendStatus).toHaveBeenCalledTimes(1);
+    expect(harness.sendStatus).toHaveBeenCalledWith(expect.objectContaining({
+      orderId: ORDER_ID,
+      status: "in_production",
+      idempotencyKey: `order-status:${ORDER_ID}:in_production:v1`,
+    }));
   });
 });

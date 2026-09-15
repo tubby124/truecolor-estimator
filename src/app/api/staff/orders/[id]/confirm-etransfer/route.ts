@@ -5,18 +5,17 @@
  * Guards that the order is etransfer + pending_payment before proceeding.
  *
  * Side effects (all non-fatal after status update):
- *   1. sendPaymentReceipt — itemized receipt with line items, taxes, total
+ *   1. True Color payment-confirmation update (Wave owns the financial receipt)
  *   2. Staff notification FROM hello@outreach.true-color.ca
  *   3. Wave invoice approved + payment recorded as BANK_TRANSFER
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
-import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
-import { loadReceiptPaymentSources } from "@/lib/payment/receipt-payment-sources";
+import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
 import { sendEmail } from "@/lib/email/smtp";
 import { escHtml } from "@/lib/email/components/escHtml";
-import { approveWaveInvoice, recordWavePayment, findCustomerByEmail, getWaveInvoicePublicUrl } from "@/lib/wave/invoice";
+import { approveWaveInvoice, recordWavePayment, findCustomerByEmail } from "@/lib/wave/invoice";
 import { incrementCustomerOrderStats } from "@/lib/customers/incrementOrderStats";
 import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
@@ -185,8 +184,8 @@ export async function POST(_req: NextRequest, { params }: Params) {
     }
 
     // ── 1. Wave: approve invoice + record payment ────────────────────────────────
-    // Runs BEFORE the receipt email so the email's "Download Tax Invoice (PDF)"
-    // link is only included when Wave actually marks the invoice PAID.
+    // Runs BEFORE the customer update so Wave's financial document is only
+    // available after the invoice is genuinely PAID.
     // Split try/catch on approve vs record so a re-approval throw on an already-
     // approved invoice doesn't short-circuit recordWavePayment (bug 2026-05-22).
     let wavePaid = Boolean(order.wave_payment_recorded_at);
@@ -245,45 +244,53 @@ export async function POST(_req: NextRequest, { params }: Params) {
       }
     }
 
-    // ── 2. Itemized receipt ──────────────────────────────────────────────────────
-    // Note: cut the bare "payment confirmed" status email — paymentReceipt
-    // below has everything that one had + line items + GST# + PDF link.
-    // Reduces customer-facing emails per order from 9 → 4 (2026-05-14).
-    // waveInvoiceUrl only attached when Wave confirms the invoice is PAID.
-
-    try {
-      const waveInvoiceUrl = wavePaid && order.wave_invoice_id
-        ? await getWaveInvoicePublicUrl(order.wave_invoice_id).catch(() => null)
-        : null;
-      await sendPaymentReceipt({
-        orderNumber: order.order_number,
-        customerName: customer.name,
-        customerEmail: customer.email,
-        createdAt: order.created_at,
-        items: items.map((i) => ({
-          product_name: i.product_name,
-          qty: i.qty,
-          width_in: i.width_in,
-          height_in: i.height_in,
-          sides: i.sides,
-          line_total: Number(i.line_total),
-        })),
-        subtotal: Number(order.subtotal),
-        gst: Number(order.gst),
-        pst: Number(order.pst ?? 0),
-        total: Number(order.total),
-        isRush: Boolean(order.is_rush),
-        discountCode: order.discount_code ?? null,
-        discountAmount: order.discount_amount ? Number(order.discount_amount) : null,
-        paymentSources: await loadReceiptPaymentSources(supabase, order.id),
-        oid: order.id,
-        receiptToken: order.receipt_token ?? null,
-        waveInvoiceUrl,
-      });
-      console.log(`[confirm-etransfer] receipt sent → ${customer.email}${waveInvoiceUrl ? " (with Wave PDF)" : ""}`);
-    } catch (e) {
-      console.error("[confirm-etransfer] receipt failed (non-fatal):", e);
+    // ── 2. True Color payment update ───────────────────────────────────────────
+    // A manual e-transfer becomes a Wave paid invoice first. Only then send our
+    // service update; Wave remains the official financial document.
+    let notificationWarning: string | undefined;
+    if (order.wave_invoice_id && !wavePaid) {
+      notificationWarning = "eTransfer was recorded, but the Wave paid invoice is not confirmed. No customer update was sent.";
+    } else {
+      try {
+        await sendOrderStatusEmail({
+          orderId: order.id,
+          idempotencyKey: `payment-confirmation:${order.id}:v1`,
+          requireEmailLog: true,
+          status: "payment_received",
+          orderNumber: order.order_number,
+          customerName: customer.name,
+          customerEmail: customer.email,
+          items: items.map((i) => ({
+            product_name: i.product_name,
+            qty: i.qty,
+            width_in: i.width_in,
+            height_in: i.height_in,
+            sides: i.sides,
+            line_total: Number(i.line_total),
+          })),
+          total: Number(order.total),
+          isRush: Boolean(order.is_rush),
+          paymentMethod: "etransfer",
+        });
+        console.log(`[confirm-etransfer] payment update accepted → ${customer.email}`);
+      } catch (e) {
+        notificationWarning = "eTransfer was confirmed, but the customer payment update could not be confirmed. Check delivery before resending.";
+        console.error("[confirm-etransfer] payment update failed (non-fatal):", e);
+      }
     }
+
+    await recordAuditEvent({
+      actor_type: "system",
+      event_type: "order.notification_outcome",
+      entity_type: "order",
+      entity_id: id,
+      detail: {
+        order_number: order.order_number,
+        status: "payment_received",
+        outcome: notificationWarning ? "unconfirmed" : "accepted",
+        channel: "truecolor_payment_update",
+      },
+    });
 
     // ── 3. Staff notification ────────────────────────────────────────────────────
 
@@ -305,20 +312,22 @@ export async function POST(_req: NextRequest, { params }: Params) {
     <p style="margin:0 0 20px;font-size:20px;font-weight:700;color:#1c1712;">$${escHtml(totalStr)} CAD</p>
     <p style="margin:0;font-size:13px;color:#6b7280;line-height:1.6;">
       Status updated to <strong>Payment Received</strong>.<br/>
-      Customer confirmation + itemized receipt emailed automatically.
+      ${notificationWarning
+        ? "Customer payment update was not confirmed; check delivery before resending."
+        : "Customer payment update accepted. Wave is the official paid invoice."}
     </p>
   </div>
 </body></html>`,
-        text: `eTransfer confirmed — ${order.order_number}\nCustomer: ${customer.name} (${customer.email})\nTotal: $${totalStr} CAD\nStatus → Payment Received. Customer receipt emailed.`,
+        text: `eTransfer confirmed — ${order.order_number}\nCustomer: ${customer.name} (${customer.email})\nTotal: $${totalStr} CAD\nStatus → Payment Received. ${notificationWarning ? "Customer payment update was not confirmed." : "Customer payment update accepted; Wave holds the official paid invoice."}`,
       });
     } catch (e) {
       console.error("[confirm-etransfer] staff notification failed (non-fatal):", e);
     }
 
-    // Wave approve+record was handled above (step 1) before the receipt email,
-    // so the email's Wave PDF link only ships when Wave is genuinely PAID.
+    // Wave approval/recording is complete before the customer update, so staff
+    // never see a financial-document success state for an unpaid Wave invoice.
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, ...(notificationWarning ? { notificationWarning } : {}) });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to confirm eTransfer";
     console.error("[confirm-etransfer]", message);

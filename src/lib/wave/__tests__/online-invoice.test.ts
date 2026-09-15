@@ -9,7 +9,7 @@ vi.mock("../client", () => ({
   WAVE_PRINT_PRODUCT_ID: "print",
 }));
 
-import { getWaveOnlineInvoiceSnapshot } from "../invoice";
+import { getWaveOnlineInvoiceSnapshot, getWavePaidInvoiceDocument } from "../invoice";
 
 function invoice(overrides: Record<string, unknown> = {}) {
   return {
@@ -71,5 +71,26 @@ describe("Wave online invoice readback", () => {
   ])("rejects incomplete, foreign, malformed or nonreconciling provider data", async (value) => {
     query.mockResolvedValue({ business: { invoice: value } });
     await expect(getWaveOnlineInvoiceSnapshot("invoice")).rejects.toThrow();
+  });
+
+  it("only returns a printable document after Wave confirms the invoice is paid in full", async () => {
+    query.mockResolvedValue({ business: { invoice: invoice({
+      status: "PAID",
+      amountDue: { minorUnitValue: "0" },
+      amountPaid: { minorUnitValue: "11100" },
+    }) } });
+    await expect(getWavePaidInvoiceDocument("invoice")).resolves.toEqual({
+      invoiceNumber: "123",
+      viewUrl: "https://invoice.waveapps.com/customer/token",
+    });
+  });
+
+  it("does not expose a draft or partial Wave invoice as a paid document", async () => {
+    query.mockResolvedValue({ business: { invoice: invoice({
+      status: "SAVED",
+      amountDue: { minorUnitValue: "1" },
+      amountPaid: { minorUnitValue: "11099" },
+    }) } });
+    await expect(getWavePaidInvoiceDocument("invoice")).rejects.toThrow("paid");
   });
 });
