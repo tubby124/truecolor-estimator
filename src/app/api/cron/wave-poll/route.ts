@@ -70,14 +70,6 @@ export async function GET(req: NextRequest) {
         ) {
           const recovered = await recoverProvisionalOrderWaveInvoice(supabase, order.id);
           if (recovered.action === "ready") approvedRecovered += 1;
-        } else if (!order.wave_invoice_approved_at && snapshot.status !== "DRAFT") {
-          const { error: updateError } = await supabase
-            .from("orders")
-            .update({ wave_invoice_approved_at: snapshot.modifiedAt })
-            .eq("id", order.id)
-            .is("wave_invoice_approved_at", null);
-          if (updateError) throw new Error("Wave approval readback could not be saved");
-          approvedRecovered += 1;
         }
 
         const reconciliation = await reconcileWaveInvoicePaymentSnapshot(supabase, snapshot, {
@@ -109,19 +101,20 @@ export async function GET(req: NextRequest) {
         }
       } catch (waveError) {
         waveErrors += 1;
-        console.error(
-          `[wave-poll] reconciliation failed for ${order.order_number}:`,
-          waveError instanceof Error ? waveError.message : "unknown error",
-        );
+        console.error("[wave-poll] Wave reconciliation failed", {
+          order_id: order.id,
+          error_type: waveError instanceof Error ? waveError.name : "UnknownError",
+        });
       }
     }
 
     const detail =
       `scanned=${orders.length} approved+=${approvedRecovered} provider_payments=${providerPaymentsAccepted} ` +
       `manual_ignored=${manualPaymentsIgnored} partial=${partialOrders} full=${fullyPaidOrders} errors=${waveErrors}`;
-    await recordCronRun("wave-poll", waveErrors < Math.max(orders.length, 1) / 2, detail);
+    const ok = waveErrors === 0;
+    await recordCronRun("wave-poll", ok, detail);
     return NextResponse.json({
-      ok: true,
+      ok,
       scanned: orders.length,
       approved_recovered: approvedRecovered,
       provider_payments_accepted: providerPaymentsAccepted,

@@ -217,7 +217,7 @@ BEGIN
   END IF;
   IF v_order.voided_at IS NOT NULL OR COALESCE(v_order.is_archived, false) OR
      v_order.status NOT IN ('pending_payment', 'payment_received', 'in_production',
-      'ready_for_pickup', 'complete', 'completed') THEN
+      'ready_for_pickup', 'complete') THEN
     RETURN QUERY SELECT 'not_payable'::text, v_order.id, v_order.order_number,
       v_order.payment_method, 'wave_payments'::text, false, 0::bigint, 0::bigint, 0;
     RETURN;

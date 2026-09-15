@@ -16,12 +16,20 @@ CREATE TABLE public.customers (
   email text
 );
 
+CREATE TYPE public.order_status AS ENUM (
+  'pending_payment',
+  'payment_received',
+  'in_production',
+  'ready_for_pickup',
+  'complete'
+);
+
 CREATE TABLE public.orders (
   id uuid PRIMARY KEY,
   order_number text NOT NULL,
   customer_id uuid REFERENCES public.customers(id),
   total numeric NOT NULL,
-  status text NOT NULL,
+  status public.order_status NOT NULL,
   paid_at timestamptz,
   payment_method text,
   is_archived boolean DEFAULT false,

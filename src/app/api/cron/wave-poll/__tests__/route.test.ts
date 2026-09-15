@@ -29,8 +29,7 @@ function request(secret = "cron-secret") {
   });
 }
 
-function database() {
-  const orders = [{
+function database(orders = [{
     id: "order-1",
     order_number: "TC-1",
     wave_invoice_id: "invoice-1",
@@ -39,7 +38,7 @@ function database() {
     quote_wave_state: "ambiguous",
     quote_wave_reservation_id: "reservation-1",
     status: "pending_payment",
-  }];
+  }]) {
   const chain = {
     select: vi.fn(),
     gte: vi.fn(),
@@ -100,5 +99,68 @@ describe("Wave poll verified recovery", () => {
     expect(response.status).toBe(401);
     expect(mocks.createServiceClient).not.toHaveBeenCalled();
     expect(mocks.getWaveInvoicePaymentSnapshot).not.toHaveBeenCalled();
+  });
+
+  it("does not mark an invoice recovered without the guarded provisional transition", async () => {
+    const unverified = {
+      id: "order-unverified",
+      order_number: "TC-UNVERIFIED",
+      wave_invoice_id: "invoice-unverified",
+      wave_invoice_approved_at: null,
+      wave_payment_recorded_at: null,
+      quote_wave_state: "failed",
+      quote_wave_reservation_id: "reservation-unverified",
+      status: "pending_payment",
+    };
+    const db = database([unverified]);
+    mocks.createServiceClient.mockReturnValue(db);
+    mocks.getWaveInvoicePaymentSnapshot.mockResolvedValue({
+      id: "invoice-unverified",
+      invoiceNumber: "4002",
+      status: "SENT",
+    });
+
+    const response = await GET(request());
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ ok: true, approved_recovered: 0 });
+    expect(mocks.recoverProvisionalOrderWaveInvoice).not.toHaveBeenCalled();
+    expect(db.from).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports an unhealthy run when one of several orders fails", async () => {
+    const first = {
+      id: "order-1",
+      order_number: "TC-1",
+      wave_invoice_id: "invoice-1",
+      wave_invoice_approved_at: "2026-09-15T12:00:00.000Z",
+      wave_payment_recorded_at: null,
+      quote_wave_state: "ready",
+      quote_wave_reservation_id: "reservation-1",
+      status: "pending_payment",
+    };
+    const second = { ...first, id: "order-2", order_number: "TC-2", wave_invoice_id: "invoice-2" };
+    const third = { ...first, id: "order-3", order_number: "TC-3", wave_invoice_id: "invoice-3" };
+    const db = database([first, second, third]);
+    mocks.createServiceClient.mockReturnValue(db);
+    mocks.getWaveInvoicePaymentSnapshot.mockImplementation(async (invoiceId: string) => {
+      if (invoiceId === "invoice-2") throw new Error("provider payload with private details");
+      return { id: invoiceId, invoiceNumber: "4001", status: "SENT" };
+    });
+
+    const response = await GET(request());
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ ok: false, scanned: 3, wave_errors: 1 });
+    expect(mocks.recordCronRun).toHaveBeenLastCalledWith(
+      "wave-poll",
+      false,
+      expect.stringContaining("errors=1"),
+    );
+    expect(console.error).toHaveBeenCalledWith(
+      "[wave-poll] Wave reconciliation failed",
+      { order_id: "order-2", error_type: "Error" },
+    );
+    expect(JSON.stringify(mocks.recordCronRun.mock.calls)).not.toContain("private details");
   });
 });
