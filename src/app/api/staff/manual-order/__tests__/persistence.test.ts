@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
-const mocks = vi.hoisted(() => ({ client: {} as unknown, provision: vi.fn(), email: vi.fn(), staffEmail: vi.fn(), token: vi.fn(), audit: vi.fn() }));
+const mocks = vi.hoisted(() => ({ client: {} as unknown, online: vi.fn(), provision: vi.fn(), email: vi.fn(), staffEmail: vi.fn(), token: vi.fn(), audit: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ requireStaffUser: async () => ({ email: "staff@example.test" }), createServiceClient: () => mocks.client }));
+vi.mock("@/lib/payment/wave-online-checkout", () => ({ resolveWaveOnlineCheckout: mocks.online }));
 vi.mock("@/lib/payment/quote-wave", () => ({ provisionOrderWaveInvoice: mocks.provision }));
 vi.mock("@/lib/payment/token", () => ({ encodePaymentToken: mocks.token }));
 vi.mock("@/lib/email/paymentRequest", () => ({ sendPaymentRequestEmail: mocks.email }));
@@ -59,6 +60,7 @@ function database(options: { itemFailure?: boolean; insertFailure?: boolean; rac
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.provision.mockResolvedValue({ action: "ready", invoiceId: "wave-id" });
+  mocks.online.mockResolvedValue({ action: "ready", checkoutUrl: "https://invoice.waveapps.com/invoices/test" });
   mocks.email.mockResolvedValue(undefined);
   mocks.token.mockReturnValue("signed-token");
   mocks.audit.mockResolvedValue(undefined);
@@ -81,6 +83,10 @@ describe("manual order persistence and repeat protection", () => {
     expect(db.insertedLines[0]).toMatchObject({ qty: 3, line_total: 10, line_items_json: [expect.objectContaining({ pricingSource: "staff_manual", originalAmount: 10, applyPst: true })] });
     expect(mocks.email).toHaveBeenCalledWith(expect.objectContaining({ subtotal: 10, gst: .5, pst: .6, total: 11.1, items: [expect.objectContaining({ unitPrice: undefined, amount: 10 })] }));
     expect(mocks.token.mock.calls[0][0]).toBe(11.1);
+    expect(db.saved()?.payment_method).toBe("wave");
+    expect(mocks.email).toHaveBeenCalledWith(expect.objectContaining({ paymentMethod: "wave" }));
+    expect(mocks.staffEmail).toHaveBeenCalledWith(expect.objectContaining({ payment_method: "wave" }));
+    expect(mocks.online).toHaveBeenCalledWith(expect.anything(), { orderId: "order-id", requestedAmountCents: 1110 });
     expect(mocks.provision.mock.calls[0][2].waveItems).toEqual([expect.objectContaining({ qty: 1, unitPrice: 10, applyPst: true })]);
   });
   it("persists and sends Wave's per-line tax result for two half-dollar lines", async () => {

@@ -551,6 +551,15 @@ describe("quote send fingerprint", () => {
     expect(sameRecipient).toBe(first);
     expect(changedPrice).not.toBe(first);
   });
+
+  it("changes the durable send intent when the tax-rounding capability changes", () => {
+    const first = buildQuoteSendFingerprint(base);
+    const perLine = buildQuoteSendFingerprint({
+      ...base,
+      rates: { ...base.rates, structuredTaxRoundingVersion: "wave_per_line_v1" },
+    });
+    expect(perLine).not.toBe(first);
+  });
 });
 
 describe("quote send migration contract", () => {

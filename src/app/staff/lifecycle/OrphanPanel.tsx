@@ -107,7 +107,7 @@ export function OrphanPanel({ orphans }: { orphans: Orphan[] }) {
                       onFocus={(e) => e.currentTarget.select()}
                     />
                     <a
-                      href={`mailto:${o.customer_email}?subject=${encodeURIComponent(`Your True Color order ${o.order_number} — pay link`)}&body=${encodeURIComponent(`Hi ${o.customer_name.split(" ")[0]},\n\nApologies for the back-and-forth on your order. Here's a clean Pay Now link for ${o.order_number} ($${o.total.toFixed(2)} CAD):\n\n${o.pay_link_url}\n\nIt opens secure Clover checkout. Let me know if anything looks off.\n\nAlbert\nTrue Color Display Printing\n(306) 954-8688`)}`}
+                      href={`mailto:${o.customer_email}?subject=${encodeURIComponent(`Your True Color order ${o.order_number} — pay link`)}&body=${encodeURIComponent(`Hi ${o.customer_name.split(" ")[0]},\n\nApologies for the back-and-forth on your order. Here's a clean Pay Now link for ${o.order_number} ($${o.total.toFixed(2)} CAD):\n\n${o.pay_link_url}\n\nIt opens your itemized Wave invoice for secure online payment. Let me know if anything looks off.\n\nAlbert\nTrue Color Display Printing\n(306) 954-8688`)}`}
                       className="inline-flex items-center px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold rounded whitespace-nowrap"
                     >
                       Email customer
@@ -120,7 +120,7 @@ export function OrphanPanel({ orphans }: { orphans: Orphan[] }) {
         </table>
       </div>
       <p className="text-xs text-gray-400 mt-2">
-        Recovery URLs are HMAC-signed Clover Pay Now tokens (30-day expiry). Click <span className="font-semibold">Email customer</span> to open a pre-filled email in your mail client — adjust the body if needed before sending.
+        Recovery URLs are signed True Color payment links to Wave (30-day expiry). Click <span className="font-semibold">Email customer</span> to open a pre-filled email in your mail client — adjust the body if needed before sending.
       </p>
     </section>
   );

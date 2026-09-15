@@ -38,7 +38,7 @@ export interface OrderConfirmationParams {
   discount_code?: string;      // shown as a discount row in the summary
   discount_amount?: number;    // pre-tax discount amount (already subtracted from subtotal)
   is_rush: boolean;
-  payment_method: "clover_card" | "etransfer";
+  payment_method: "clover_card" | "wave" | "etransfer";
   checkout_url?: string; // Clover hosted checkout URL (card orders only)
   uploadedFileCount?: number; // number of artwork files the customer uploaded
   /** Internal — CID for inline QR code (Brevo attachment). Set by sendOrderConfirmationEmail, not callers. */
@@ -70,7 +70,7 @@ export async function sendOrderConfirmationEmail(
   // what they bought. First-item anchor (e.g. "50 business cards") + verb.
   const anchor = productAnchor(items);
   const subject =
-    payment_method === "clover_card"
+    payment_method !== "etransfer"
       ? `Complete your payment — ${anchor}`
       : `Got your order — ${anchor}`;
 
@@ -196,13 +196,13 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
 
   // ── Payment note block ──
   const paymentBlock =
-    payment_method === "clover_card"
+    payment_method !== "etransfer"
       ? `<div style="background: #fff7ed; border: 1px solid #fb923c; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px;">
           <p style="margin: 0 0 6px; font-size: 13px; font-weight: 700; color: #9a3412; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
             Complete your payment
           </p>
           <p style="margin: 0 0 14px; font-size: 13px; color: #7c2d12; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.5;">
-            Your order is confirmed — click below to pay <strong>$${total.toFixed(2)} CAD</strong> securely via Clover.
+            Your order is confirmed — click below to pay <strong>$${total.toFixed(2)} CAD</strong> securely via ${payment_method === "wave" ? "Wave" : "Clover"}.
           </p>
           ${checkout_url
             ? `<a href="${escHtml(checkout_url)}"
@@ -262,7 +262,7 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
 </head>
 <body style="margin: 0; padding: 0; background-color: #f4efe9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;">
   ${preheader(
-    payment_method === "clover_card"
+    payment_method !== "etransfer"
       ? "Tap the QR or button below — payment takes 30 seconds."
       : "Send e-transfer to info@true-color.ca · we start printing once received."
   )}
@@ -291,7 +291,7 @@ function buildOrderConfirmationHtml(p: OrderConfirmationParams): string {
                 Order confirmed!
               </h1>
               <p style="margin: 0 0 18px; font-size: 14px; color: #6b7280; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                ${payment_method === "clover_card"
+                ${payment_method !== "etransfer"
                   ? `Hi ${escHtml(contact.name)}, your order is saved and held for you. Complete payment below to start production.`
                   : `Hi ${escHtml(contact.name)}, thanks for your order. We have received it and will get started once payment clears.`}
               </p>
@@ -496,8 +496,8 @@ function buildOrderConfirmationText(p: OrderConfirmationParams): string {
   });
 
   const payNote =
-    payment_method === "clover_card"
-      ? `Please complete your payment of $${total.toFixed(2)} CAD at:\n${checkout_url ?? "https://truecolorprinting.ca"}`
+    payment_method !== "etransfer"
+      ? `Please complete your payment of $${total.toFixed(2)} CAD${payment_method === "wave" ? " through Wave" : ""} at:\n${checkout_url ?? "https://truecolorprinting.ca"}`
       : `Please send $${total.toFixed(2)} CAD via Interac e-Transfer to: info@true-color.ca (auto-deposit, no password).`;
 
   const lines = [

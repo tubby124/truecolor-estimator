@@ -136,6 +136,7 @@ async function fetchOrders() {
       archived_at,
       subtotal,
       gst,
+      pst,
       total,
       payment_method,
       wave_invoice_id,

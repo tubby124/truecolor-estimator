@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getCanonicalTaxRates } from "@/lib/pricing/canonical-rates";
+import { STRUCTURED_TAX_ROUNDING_VERSION } from "@/lib/payment/structured-quote-tax";
 
 export interface StructuredQuoteLineItem {
   description: string;
@@ -22,6 +23,7 @@ export interface QuoteTaxRates {
   gstRate: number;
   pstRate: number;
   structuredTaxPolicyVersion?: string;
+  structuredTaxRoundingVersion?: string;
 }
 
 export interface QuotePaymentBreakdown {
@@ -90,7 +92,17 @@ export async function getQuoteTaxRates(supabase: SupabaseClient): Promise<QuoteT
   if (data.structured_tax_policy_version != null && data.structured_tax_policy_version !== "pst20_20260906") {
     throw new Error("Structured quote tax policy version is unsupported. Coordinate the application and database release.");
   }
-  return { ...canonical, ...(data.structured_tax_policy_version === "pst20_20260906" ? { structuredTaxPolicyVersion: "pst20_20260906" } : {}) };
+  if (data.structured_tax_rounding_version != null &&
+      data.structured_tax_rounding_version !== STRUCTURED_TAX_ROUNDING_VERSION) {
+    throw new Error("Structured quote tax rounding version is unsupported. Coordinate the application and database release.");
+  }
+  return {
+    ...canonical,
+    ...(data.structured_tax_policy_version === "pst20_20260906" ? { structuredTaxPolicyVersion: "pst20_20260906" } : {}),
+    ...(data.structured_tax_rounding_version === STRUCTURED_TAX_ROUNDING_VERSION
+      ? { structuredTaxRoundingVersion: STRUCTURED_TAX_ROUNDING_VERSION }
+      : {}),
+  };
 }
 
 export interface QuoteOrderResult {

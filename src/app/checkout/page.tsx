@@ -553,7 +553,7 @@ export default function CheckoutPage() {
         if (res.status === 503) {
           throw new Error("CHECKOUT_ACCOUNTING_PENDING");
         }
-        if (res.status === 409) {
+        if (res.status === 409 && data.code !== "WAVE_PROVISIONING_PENDING") {
           try {
             sessionStorage.removeItem(CHECKOUT_SUBMISSION_KEY);
           } catch { /* ignore */ }

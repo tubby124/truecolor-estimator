@@ -12,16 +12,9 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireStaffUser, createServiceClient } from "@/lib/supabase/server";
-import { resolveOrderPayLink, type ResolvedOrderPayLink } from "@/lib/orders/payLink";
-import { sendPaymentRequestEmail } from "@/lib/email/paymentRequest";
 import { sendEmail } from "@/lib/email/smtp";
 import { sanitizeError } from "@/lib/errors/sanitize";
-import { voidWaveInvoice, createOrFindWaveCustomer, createWaveInvoice, approveWaveInvoice, type WaveLineItem } from "@/lib/wave/invoice";
 import { recordAuditEvent } from "@/lib/audit/record";
-
-const GST_RATE = 0.05;
-const PST_RATE = 0.06;
-const RUSH_FEE = 40;
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -98,32 +91,8 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     const discountAmount = Number(dc.discount_amount);
 
-    // 5. Set pending_discount_code on customer
-    const { error: pendErr } = await supabase
-      .from("customers")
-      .update({ pending_discount_code: dc.code } as Record<string, unknown>)
-      .eq("id", customer.id);
-    if (pendErr) {
-      console.error("[assign-discount] failed to set pending_discount_code:", pendErr);
-      return NextResponse.json({ error: "Failed to attach code to account" }, { status: 500 });
-    }
-
-    // Audit event: coupon issued by staff
-    void recordAuditEvent({
-      actor_type: "staff",
-      actor_id: staffCheck.email ?? "staff",
-      event_type: "coupon.issued",
-      entity_type: "customer",
-      entity_id: customer.id,
-      detail: {
-        code: dc.code,
-        discount_amount: dc.discount_amount,
-        customer_email: customer.email,
-      },
-    });
-
-    // 6. Find all pending_payment orders for this customer
-    const { data: orders } = await supabase
+    // 5. Find all pending_payment orders before mutating customer state.
+    const { data: orders, error: ordersErr } = await supabase
       .from("orders")
       .select(`
         id, order_number, status, is_rush, subtotal, gst, pst, total,
@@ -134,166 +103,49 @@ export async function POST(req: NextRequest, { params }: Params) {
       .eq("status", "pending_payment")
       .order("created_at", { ascending: false });
 
-    // 7a. No pending orders — send notification email and return
-    if (!orders?.length) {
-      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
-      await sendEmail({
-        to: customer.email,
-        subject: `Your $${discountAmount.toFixed(2)} discount is ready — True Color Printing`,
-        html: buildNotificationHtml(customer.name, dc.code, discountAmount, siteUrl),
-        text: buildNotificationText(customer.name, dc.code, discountAmount, siteUrl),
-        replyTo: "info@true-color.ca",
-      });
-      console.log(
-        `[assign-discount] no pending order — notification sent to ${customer.email} | code ${dc.code}`
-      );
-      return NextResponse.json({ ok: true, action: "code_assigned_no_order" });
-    }
-
-    for (const order of orders) {
-    // 8. Tax recalculation
-    const rush = order.is_rush ? RUSH_FEE : 0;
-    const originalSubtotal = Number(order.subtotal);
-    const newDiscountedSubtotal = Math.max(0, originalSubtotal - discountAmount);
-    const newGst = Math.round((newDiscountedSubtotal + rush) * GST_RATE * 100) / 100;
-    const newPst = Math.round((newDiscountedSubtotal + rush) * PST_RATE * 100) / 100;
-    const newTotal = Math.round((newDiscountedSubtotal + rush + newGst + newPst) * 100) / 100;
-
-    // 9. Update order row
-    const { error: upErr } = await supabase
-      .from("orders")
-      .update({
-        subtotal: newDiscountedSubtotal,
-        gst: newGst,
-        pst: newPst,
-        total: newTotal,
-        discount_code: dc.code,
-        discount_amount: discountAmount,
-      })
-      .eq("id", order.id);
-    if (upErr) {
-      console.error("[assign-discount] order update failed:", upErr);
-      return NextResponse.json({ error: "Failed to update order totals" }, { status: 500 });
-    }
-
-    // 9b. Wave invoice present — void old, create new at discounted amounts (non-fatal, fire-and-forget)
-    if (order.wave_invoice_id) {
-      const capturedWaveInvoiceId = order.wave_invoice_id;
-      void (async () => {
-        try {
-          await voidWaveInvoice(capturedWaveInvoiceId).catch((e: unknown) => {
-            console.warn(`[assign-discount] Wave invoiceVoid failed (continuing): ${e instanceof Error ? e.message : e}`);
-          });
-          const waveCustomerId = await createOrFindWaveCustomer(
-            customer.email,
-            (customer.name as string | null) ?? customer.email
-          );
-          const waveItems: WaveLineItem[] = [
-            {
-              description: `True Color Order ${order.order_number} (${dc.code} discount applied)`,
-              unitPrice: newDiscountedSubtotal,
-              qty: 1,
-              applyGst: true,
-              applyPst: true,
-            },
-          ];
-          const inv = await createWaveInvoice(waveCustomerId, waveItems, {
-            isRush: order.is_rush,
-            orderNumber: order.order_number,
-          });
-          await approveWaveInvoice(inv.invoiceId);
-          // Must `await` — bug found 2026-05-15 (Wave fields silently dropping).
-          {
-            const { error: updErr } = await supabase
-              .from("orders")
-              .update({ wave_invoice_id: inv.invoiceId } as Record<string, unknown>)
-              .eq("id", order.id);
-            if (updErr) console.error("[assign-discount] wave_invoice_id save failed (non-fatal):", updErr.message);
-          }
-          console.log(
-            `[assign-discount] Wave invoice replaced: ${capturedWaveInvoiceId} → ${inv.invoiceId} | order ${order.order_number}`
-          );
-        } catch (waveErr) {
-          console.error("[assign-discount] Wave invoice replacement failed (non-fatal):", waveErr instanceof Error ? waveErr.message : waveErr);
-        }
-      })();
-    }
-
-    // 10. Fresh payment token
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
-    const items = (Array.isArray(order.order_items) ? order.order_items : [order.order_items])
-      .filter(Boolean) as Array<{ product_name: string; qty: number; line_total: number }>;
-    const description =
-      items.length === 1
-        ? `${items[0].product_name}${items[0].qty > 1 ? ` x ${items[0].qty}` : ""}`
-        : items.length > 1
-          ? `${items[0].product_name} + ${items.length - 1} more (Order ${order.order_number})`
-          : `True Color Order ${order.order_number}`;
-
-    // Ledger-aware: the freshly discounted total is what the customer owes
-    // only if they haven't already paid part of the order.
-    let payLink: ResolvedOrderPayLink;
-    try {
-      payLink = await resolveOrderPayLink(supabase, {
-        orderId: order.id,
-        orderNumber: order.order_number,
-        total: newTotal,
-        customerEmail: customer.email,
-        siteUrl,
-      });
-    } catch (linkErr) {
-      console.error("[assign-discount] pay link resolution failed:", linkErr instanceof Error ? linkErr.message : linkErr);
+    if (ordersErr) {
+      console.error("[assign-discount] pending-order lookup failed:", ordersErr);
       return NextResponse.json(
-        { error: "Could not read the payment ledger — the updated invoice was not emailed" },
-        { status: 500 }
+        { error: "Could not verify pending orders. No discount was applied." },
+        { status: 503 },
       );
     }
-    const paymentUrl = payLink.paymentUrl;
 
-    // NOTE: do NOT update payment_reference — it is set to the order UUID by /pay/[token]
-    // when the customer clicks, and the Clover webhook matches on it.
-    // Overwriting it with the URL breaks webhook matching.
+    // A pending order requires an atomic replacement workflow. Do not change
+    // totals, attach a discount, or email a generic Wave link until that exists.
+    if (orders?.length) {
+      return NextResponse.json({
+        error: "This customer has a pending order. Apply the discount through the reviewed order-replacement workflow before sending another payment request.",
+      }, { status: 409 });
+    }
 
-    // 11. Send updated payment email
-    // Pass originalSubtotal so customer sees pre-discount subtotal, then discount row, then new total
-    await sendPaymentRequestEmail({
-      orderId: order.id,
-      orderNumber: order.order_number,
-      contact: {
-        name: customer.name as string,
-        email: customer.email,
-        company: customer.company as string | null,
-      },
-      items:
-        items.length > 0
-          ? items.map((it) => ({
-              product: it.product_name,
-              qty: it.qty || 1,
-              amount: Number(it.line_total),
-            }))
-          : [{ product: description, qty: 1, amount: originalSubtotal }],
-      subtotal: originalSubtotal,
-      gst: newGst,
-      pst: newPst,
-      total: newTotal,
-      balanceDue: payLink.amountDue,
-      paymentUrl,
-      paymentMethod: "clover",
-      notes: order.notes as string | null,
-      discount_code: dc.code,
-      discount_amount: discountAmount,
+    // 6. No pending orders — attach the code, record the audit event, then notify.
+    const { error: pendErr } = await supabase
+      .from("customers")
+      .update({ pending_discount_code: dc.code } as Record<string, unknown>)
+      .eq("id", customer.id);
+    if (pendErr) {
+      console.error("[assign-discount] failed to set pending_discount_code:", pendErr);
+      return NextResponse.json({ error: "Failed to attach code to account" }, { status: 500 });
+    }
+    void recordAuditEvent({
+      actor_type: "staff", actor_id: staffCheck.email ?? "staff", event_type: "coupon.issued",
+      entity_type: "customer", entity_id: customer.id,
+      detail: { code: dc.code, discount_amount: dc.discount_amount, customer_email: customer.email },
     });
 
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
+    await sendEmail({
+      to: customer.email,
+      subject: `Your $${discountAmount.toFixed(2)} discount is ready — True Color Printing`,
+      html: buildNotificationHtml(customer.name, dc.code, discountAmount, siteUrl),
+      text: buildNotificationText(customer.name, dc.code, discountAmount, siteUrl),
+      replyTo: "info@true-color.ca",
+    });
     console.log(
-      `[assign-discount] order ${order.order_number} updated | code=${dc.code} | discount=$${discountAmount} | newTotal=$${newTotal} | email → ${customer.email}`
+      `[assign-discount] no pending order — notification sent to ${customer.email} | code ${dc.code}`
     );
-    } // end for (const order of orders)
-
-    return NextResponse.json({
-      ok: true,
-      action: "invoice_updated",
-      orderCount: orders.length,
-    });
+    return NextResponse.json({ ok: true, action: "code_assigned_no_order" });
   } catch (err) {
     console.error("[assign-discount]", err instanceof Error ? err.message : err);
     return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });

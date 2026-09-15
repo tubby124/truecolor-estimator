@@ -35,7 +35,7 @@ describe("catalog order submission idempotency contract", () => {
     expect(route).toMatch(/\.select\("checkout_line_key, line_total(?:, [^"]+)?"\)/);
     expect(checkout).toContain("if (res.status === 503)");
     expect(checkout).toContain('throw new Error("CHECKOUT_ACCOUNTING_PENDING")');
-    expect(checkout).toContain("if (res.status === 409)");
+    expect(checkout).toContain('data.code !== "WAVE_PROVISIONING_PENDING"');
     expect(checkout).toContain("sessionStorage.removeItem(CHECKOUT_SUBMISSION_KEY)");
     expect(checkout).toContain('throw new Error("CHECKOUT_RETRY_AVAILABLE")');
     const errors = source("src/lib/errors/sanitize.ts");
@@ -68,6 +68,9 @@ describe("catalog online payment routing", () => {
     expect(route).toContain('payment_method === "wave"');
     expect(route).not.toContain("createCloverCheckout(");
     expect(route).not.toContain("reserveOrderCheckout(");
+    expect(route).toContain("if (payment_method === \"wave\") try");
+    expect(route).toContain("resolveOrderPayLink(supabase");
+    expect(route).toContain("emailCheckoutUrl = signed.amountDueCents > 0 ? signed.paymentUrl : null");
     expect(checkout).toContain('useState<"wave" | "etransfer">("wave")');
     expect(checkout).toContain('if (payMethod === "wave" && data.checkoutUrl)');
     expect(checkout).not.toContain("Clover's secure checkout");
@@ -75,5 +78,13 @@ describe("catalog online payment routing", () => {
     expect(gateway).toContain("resolveWaveOnlineCheckout(");
     expect(gateway).not.toContain("createCloverCheckout(");
     expect(gateway).not.toContain("reserveOrderCheckout(");
+  });
+
+  it("keeps e-Transfer independent of Wave provisioning", () => {
+    const route = source("src/app/api/orders/route.ts");
+    const waveGate = route.indexOf('if (payment_method === "wave") try');
+    const provision = route.indexOf("provisionOrderWaveInvoice(");
+    expect(waveGate).toBeGreaterThan(0);
+    expect(provision).toBeGreaterThan(waveGate);
   });
 });

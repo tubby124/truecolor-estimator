@@ -2,9 +2,11 @@
 
 ## Decision state
 
-**Direction selected; implementation deferred until the current repair is complete.** The owner selected Wave for online orders/invoices/payment links and Clover for in-person payments, with Wave Pro deferred until later. The latest instruction prioritizes finishing and verifying the current payment repair before starting that migration. No plan purchase, payment-button disabling, or provider-default change has been made.
+**Wave online migration is now the active, explicitly authorized repair.** The owner rejected the Clover-directed internal test and clarified that finishing the task includes Wave online now, with Clover retained for in-person payments and Pro deferred. The earlier decision to defer migration was the assistant's interpretation and is superseded. Do not send another Clover online test as acceptance of this request.
 
-Selected target: Wave online plus Clover in person for the invoice-led business, migrated gradually after a successful pilot. Wave Starter remains usable for online collection with authenticated polling; immediate webhook delivery waits for a later Pro upgrade. Keep the repaired current flow operational during that decision. Actual Clover online/card-not-present pricing must be verified from the merchant agreement or statement before any savings claim.
+The $1.12 staff resend reached the owner's inbox and correctly opened Clover under the prior deployed routing. That proves only the old channel, not the selected Wave setup. The owner was told not to pay that link. The new release must route the real customer website flow, both staff payment-link actions and payable quotes to Wave, preserve payment evidence and balances, and verify an actual Wave page before another owner test send. Current implementation/deployment evidence belongs in the incident audit and issue #98.
+
+Wave Starter uses authenticated polling and on-demand reconciliation. No Pro purchase is required for this phase. Immediate webhook delivery remains a later Pro acceptance check.
 
 ## Verified current facts
 
@@ -33,7 +35,7 @@ Manual payment links remain available. The portal should produce a single durabl
 4. Pilot one owner-approved new order and verify real provider payment, one ledger entry, staff notification, customer receipt state and bookkeeping. A local mock or signed synthetic event is not that proof.
 5. Switch the default for new online orders only after the pilot succeeds. Keep rollback available per order; avoid a bulk conversion of already-issued invoices.
 
-Acceptance cases before claiming the workflow is reusable: a manual custom invoice; a multi-item website order; a deposit followed by a balance payment; an in-person Clover payment against an online-issued invoice; a repeated link after payment; a refund with provider/accounting/website reconciliation. Preserve quoted items, taxes, discounts and total in every case. No test charge or customer communication is authorized by this proposal.
+Acceptance cases before claiming the workflow is reusable: a manual custom invoice; a multi-item website order; a deposit followed by a balance payment; an in-person Clover payment against an online-issued invoice; a repeated link after payment; a refund with provider/accounting/website reconciliation. Preserve quoted items, taxes, discounts and total in every case. The owner separately authorized controlled test emails to their specified Gmail address; no assistant-initiated charge is authorized.
 
 The [incident audit](PAYMENT-INCIDENT-AUDIT-20260915.md) and [issue #98](https://github.com/tubby124/truecolor-estimator/issues/98) retain the deployed repair evidence and historical holds.
 

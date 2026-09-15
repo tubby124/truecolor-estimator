@@ -58,11 +58,12 @@ describe("quote Wave provisioning contract", () => {
   it("gates catalog checkout and retry links on the same durable Wave state", () => {
     const ordersRoute = source("src/app/api/orders/route.ts");
     const provision = ordersRoute.indexOf("provisionOrderWaveInvoice(");
-    const clover = ordersRoute.indexOf("createCloverCheckout(");
+    const resolve = ordersRoute.indexOf("resolveWaveOnlineCheckout(");
     expect(provision).toBeGreaterThan(0);
-    expect(clover).toBeGreaterThan(provision);
-    expect(ordersRoute.slice(provision, clover)).toContain('wave.action !== "ready"');
-    expect(ordersRoute.slice(provision, clover)).toContain("return NextResponse.json(");
+    expect(resolve).toBeGreaterThan(provision);
+    expect(ordersRoute.slice(provision, resolve)).toContain('wave.action !== "ready"');
+    expect(ordersRoute.slice(provision, resolve)).toContain("return NextResponse.json(");
+    expect(ordersRoute).not.toContain("createCloverCheckout(");
     expect(ordersRoute).not.toContain("createWaveInvoice(");
     expect(ordersRoute).not.toContain("approveWaveInvoice(");
 

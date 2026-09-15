@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { resolveOrderPayLink } from "@/lib/orders/payLink";
+import { resolveWaveOnlineCheckout } from "@/lib/payment/wave-online-checkout";
 import type { LatestPaymentAttempt } from "@/lib/payments/attempts";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://dczbgraekmzirxknjvwe.supabase.co";
@@ -67,6 +68,9 @@ export async function GET(req: NextRequest) {
       receipt_token,
       paid_at,
       wave_payment_recorded_at,
+      wave_invoice_id,
+      wave_invoice_number,
+      wave_invoice_approved_at,
       proof_storage_path,
       proof_storage_paths,
       proof_sent_at,
@@ -124,7 +128,14 @@ export async function GET(req: NextRequest) {
 
   const ordersWithPayUrl = await Promise.all((orders ?? []).map(async (order) => {
     let pay_url: string | null = null;
-    if (order.status === "pending_payment" && order.payment_method === "clover_card") {
+    if (order.status === "pending_payment" && order.payment_method === "wave") {
+      try {
+        const resolved = await resolveWaveOnlineCheckout(admin, { orderId: order.id });
+        pay_url = resolved.action === "ready" ? resolved.checkoutUrl : null;
+      } catch {
+        // A stale or unverified Wave invoice is intentionally not actionable.
+      }
+    } else if (order.status === "pending_payment" && order.payment_method === "clover_card") {
       try {
         // Ledger-aware: an account "Pay now" link must charge the balance that
         // is still owed, not the original order total.

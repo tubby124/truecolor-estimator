@@ -28,6 +28,7 @@ import {
 } from "@/lib/payment/pst-exemption";
 import {
   computeStructuredQuoteTotals,
+  STRUCTURED_TAX_ROUNDING_VERSION,
   type StructuredQuoteLineItem,
 } from "@/lib/payment/structured-quote-tax";
 import {
@@ -126,6 +127,7 @@ export function buildQuoteSendFingerprint(input: {
     totalCents: input.totalCents,
     gstRate: input.rates.gstRate,
     pstRate: input.rates.pstRate,
+    structuredTaxRoundingVersion: input.rates.structuredTaxRoundingVersion ?? null,
     pstExempt: pstExemption.enabled,
     pstVendorNumber: pstExemption.vendorNumber ?? "",
     pstResaleConfirmed: pstExemption.resaleConfirmed,
@@ -249,7 +251,7 @@ export function buildQuoteHtml(opts: {
         Pay ${esc(payLabel)} now &rarr;
       </a>
       <p style="font-size:12px;color:#666;margin-top:12px;">Pay securely by credit card to confirm your order — we start production once payment clears (typically same day).</p>
-      <p style="font-size:11px;color:#aaa;margin-top:6px;">Link valid 30 days · Powered by Clover · Questions? Reply to this email or call <strong>(306) 954-8688</strong></p>
+      <p style="font-size:11px;color:#aaa;margin-top:6px;">Link valid 30 days · Powered by Wave · Questions? Reply to this email or call <strong>(306) 954-8688</strong></p>
     </div>
   </div>
 
@@ -301,7 +303,7 @@ export function buildQuotePlainText(opts: {
     `Payment total (tax included): $${total.toFixed(2)} CAD`,
     "",
     `Pay securely by credit card to confirm your order: ${payUrl}`,
-    "(Link valid 30 days. Powered by Clover.)",
+    "(Link valid 30 days. Powered by Wave.)",
     "",
     "Questions? Reply to this email or call (306) 954-8688.",
     "",
@@ -424,9 +426,17 @@ export async function POST(req: NextRequest, { params }: Params) {
         p_gst_cents: gstCents,
         p_pst_cents: pstCents,
         p_description: cloverDescription,
-        p_line_items: rates.structuredTaxPolicyVersion === "pst20_20260906"
-          ? lineItems.map((item) => ({ ...item, taxPolicyVersion: "pst20_20260906", pricingSource: "staff_manual", applyPst: !pstExemption.enabled && (lineItems.some((line) => line.taxClass === "printed_good") || !["design_service", "rush_service"].includes(item.taxClass)) }))
-          : lineItems,
+        p_line_items: lineItems.map((item) => ({
+          ...item,
+          ...(rates.structuredTaxPolicyVersion === "pst20_20260906"
+            ? { taxPolicyVersion: "pst20_20260906" }
+            : {}),
+          ...(rates.structuredTaxRoundingVersion === STRUCTURED_TAX_ROUNDING_VERSION
+            ? { taxRoundingVersion: STRUCTURED_TAX_ROUNDING_VERSION }
+            : {}),
+          pricingSource: "staff_manual",
+          applyPst: !pstExemption.enabled && (lineItems.some((line) => line.taxClass === "printed_good") || !["design_service", "rush_service"].includes(item.taxClass)),
+        })),
         p_request_fingerprint: requestFingerprint,
         p_recipient: to,
         p_subject: emailSubject,

@@ -4,7 +4,11 @@ import { getCanonicalTaxRates } from "@/lib/pricing/canonical-rates";
 import { computeTax, computeTaxForCart } from "@/lib/pricing/tax";
 import { computeTaxCents } from "@/lib/payment/tax-math";
 import { manualBreakdownCents, scaleManualPricing } from "@/lib/payment/manual-pricing";
-import { computeStructuredQuoteTotals, STRUCTURED_TAX_POLICY_VERSION } from "@/lib/payment/structured-quote-tax";
+import {
+  computeStructuredQuoteTotals,
+  STRUCTURED_TAX_POLICY_VERSION,
+  STRUCTURED_TAX_ROUNDING_VERSION,
+} from "@/lib/payment/structured-quote-tax";
 
 const rates = getCanonicalTaxRates();
 const active = { ...rates, structuredTaxPolicyVersion: STRUCTURED_TAX_POLICY_VERSION };
@@ -40,6 +44,27 @@ describe("canonical tax parity", () => {
     expect(computeStructuredQuoteTotals(lines, rates).pst).toBe(6);
     expect(computeStructuredQuoteTotals(lines, active).pst).toBe(8.1);
     expect(computeStructuredQuoteTotals(lines, active, true).pst).toBe(0);
+  });
+  it("matches Wave's per-line tax rounding only after the explicit capability is present", () => {
+    const lines = [
+      { description: "Small item A", qty: "1", unitPrice: "0.50", taxClass: "printed_good" as const },
+      { description: "Small item B", qty: "1", unitPrice: "0.50", taxClass: "printed_good" as const },
+    ];
+    expect(computeStructuredQuoteTotals(lines, active)).toMatchObject({
+      subtotal: 1,
+      gst: .05,
+      pst: .06,
+      grandTotal: 1.11,
+    });
+    expect(computeStructuredQuoteTotals(lines, {
+      ...active,
+      structuredTaxRoundingVersion: STRUCTURED_TAX_ROUNDING_VERSION,
+    })).toMatchObject({
+      subtotal: 1,
+      gst: .06,
+      pst: .06,
+      grandTotal: 1.12,
+    });
   });
   it("preserves bespoke no-floor overrides and standalone service exemptions", () => {
     const service = [{ amount: 10, qty: 3, unitPrice: 99, taxClass: "design_service" as const }];

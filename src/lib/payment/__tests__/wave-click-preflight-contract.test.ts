@@ -36,19 +36,15 @@ describe("existing-order Wave click-time checkout contract", () => {
     expect(route).not.toContain("createCloverCheckout(");
   });
 
-  it("gates only resumed /api/orders checkout before Clover reservation", () => {
+  it("resolves every online /api/orders checkout through the same Wave path", () => {
     const route = source("src/app/api/orders/route.ts");
-    const resumed = route.indexOf("if (resumedOrder && payment_method === \"clover_card\")");
-    const preflight = route.indexOf("preflightWaveBeforeCloverCheckout(", resumed);
-    const reserve = route.indexOf("reserveOrderCheckout(", preflight);
-    const clover = route.indexOf("createCloverCheckout(", preflight);
-
-    expect(resumed).toBeGreaterThan(0);
-    expect(preflight).toBeGreaterThan(resumed);
-    expect(reserve).toBeGreaterThan(preflight);
-    expect(clover).toBeGreaterThan(preflight);
-    expect(route.slice(preflight, reserve)).toContain("No payment was started.");
-    expect(route).toContain("createCloverCheckout(totalCents, description, contact.email, redirectUrl, order.id)");
-    expect(route.match(/preflightWaveBeforeCloverCheckout\(/g)).toHaveLength(1);
+    const provision = route.indexOf("provisionOrderWaveInvoice(");
+    const resolve = route.indexOf("resolveWaveOnlineCheckout(", provision);
+    expect(provision).toBeGreaterThan(0);
+    expect(resolve).toBeGreaterThan(provision);
+    expect(route.slice(provision, resolve)).toContain('wave.action !== "ready"');
+    expect(route).not.toContain("preflightWaveBeforeCloverCheckout(");
+    expect(route).not.toContain("reserveOrderCheckout(");
+    expect(route).not.toContain("createCloverCheckout(");
   });
 });

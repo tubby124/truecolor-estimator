@@ -147,7 +147,11 @@ export function ReceiptModal({ order, email, onClose }: { order: Order; email: s
           {order.payment_method && (
             <p>
               <span className="font-semibold text-gray-600">Payment method:</span>{" "}
-              {order.payment_method === "clover_card" ? "Credit / debit card" : "Interac e-Transfer"}
+              {order.payment_method === "clover_card"
+                ? "Credit / debit card"
+                : order.payment_method === "wave"
+                  ? "Wave online payment"
+                  : "Interac e-Transfer"}
             </p>
           )}
         </div>

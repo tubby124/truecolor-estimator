@@ -34,6 +34,15 @@ describe("followupCopy", () => {
     expect(c.subject).toBe("e-Transfer reminder — TC-2026-0319");
   });
 
+  it("uses provider-accurate Wave follow-up wording without card-time promises", () => {
+    const c = followupCopy(1, { ...baseCtx, paymentMethod: "wave" })!;
+    expect(c.subject).toContain("Wave invoice");
+    expect(c.cta).toBe("View Wave invoice");
+    expect(c.body).toContain("Wave invoice");
+    expect(c.foot).toContain("verify provider payment");
+    expect(c.foot).not.toContain("30 seconds");
+  });
+
   it("T2 subject/headline mapping", () => {
     const c = followupCopy(2, baseCtx)!;
     expect(c.subject).toBe("Quick check on your order TC-2026-0319");
@@ -46,6 +55,13 @@ describe("followupCopy", () => {
     expect(c.body).toContain("reply to this email");
     expect(c.foot).toContain("Already sent payment");
     expect(c.foot).toContain("info@true-color.ca");
+  });
+
+  it("keeps Wave T2 reconciliation-safe", () => {
+    const c = followupCopy(2, { ...baseCtx, paymentMethod: "wave" })!;
+    expect(c.cta).toBe("View Wave invoice");
+    expect(c.foot).toContain("reconcile");
+    expect(c.body).not.toContain("under a minute");
   });
 
   it("T3 subject/headline mapping", () => {

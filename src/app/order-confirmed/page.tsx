@@ -48,10 +48,8 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
       const supabase = createServiceClient();
 
       // Read-only: fetch order details to display.
-      // Payment confirmation is written exclusively by the Clover webhook
-      // (/api/webhooks/clover) when it receives a captured PAYMENT event.
-      // We never auto-confirm here — Clover redirects to this URL on both
-      // success AND cancellation/timeout, so we can't trust the redirect alone.
+      // A provider redirect is never payment evidence. Clover and Wave both
+      // reconcile into the local paid state before this page may say confirmed.
       const { data } = await supabase
         .from("orders")
         .select("order_number, total, gst, pst, payment_method, payment_reference, receipt_token, status, paid_at, conversion_type, conversion_key, customers(email, name, company), order_items(product_name, category, qty, line_total)")
@@ -99,11 +97,16 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
     }
   }
 
-  // Clover orders: payment is confirmed by the webhook, not this redirect.
-  // Show a "processing" notice if the webhook hasn't fired yet.
+  // Online payment is confirmed only after local provider reconciliation, not
+  // from this redirect. Wave Starter uses polling/on-demand reconciliation;
+  // do not run the Clover-specific browser watcher for a Wave invoice.
   const isCloverPending =
     orderSummary?.payment_method === "clover_card" &&
     orderSummary?.status === "pending_payment";
+  const isWavePending =
+    orderSummary?.payment_method === "wave" &&
+    orderSummary?.status === "pending_payment";
+  const isOnlinePending = isCloverPending || isWavePending;
 
   return (
     <div className="min-h-screen bg-white">
@@ -140,7 +143,7 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
 
         {/* Icon — pending clock vs confirmed checkmark */}
         <div className="flex justify-center mb-6">
-          {isCloverPending ? (
+          {isOnlinePending ? (
             <div className="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -170,7 +173,7 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
         </div>
 
         <h1 className="text-3xl font-bold text-[#1c1712] mb-3">
-          {isCloverPending ? "Verifying your payment…" : "Order confirmed!"}
+          {isOnlinePending ? "Verifying your payment…" : "Order confirmed!"}
         </h1>
 
         {/* Order number badge */}
@@ -182,18 +185,22 @@ export default async function OrderConfirmedPage({ searchParams }: Props) {
         )}
 
         <p className="text-gray-500 text-lg mb-10 leading-relaxed">
-          {isCloverPending
-            ? "Please wait while we verify your card payment. Do not close this page or pay again."
+          {isOnlinePending
+            ? isWavePending
+              ? "Your Wave invoice payment is being verified. Do not pay again; we’ll email you once it is recorded."
+              : "Please wait while we verify your card payment. Do not close this page or pay again."
             : <>We&apos;ve got your order and will have it ready for pickup at{" "}<span className="font-semibold text-[#1c1712]">216 33rd St W, Saskatoon</span>.</>
           }
         </p>
 
         {/* Clover payment processing notice — shown while webhook hasn't confirmed yet */}
-        {isCloverPending && (
+        {isOnlinePending && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 text-left mb-8">
             <p className="font-bold text-yellow-800 mb-1">Payment being verified</p>
             <p className="text-sm text-yellow-700 leading-relaxed">
-              {orderSummary?.latest_payment_attempt?.status === "card_declined"
+              {isWavePending
+                ? "Wave payment confirmation can take a short time to appear. We verify the provider record before starting production and will email your receipt once payment is recorded."
+                : orderSummary?.latest_payment_attempt?.status === "card_declined"
                 ? orderSummary.latest_payment_attempt.customer_message ?? "Your card payment did not complete. Please try again or use e-Transfer."
                 : "Your card payment is being processed. You'll receive a confirmation email once it's verified — this usually takes under a minute. You do not need to do anything else."}
             </p>

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { decodePaymentToken } from "@/lib/payment/token";
 
 const mocks = vi.hoisted(() => ({
+  online: vi.fn(),
   auth: vi.fn(),
   db: vi.fn(),
   audit: vi.fn(),
@@ -13,6 +14,7 @@ vi.mock("@/lib/supabase/server", () => ({
   requireStaffUser: mocks.auth,
   createServiceClient: () => ({ from: mocks.db }),
 }));
+vi.mock("@/lib/payment/wave-online-checkout", () => ({ resolveWaveOnlineCheckout: mocks.online }));
 vi.mock("@/lib/audit/record", () => ({ recordAuditEvent: mocks.audit }));
 // The copy path must never email — the Resend button owns that.
 vi.mock("@/lib/email/paymentRequest", () => ({ sendPaymentRequestEmail: mocks.sendEmail }));
@@ -66,6 +68,7 @@ beforeEach(() => {
   ledger = { data: [], error: null };
 
   mocks.auth.mockResolvedValue({ email: "staff@example.test" });
+  mocks.online.mockResolvedValue({ action: "ready", checkoutUrl: "https://invoice.waveapps.com/invoices/test" });
   mocks.audit.mockResolvedValue(true);
   mocks.sendEmail.mockResolvedValue(undefined);
   mocks.db.mockImplementation((table: string) =>

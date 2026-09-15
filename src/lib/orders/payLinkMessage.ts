@@ -26,7 +26,7 @@ export function buildPayLinkMessage(input: PayLinkMessageInput): string {
     : amount;
 
   return [
-    `Hi ${firstName}, here's your secure payment link for order ${input.orderNumber} (${amountPhrase}):`,
+    `Hi ${firstName}, here's your secure Wave invoice payment link for order ${input.orderNumber} (${amountPhrase}):`,
     input.paymentUrl,
     ``,
     `True Color Display Printing`,

@@ -41,6 +41,7 @@ import { getMetaCapiRequestContext } from "@/lib/analytics/metaCapi";
 import { recordAuditEvent, extractRequestContext } from "@/lib/audit/record";
 import { parseGa4ClientContext } from "@/lib/analytics/ga4-client-context";
 import { resolveWaveOnlineCheckout } from "@/lib/payment/wave-online-checkout";
+import { resolveOrderPayLink } from "@/lib/orders/payLink";
 
 // `LatestPaidHintPayload` contributes the optional `latest_paid_*` fields the
 // checkout submit sends when localStorage still holds a paid touch that the
@@ -764,12 +765,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 5. Provision and approve Wave under a locked, fail-closed reservation.
+    // 5. Online card payment provisions and approves Wave under a locked,
+    // fail-closed reservation. e-Transfer is a separate channel and must stay
+    // available when Wave is unavailable.
     // Online payment is unreachable until the approved invoice is durably linked
     // to this order. Any outcome after a Wave call begins is treated as ambiguous
     // and requires staff reconciliation instead of an automatic retry.
     let waveInvoiceId: string | null = null;
-    try {
+    if (payment_method === "wave") try {
       const wave = await provisionOrderWaveInvoice(
         supabase,
         order.id,
@@ -783,7 +786,7 @@ export async function POST(req: NextRequest) {
       );
       if (wave.action !== "ready" || !wave.invoiceId) {
         return NextResponse.json(
-          { error: "Order accounting setup is still being verified. No payment was started.", orderId: order.id },
+          { error: "Order accounting setup is still being verified. No payment was started.", code: "WAVE_PROVISIONING_PENDING", orderId: order.id },
           { status: 409 },
         );
       }
@@ -805,7 +808,7 @@ export async function POST(req: NextRequest) {
         { status: 503 },
       );
     }
-    if (!waveInvoiceId) {
+    if (payment_method === "wave" && !waveInvoiceId) {
       return NextResponse.json(
         { error: "Order accounting setup could not be confirmed. No payment was started.", orderId: order.id },
         { status: 503 },
@@ -825,7 +828,17 @@ export async function POST(req: NextRequest) {
         });
         if (online.action === "ready") {
           checkoutUrl = online.checkoutUrl;
-          emailCheckoutUrl = online.checkoutUrl;
+          // The customer email must use our signed /pay gateway, which
+          // rechecks paid/voided/changed state before it opens Wave.
+          const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
+          const signed = await resolveOrderPayLink(supabase, {
+            orderId: order.id,
+            orderNumber: order.order_number,
+            total: Number(order.total),
+            customerEmail: emailKey,
+            siteUrl,
+          });
+          emailCheckoutUrl = signed.amountDueCents > 0 ? signed.paymentUrl : null;
         } else if (online.action === "already_paid") {
           const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
           return NextResponse.json({

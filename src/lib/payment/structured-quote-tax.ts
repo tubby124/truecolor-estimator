@@ -21,6 +21,23 @@ export interface StructuredQuoteTotals {
 }
 
 export const STRUCTURED_TAX_POLICY_VERSION = "pst20_20260906";
+export const STRUCTURED_TAX_ROUNDING_VERSION = "wave_per_line_v1";
+
+function lineCents(item: StructuredQuoteLineItem): number {
+  return Math.round((parseFloat(item.qty) || 0) * (parseFloat(item.unitPrice) || 0) * 100);
+}
+
+function lineIsPstTaxable(
+  item: StructuredQuoteLineItem,
+  lineItems: StructuredQuoteLineItem[],
+  rates: TaxRates,
+): boolean {
+  if (rates.structuredTaxPolicyVersion === STRUCTURED_TAX_POLICY_VERSION) {
+    return lineItems.some((line) => line.taxClass === "printed_good") ||
+      !["design_service", "rush_service"].includes(item.taxClass);
+  }
+  return !["design_service", "rush_service"].includes(item.taxClass);
+}
 
 /** Current policy for new revisions. Standalone design/rush remains GST only;
  * services supplied with printed goods belong to that taxable print sale. */
@@ -37,7 +54,25 @@ export function computeStructuredQuoteTotals(
   rates: TaxRates,
   pstExempt = false,
 ): StructuredQuoteTotals {
-  const subtotalCents = lineItems.reduce((sum, item) => sum + Math.round((parseFloat(item.qty) || 0) * (parseFloat(item.unitPrice) || 0) * 100), 0);
+  const subtotalCents = lineItems.reduce((sum, item) => sum + lineCents(item), 0);
+  if (rates.structuredTaxRoundingVersion === STRUCTURED_TAX_ROUNDING_VERSION) {
+    const gstCents = lineItems.reduce(
+      (sum, item) => sum + Math.round(lineCents(item) * rates.gstRate),
+      0,
+    );
+    const pstCents = pstExempt ? 0 : lineItems.reduce(
+      (sum, item) => sum + (lineIsPstTaxable(item, lineItems, rates)
+        ? Math.round(lineCents(item) * rates.pstRate)
+        : 0),
+      0,
+    );
+    return {
+      subtotal: subtotalCents / 100,
+      gst: gstCents / 100,
+      pst: pstCents / 100,
+      grandTotal: (subtotalCents + gstCents + pstCents) / 100,
+    };
+  }
   // Capability comes from the read-only DB config. Until the additive migration
   // is applied, preview, API and existing SQL all keep the same legacy basis.
   const pstBaseCents = rates.structuredTaxPolicyVersion === STRUCTURED_TAX_POLICY_VERSION

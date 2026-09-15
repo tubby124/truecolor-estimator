@@ -1,3 +1,4 @@
+import { resolveWaveOnlineCheckout } from "@/lib/payment/wave-online-checkout";
 import { paymentLinkBlock } from "@/lib/orders/payment-readiness";
 /**
  * POST /api/staff/orders/[id]/payment-link
@@ -75,6 +76,17 @@ export async function POST(_req: NextRequest, { params }: Params) {
 
     if (!customer?.email) {
       return NextResponse.json({ error: "No customer email on file" }, { status: 400 });
+    }
+
+    // Verify the actual Wave invoice before handing out another online link.
+    // The signed link repeats this check when opened, after any later payment.
+    try {
+      const online = await resolveWaveOnlineCheckout(supabase, { orderId: id });
+      if (online.action !== "ready") {
+        return NextResponse.json({ error: online.action === "already_paid" ? "This order is already paid" : "The payment balance changed. Refresh this order before sending a link." }, { status: 409 });
+      }
+    } catch {
+      return NextResponse.json({ error: "Wave online payment is not ready. Review this order before sending a payment link." }, { status: 503 });
     }
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";

@@ -11,7 +11,7 @@ vi.mock("@/lib/email/staffNotification", () => ({ sendStaffOrderNotification: mo
 vi.mock("@/lib/analytics/metaCapi", () => ({ getMetaCapiRequestContext: () => ({}) }));
 import { POST } from "../route";
 const cartItem = { id: "cart", product_name: "Coroplast sign", product_slug: "coroplast-signs", category: "SIGN", label: "24x36", qty: 1, config: { category: "SIGN", material_code: "MPHCC020", width_in: 24, height_in: 36, sides: 1 }, sell_price: 48, gst_rate: .05 };
-const base = { checkout_submission_id: "00000000-0000-4000-8000-000000000001", items: [cartItem], contact: { name: "Synthetic customer", email: "customer@example.test", address: "Synthetic", company: "Synthetic" }, marketing_consent: true, is_rush: false, payment_method: "clover_card", expectedTotalCents: 5328 };
+const base = { checkout_submission_id: "00000000-0000-4000-8000-000000000001", items: [cartItem], contact: { name: "Synthetic customer", email: "customer@example.test", address: "Synthetic", company: "Synthetic" }, marketing_consent: true, is_rush: false, payment_method: "wave", expectedTotalCents: 5328 };
 let discount: { code: string; discount_amount: number; is_active: boolean; per_account_limit: number; max_uses: number | null; expires_at: string | null; id: string } | null;
 function database() {
   const from = (table: string) => {
@@ -63,6 +63,12 @@ describe("checkout reviewed final charge", () => {
     // Current item is 24, both old20 and new24 top up to25 =>27.75.
     expect((await post({ items: [smallSign], expectedTotalCents: 2775 })).status).toBe(500);
     expect(mocks.mutation).toHaveBeenCalledWith("customers", "insert", expect.anything());
+  });
+  it("accepts e-Transfer through price validation without calling Wave", async () => {
+    const response = await post({ payment_method: "etransfer" });
+    expect(response.status).toBe(500);
+    expect(mocks.mutation).toHaveBeenCalledWith("customers", "insert", expect.anything());
+    expect(mocks.provider).not.toHaveBeenCalled();
   });
   it("retains the public rush confirmation block before any database writes", async () => {
     expect((await post({ is_rush: true })).status).toBe(409); expect(mocks.mutation).not.toHaveBeenCalled(); expect(mocks.provider).not.toHaveBeenCalled();
