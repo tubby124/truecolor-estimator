@@ -1055,7 +1055,7 @@ export async function POST(req: NextRequest) {
         discount_code: validatedDiscountCode ?? undefined,
         discount_amount: discount > 0 ? discount : undefined,
         is_rush,
-        payment_method,
+        payment_method: payment_method === "clover_card" ? "clover_pending" : payment_method,
         notes: notes ?? null,
         filePaths: file_storage_paths ?? [],
         siteUrl: siteUrlForEmail,
