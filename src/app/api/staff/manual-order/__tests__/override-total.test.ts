@@ -39,12 +39,17 @@ describe("applyOverrideTotal — exact tax-consistent back-solve", () => {
       // Grand total equals exactly what staff typed.
       expect(breakdown.totalCents).toBe(Math.round(target * 100));
 
-      // Tax split is exactly GST 5% + PST 6% of the full subtotal —
-      // recomputed independently from the scaled line amounts (no drift).
+      // Tax split uses the same per-line rounding as the emitted Wave lines.
       const recomputed = computeBreakdownCents(scaled);
       expect(recomputed).toEqual(breakdown);
-      expect(breakdown.gstCents).toBe(Math.round(breakdown.subtotalCents * 0.05));
-      expect(breakdown.pstCents).toBe(Math.round(breakdown.subtotalCents * 0.06));
+      expect(breakdown.gstCents).toBe(scaled.reduce(
+        (sum, item) => sum + Math.round(Math.round(item.amount * 100) * 0.05),
+        0,
+      ));
+      expect(breakdown.pstCents).toBe(scaled.reduce(
+        (sum, item) => sum + Math.round(Math.round(item.amount * 100) * 0.06),
+        0,
+      ));
     });
   }
 
@@ -69,6 +74,40 @@ describe("applyOverrideTotal — exact tax-consistent back-solve", () => {
     expect(computeBreakdownCents(items, true)).toEqual(breakdown);
   });
 
+  it("matches Wave's confirmed per-line half-cent rounding", () => {
+    expect(computeBreakdownCents([product(0.5), product(0.5)])).toEqual({
+      subtotalCents: 100,
+      gstCents: 6,
+      pstCents: 6,
+      totalCents: 112,
+    });
+  });
+
+  it("preserves the exact tax split when aggregate rounding hides the mismatch", () => {
+    expect(computeBreakdownCents([product(0.25), product(0.25)])).toEqual({
+      subtotalCents: 50,
+      gstCents: 2,
+      pstCents: 4,
+      totalCents: 56,
+    });
+  });
+
+  it("rounds GST per line while keeping a standalone service outside the PST base", () => {
+    expect(computeBreakdownCents([
+      { ...product(0.5), taxClass: "printed_good" },
+      { ...fee(0.5), taxClass: "design_service", standaloneService: true },
+    ])).toEqual({ subtotalCents: 100, gstCents: 6, pstCents: 3, totalCents: 109 });
+  });
+
+  it("rounds GST per line and removes all PST for a confirmed resale exemption", () => {
+    expect(computeBreakdownCents([product(0.5), product(0.5)], true)).toEqual({
+      subtotalCents: 100,
+      gstCents: 6,
+      pstCents: 0,
+      totalCents: 106,
+    });
+  });
+
   it("rejects a zero/negative override total", () => {
     expect(() => applyOverrideTotal([product(45)], 0)).toThrow();
     expect(() => applyOverrideTotal([product(45)], -5)).toThrow();
@@ -80,5 +119,11 @@ describe("applyOverrideTotal — exact tax-consistent back-solve", () => {
 
   it("rejects an override when there are no positive line amounts", () => {
     expect(() => applyOverrideTotal([product(0)], 100)).toThrow();
+  });
+
+  it("rejects a total that cannot be represented by exact per-line tax cents", () => {
+    expect(() => applyOverrideTotal([product(0.05)], 0.09)).toThrow(
+      "This total cannot be matched exactly with the current tax mix.",
+    );
   });
 });

@@ -1,5 +1,5 @@
 import { computeTaxCents, type TaxRates } from "@/lib/payment/tax-math";
-import { structuredQuotePstBaseCents, type StructuredQuoteTaxClass } from "@/lib/payment/structured-quote-tax";
+import type { StructuredQuoteTaxClass } from "@/lib/payment/structured-quote-tax";
 
 export interface ManualPricingLine {
   amount: number;
@@ -12,12 +12,36 @@ export interface ManualPricingLine {
 export const maximumManualTotalCents = (rates: TaxRates) => Math.round(99999 * (1 + rates.gstRate + rates.pstRate) * 100);
 
 export function manualBreakdownCents(items: ManualPricingLine[], rates: TaxRates, pstExempt = false) {
-  const lines = items.filter((item) => !item.standaloneService).map((item) => ({
-    description: "Manual line", qty: "1", unitPrice: (Math.round(item.amount * 100) / 100).toFixed(2),
+  // Preserve canonical rate validation even for an empty manual quote.
+  computeTaxCents(0, rates, pstExempt, 0);
+  const normalized = items.map((item) => ({
+    ...item,
+    amountCents: Math.round(item.amount * 100),
     taxClass: item.taxClass ?? "printed_good" as StructuredQuoteTaxClass,
   }));
-  const subtotalCents = items.reduce((sum, item) => sum + Math.round(item.amount * 100), 0);
-  return { subtotalCents, ...computeTaxCents(subtotalCents, rates, pstExempt, structuredQuotePstBaseCents(lines)) };
+  const bundledPrint = normalized.some((item) => !item.standaloneService && item.taxClass === "printed_good");
+
+  // Manual Wave invoices emit one qty=1 line for each saved manual item. Wave
+  // rounds each line's taxes to cents before adding the invoice totals, so the
+  // preview and saved order must use that same boundary. Rounding once on the
+  // combined subtotal can differ even when the grand total happens to match.
+  return normalized.reduce((sum, item) => {
+    const applyPst = !item.standaloneService && (
+      bundledPrint || !["design_service", "rush_service"].includes(item.taxClass)
+    );
+    const lineTax = computeTaxCents(
+      item.amountCents,
+      rates,
+      pstExempt,
+      applyPst ? item.amountCents : 0,
+    );
+    return {
+      subtotalCents: sum.subtotalCents + item.amountCents,
+      gstCents: sum.gstCents + lineTax.gstCents,
+      pstCents: sum.pstCents + lineTax.pstCents,
+      totalCents: sum.totalCents + lineTax.totalCents,
+    };
+  }, { subtotalCents: 0, gstCents: 0, pstCents: 0, totalCents: 0 });
 }
 
 /** Shared by modal and API. An override changes only this quote's line amounts. */

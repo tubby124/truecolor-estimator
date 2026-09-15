@@ -83,6 +83,62 @@ describe("manual order persistence and repeat protection", () => {
     expect(mocks.token.mock.calls[0][0]).toBe(11.1);
     expect(mocks.provision.mock.calls[0][2].waveItems).toEqual([expect.objectContaining({ qty: 1, unitPrice: 10, applyPst: true })]);
   });
+  it("persists and sends Wave's per-line tax result for two half-dollar lines", async () => {
+    const db = database();
+    const items = [
+      { product: "Line A", qty: 1, amount: 0.5, unitPrice: 0.5 },
+      { product: "Line B", qty: 1, amount: 0.5, unitPrice: 0.5 },
+    ];
+    const expectedPricing = {
+      gstRate: 0.05,
+      pstRate: 0.06,
+      subtotalCents: 100,
+      gstCents: 6,
+      pstCents: 6,
+      totalCents: 112,
+    };
+
+    const response = await POST(request({ ...base, items, expectedPricing }));
+
+    expect(response.status).toBe(200);
+    expect(db.saved()).toMatchObject({ subtotal: 1, gst: 0.06, pst: 0.06, total: 1.12 });
+    expect(mocks.token.mock.calls[0][0]).toBe(1.12);
+    expect(mocks.email).toHaveBeenCalledWith(expect.objectContaining({
+      subtotal: 1,
+      gst: 0.06,
+      pst: 0.06,
+      total: 1.12,
+    }));
+    expect(mocks.provision.mock.calls[0][2].waveItems).toEqual([
+      expect.objectContaining({ qty: 1, unitPrice: 0.5, applyGst: true, applyPst: true }),
+      expect.objectContaining({ qty: 1, unitPrice: 0.5, applyGst: true, applyPst: true }),
+    ]);
+  });
+  it("rejects the old aggregate-rounded half-dollar total before any write or send", async () => {
+    const db = database();
+    const items = [
+      { product: "Line A", qty: 1, amount: 0.5, unitPrice: 0.5 },
+      { product: "Line B", qty: 1, amount: 0.5, unitPrice: 0.5 },
+    ];
+
+    const response = await POST(request({
+      ...base,
+      items,
+      expectedPricing: {
+        gstRate: 0.05,
+        pstRate: 0.06,
+        subtotalCents: 100,
+        gstCents: 5,
+        pstCents: 6,
+        totalCents: 111,
+      },
+    }));
+
+    expect(response.status).toBe(409);
+    expect(db.orderInserts()).toBe(0);
+    expect(mocks.provision).not.toHaveBeenCalled();
+    expect(mocks.email).not.toHaveBeenCalled();
+  });
   it("returns the saved request on repeat without another invoice or email", async () => {
     const db = database();
     await POST(request());

@@ -22,10 +22,15 @@ describe("canonical tax parity", () => {
     expect(manual.totalCents).toBe(checkout.totalCents);
     expect(structured.grandTotal * 100).toBe(checkout.totalCents);
   });
-  it("rounds once at the order base instead of accumulating per-line tax pennies", () => {
+  it("keeps catalog order rounding separate from Wave-backed manual line rounding", () => {
     const inputs = Array.from({ length: 4 }, () => ({ sell_price: .1, gst_rate: rates.gstRate, pst_rate: rates.pstRate }));
     expect(computeTaxForCart(inputs)).toEqual({ gst: .02, pst: .02, total: .44, pstBase: .4 });
-    expect(manualBreakdownCents(inputs.map((item) => ({ amount: item.sell_price })), rates).totalCents).toBe(44);
+    expect(manualBreakdownCents(inputs.map((item) => ({ amount: item.sell_price })), rates)).toEqual({
+      subtotalCents: 40,
+      gstCents: 4,
+      pstCents: 4,
+      totalCents: 48,
+    });
   });
   it("keeps old policy active without the DB capability, and changes only a newly marked revision", () => {
     const lines = [
@@ -48,5 +53,6 @@ describe("canonical tax parity", () => {
     expect(() => computeTaxCents(100, { gstRate: 5, pstRate: .06 })).toThrow();
     expect(() => computeTax({ sell_price: 100, gst_rate: .05 })).toThrow("refresh");
     expect(() => computeTaxCents(100, rates, false, 101)).toThrow("PST base");
+    expect(() => manualBreakdownCents([], { gstRate: Number.NaN, pstRate: .06 })).toThrow();
   });
 });
