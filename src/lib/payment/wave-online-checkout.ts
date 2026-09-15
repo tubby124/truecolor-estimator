@@ -4,7 +4,10 @@ import { preflightWaveBeforeCloverCheckout } from "@/lib/payment/wave-click-pref
 import { getWaveOnlineInvoiceSnapshot } from "@/lib/wave/invoice";
 
 const PAID_STATUSES = new Set(["payment_received", "in_production", "ready_for_pickup", "complete"]);
-const PAYABLE_WAVE_STATUSES = new Set(["SAVED", "UNPAID", "OVERDUE", "PARTIAL"]);
+// Wave changes an unpaid invoice to SENT/VIEWED when its hosted payment page
+// is delivered or opened. Those are still payable states; treating VIEWED as
+// terminal strands a customer after their first click.
+const PAYABLE_WAVE_STATUSES = new Set(["SAVED", "SENT", "VIEWED", "UNPAID", "OVERDUE", "PARTIAL"]);
 
 interface OnlineOrder {
   total: number | string;
