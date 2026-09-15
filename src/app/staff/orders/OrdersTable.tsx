@@ -41,6 +41,7 @@ export interface Order {
   is_rush: boolean;
   subtotal: number;
   gst: number;
+  pst?: number | null;
   total: number;
   payment_method: string;
   actual_payment_label?: string | null;

@@ -1,22 +1,14 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { decodePaymentToken } from "@/lib/payment/token";
-import { CloverCheckoutError, createCloverCheckout } from "@/lib/payment/clover";
-import {
-  completeOrderCheckout,
-  failOrderCheckout,
-  reserveOrderCheckout,
-} from "@/lib/payment/order-checkout";
 import { CallTracker } from "@/components/site/CallTracker";
 import { createServiceClient } from "@/lib/supabase/server";
 import { recordAuditEvent } from "@/lib/audit/record";
-import { recordPaymentAttempt } from "@/lib/payments/attempts";
-import { preflightWaveBeforeCloverCheckout } from "@/lib/payment/wave-click-preflight";
 import {
   resolveStoredQuotePaymentBreakdown,
   type QuotePaymentBreakdown,
 } from "@/lib/payment/quote-order";
-import { loadCloverOrderDescription } from "@/lib/payment/clover-order-description";
+import { resolveWaveOnlineCheckout } from "@/lib/payment/wave-online-checkout";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -27,22 +19,12 @@ interface Props {
   searchParams: Promise<{ state?: string }>;
 }
 
-export function hasDurablyApprovedWaveInvoice(order: {
-  wave_invoice_id?: unknown;
-  wave_invoice_approved_at?: unknown;
-  quote_wave_state?: unknown;
-}): boolean {
-  return typeof order.wave_invoice_id === "string" && order.wave_invoice_id.trim().length > 0 &&
-    typeof order.wave_invoice_approved_at === "string" && order.wave_invoice_approved_at.trim().length > 0 &&
-    order.quote_wave_state === "ready";
-}
-
 /**
  * Payment gateway page — decodes the signed token from the quote email,
- * resolves a Clover Hosted Checkout session, and redirects immediately.
+ * resolves the linked Wave invoice, and redirects immediately.
  *
  * Direct catalog links resume one durable checkout reservation. Quote links
- * use the explicit confirmation form below and their own durable reservation.
+ * use the explicit confirmation form below before an order is materialized.
  */
 export default async function PaymentGatewayPage({ params, searchParams }: Props) {
   const { token } = await params;
@@ -51,7 +33,6 @@ export default async function PaymentGatewayPage({ params, searchParams }: Props
   let amountCents: number;
   let description: string;
   let customerEmail: string | undefined;
-  let redirectUrl: string | undefined;
   let quoteId: string | undefined;
   let quoteRevision: number | undefined;
   let signedOrderId: string | undefined;
@@ -61,7 +42,6 @@ export default async function PaymentGatewayPage({ params, searchParams }: Props
     amountCents = payload.amountCents;
     description = payload.description;
     customerEmail = payload.customerEmail;
-    redirectUrl = payload.redirectUrl;
     quoteId = payload.quoteId;
     quoteRevision = payload.quoteRevision;
     signedOrderId = payload.orderId;
@@ -101,123 +81,26 @@ export default async function PaymentGatewayPage({ params, searchParams }: Props
   try {
     const orderId = signedOrderId;
     if (!orderId) return <ExpiredPage />;
-    let isPartialBalance = false;
-
-    // Stale-link and payment-ledger checks for order-scoped tokens.
-    if (orderId) {
-      const supabase = createServiceClient();
-      const { data: orderCheck, error: orderCheckError } = await supabase
-        .from("orders")
-        .select("total, status, voided_at, conversion_type, paid_at, wave_payment_recorded_at, is_archived, wave_invoice_id, wave_invoice_approved_at, quote_wave_state")
-        .eq("id", orderId)
-        .maybeSingle();
-      if (orderCheckError || !orderCheck) {
-        console.error("[pay/token] order readiness lookup failed:", orderCheckError?.message ?? "order not found");
-        return <ErrorPage />;
-      }
-      if (orderCheck.voided_at || orderCheck.is_archived) {
-        return <UpdatedLinkPage />;
-      }
-      // Block if already paid — prevents duplicate charges when customer clicks link again
-      if (orderCheck.paid_at || orderCheck.wave_payment_recorded_at || ["payment_received", "in_production", "ready_for_pickup", "complete"].includes(orderCheck?.status ?? "")) {
-        return <AlreadyPaidPage />;
-      }
-      // Orders are never allowed to create or resume Clover unless the
-      // approved Wave invoice is durably linked by the locked provisioning RPC.
-      const waveInvoiceId = typeof orderCheck.wave_invoice_id === "string" ? orderCheck.wave_invoice_id : null;
-      if (!waveInvoiceId || !hasDurablyApprovedWaveInvoice(orderCheck)) {
-        console.error("[pay/token] Clover blocked: Wave invoice is not durably ready", { orderId });
-        return <ErrorPage />;
-      }
-      // A Wave invoice can have been paid after this link was emailed but
-      // before its local poll notices. Read authenticated provider payment
-      // evidence and atomically accept it before any Clover reservation can
-      // resume or create a card checkout.
-      try {
-        const preflight = await preflightWaveBeforeCloverCheckout(supabase, {
-          orderId,
-          waveInvoiceId,
-          requestedAmountCents: amountCents,
-        });
-        if (preflight.action === "already_paid") return <AlreadyPaidPage />;
-        if (preflight.action === "updated_link") return <UpdatedLinkPage />;
-        isPartialBalance = preflight.isPartialBalance;
-      } catch (preflightError) {
-        console.error("[pay/token] Wave click-time payment preflight failed:", preflightError);
-        return <ErrorPage />;
-      }
-    }
-
-    // Build the customer-facing Clover label from the saved order rows. The
-    // signed token still controls the amount, and the ledger guard above still
-    // requires that amount to equal the balance due.
-    description = await loadCloverOrderDescription(
-      createServiceClient(),
+    const checkout = await resolveWaveOnlineCheckout(createServiceClient(), {
       orderId,
-      isPartialBalance,
-    );
+      requestedAmountCents: amountCents,
+    });
+    if (checkout.action === "already_paid") return <AlreadyPaidPage />;
+    if (checkout.action === "updated_link") return <UpdatedLinkPage />;
 
-    let createdSessionId: string | null = null;
-    {
-      const supabase = createServiceClient();
-      const reservation = await reserveOrderCheckout(supabase, orderId);
-      if (reservation.action === "resume" && reservation.checkoutUrl) {
-        checkoutUrl = reservation.checkoutUrl;
-      } else if (reservation.action === "wait" || !reservation.reservationId) {
-        return <ErrorPage />;
-      } else {
-        try {
-          const result = await createCloverCheckout(
-            amountCents, description, customerEmail, redirectUrl, orderId,
-          );
-          await completeOrderCheckout(supabase, {
-            orderId,
-            reservationId: reservation.reservationId,
-            checkoutUrl: result.checkoutUrl,
-            sessionId: result.sessionId,
-            expiresAt: result.expiresAt,
-          });
-          checkoutUrl = result.checkoutUrl;
-          createdSessionId = result.sessionId || null;
-        } catch (error) {
-          const ambiguous = !(error instanceof CloverCheckoutError) || error.outcome === "ambiguous";
-          await failOrderCheckout(supabase, {
-            orderId,
-            reservationId: reservation.reservationId,
-            ambiguous,
-            error: error instanceof Error ? error.message : "Unknown Clover checkout error",
-          }).catch((reservationError) => {
-            console.error("[pay/token] checkout reservation failure update failed:", reservationError);
-          });
-          return <ErrorPage />;
-        }
-      }
-    }
-
-    if (orderId && createdSessionId !== null) {
-      const supabase = createServiceClient();
-      await recordPaymentAttempt(supabase, {
-        order_id: orderId,
-        status: "checkout_opened",
-        amount: amountCents / 100,
-        clover_checkout_session_id: createdSessionId,
-        customer_message: "Secure Clover checkout opened. We are waiting for payment confirmation.",
-      });
-
-      void recordAuditEvent({
-        actor_type: "customer",
-        actor_id: customerEmail ?? null,
-        event_type: "order.pay_link_clicked",
-        entity_type: "order",
-        entity_id: orderId,
-        detail: { amount_cents: amountCents, description },
-      });
-    }
+    void recordAuditEvent({
+      actor_type: "customer",
+      actor_id: customerEmail ?? null,
+      event_type: "order.pay_link_clicked",
+      entity_type: "order",
+      entity_id: orderId,
+      detail: { amount_cents: amountCents, provider: "wave", invoice_number: checkout.invoiceNumber },
+    });
+    checkoutUrl = checkout.checkoutUrl;
   } catch (err) {
-    console.error("[pay/token] Clover checkout failed:", err);
+    console.error("[pay/token] Wave checkout resolution failed:", err);
     return <ErrorPage />;
   }
-
   redirect(checkoutUrl);
 }
 
@@ -279,12 +162,12 @@ function QuotePayNowPage({
             <form action="/api/pay/quote" method="post">
               <input type="hidden" name="token" value={token} />
               <button type="submit" style={{ border: 0, borderRadius: 8, background: "#059669", color: "white", fontSize: 16, fontWeight: 700, padding: "14px 30px", cursor: "pointer" }}>
-                Pay {breakdown ? money(breakdown.totalCents) : "securely"} with Clover →
+                Pay {breakdown ? money(breakdown.totalCents) : "securely"} online →
               </button>
             </form>
           )}
           <p style={{ fontSize: 12, color: "#9ca3af", marginTop: 20 }}>
-            Your order is created only after you continue. Your card details are handled securely by Clover.
+            Your order is created only after you continue. Payment is handled securely by Wave.
           </p>
         </main>
     </section>

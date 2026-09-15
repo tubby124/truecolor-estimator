@@ -22,7 +22,7 @@ describe("quote payment linkage contract", () => {
     const gateway = source("src/app/pay/[token]/page.tsx");
     const quoteReturn = gateway.indexOf("if (quoteId)");
     expect(quoteReturn).toBeGreaterThan(0);
-    expect(quoteReturn).toBeLessThan(gateway.indexOf("createCloverCheckout("));
+    expect(quoteReturn).toBeLessThan(gateway.indexOf("resolveWaveOnlineCheckout("));
     expect(gateway).not.toContain("materializeQuoteOrder");
     expect(gateway).toContain('action="/api/pay/quote" method="post"');
     expect(gateway).not.toContain('<html lang="en">');
@@ -30,7 +30,8 @@ describe("quote payment linkage contract", () => {
     const post = source("src/app/api/pay/quote/route.ts");
     expect(post).toContain("export async function POST");
     expect(post).toContain("payload.quoteRevision");
-    expect(post.indexOf("materializeQuoteOrder")).toBeLessThan(post.indexOf("createCloverCheckout("));
+    expect(post.indexOf("materializeQuoteOrder")).toBeLessThan(post.indexOf("resolveWaveOnlineCheckout("));
+    expect(post).not.toContain("createCloverCheckout(");
   });
 
   it("uses locked transactional RPCs for duplicate-safe materialization and repair", () => {
@@ -99,7 +100,7 @@ describe("quote payment linkage contract", () => {
     expect(source("src/app/api/cron/google-ads-conversions/route.ts")).toContain('event_id: `${event.event_name}:${event.quote_id}`');
   });
 
-  it("reserves and resumes checkout atomically so duplicate POSTs cannot open multiple Clover sessions", () => {
+  it("retires the fresh legacy reservation before Wave and never opens Clover", () => {
     const migration = source("supabase/migrations/20260720100000_quote_conversion_measurement.sql");
     expect(migration).toContain("checkout_action text");
     expect(migration).toContain("quote_checkout_state = 'ready'");
@@ -107,9 +108,10 @@ describe("quote payment linkage contract", () => {
     expect(migration).toContain("now() + interval '16 minutes'");
 
     const post = source("src/app/api/pay/quote/route.ts");
-    expect(post).toContain('quoteOrder.checkoutAction === "resume"');
-    expect(post).toContain('quoteOrder.checkoutAction === "wait"');
-    expect(post.indexOf('quoteOrder.checkoutAction === "wait"')).toBeLessThan(post.indexOf("createCloverCheckout("));
+    expect(post).toContain('quoteOrder.checkoutAction === "create"');
+    expect(post).toContain("releaseUnusedQuoteCheckoutReservation(");
+    expect(post).toContain("resolveWaveOnlineCheckout(");
+    expect(post).not.toContain("createCloverCheckout(");
   });
 
   it("enforces authoritative configured tax formulas in the database", () => {

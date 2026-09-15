@@ -7,7 +7,7 @@ const mocks = vi.hoisted(() => ({
   materialize: vi.fn(),
   failReservation: vi.fn(),
   provisionWave: vi.fn(),
-  preflight: vi.fn(),
+  resolveWave: vi.fn(),
   createClover: vi.fn(),
   recordAttempt: vi.fn(),
   audit: vi.fn(),
@@ -27,7 +27,7 @@ vi.mock("@/lib/payment/quote-wave", () => ({
     ambiguous = true;
   },
 }));
-vi.mock("@/lib/payment/wave-click-preflight", () => ({ preflightWaveBeforeCloverCheckout: mocks.preflight }));
+vi.mock("@/lib/payment/wave-online-checkout", () => ({ resolveWaveOnlineCheckout: mocks.resolveWave }));
 vi.mock("@/lib/payment/clover", () => ({
   createCloverCheckout: mocks.createClover,
   CloverCheckoutError: class CloverCheckoutError extends Error { outcome = "definitive"; },
@@ -75,13 +75,21 @@ describe("quote checkout Wave preflight response boundary", () => {
     });
     mocks.materialize.mockReturnValue(quoteOrder());
     mocks.provisionWave.mockResolvedValue({ action: "ready", invoiceId: "wave-invoice-1" });
+    mocks.resolveWave.mockResolvedValue({
+      action: "ready",
+      checkoutUrl: "https://invoice.waveapps.com/customer/invoice-token",
+      invoiceId: "wave-invoice-1",
+      invoiceNumber: "123",
+      amountDueCents: 10_000,
+      isPartialBalance: false,
+    });
     mocks.rateLimit.mockReturnValue(true);
-    mocks.failReservation.mockRejectedValue(new Error("reservation no longer creating"));
+    mocks.failReservation.mockResolvedValue(undefined);
     mocks.audit.mockResolvedValue(undefined);
   });
 
   it("redirects to the existing order confirmation after full Wave payment even when cleanup cannot release the reservation", async () => {
-    mocks.preflight.mockResolvedValue({ action: "already_paid" });
+    mocks.resolveWave.mockResolvedValue({ action: "already_paid" });
 
     const response = await POST(request());
 
@@ -92,7 +100,7 @@ describe("quote checkout Wave preflight response boundary", () => {
   });
 
   it("returns the stale-link page after partial Wave payment even when cleanup cannot release the reservation", async () => {
-    mocks.preflight.mockResolvedValue({ action: "updated_link" });
+    mocks.resolveWave.mockResolvedValue({ action: "updated_link" });
 
     const response = await POST(request());
 
@@ -103,7 +111,7 @@ describe("quote checkout Wave preflight response boundary", () => {
   });
 
   it("returns the error page after Wave verification failure even when cleanup cannot release the reservation", async () => {
-    mocks.preflight.mockRejectedValue(new Error("Wave read timeout"));
+    mocks.resolveWave.mockRejectedValue(new Error("Wave read timeout"));
 
     const response = await POST(request());
 
@@ -119,13 +127,30 @@ describe("quote checkout Wave preflight response boundary", () => {
       checkoutReservationId: null,
       checkoutUrl: "https://checkout.clover.com/old-session",
     }));
-    mocks.preflight.mockResolvedValue({ action: "updated_link" });
+    mocks.resolveWave.mockResolvedValue({ action: "updated_link" });
 
     const response = await POST(request());
 
     expect(response.status).toBe(303);
     expect(response.headers.get("location")).toBe(`https://truecolorprinting.ca/pay/${TOKEN}?state=stale`);
     expect(mocks.failReservation).not.toHaveBeenCalled();
+    expect(mocks.createClover).not.toHaveBeenCalled();
+  });
+
+  it("redirects a fresh structured quote to Wave without creating Clover checkout", async () => {
+    const response = await POST(request());
+    expect(response.status).toBe(303);
+    expect(response.headers.get("location")).toBe("https://invoice.waveapps.com/customer/invoice-token");
+    expect(mocks.failReservation).toHaveBeenCalledTimes(1);
+    expect(mocks.createClover).not.toHaveBeenCalled();
+  });
+
+  it("fails closed when the fresh unused reservation cannot be released", async () => {
+    mocks.failReservation.mockRejectedValue(new Error("reservation changed"));
+    const response = await POST(request());
+    expect(response.headers.get("location")).toBe(`https://truecolorprinting.ca/pay/${TOKEN}?state=error`);
+    expect(mocks.provisionWave).not.toHaveBeenCalled();
+    expect(mocks.resolveWave).not.toHaveBeenCalled();
     expect(mocks.createClover).not.toHaveBeenCalled();
   });
 });

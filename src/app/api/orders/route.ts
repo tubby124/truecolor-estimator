@@ -1,4 +1,3 @@
-import { buildCloverOrderDescription } from "@/lib/payment/clover-order-description";
 /**
  * POST /api/orders
  *
@@ -6,7 +5,7 @@ import { buildCloverOrderDescription } from "@/lib/payment/clover-order-descript
  *   1. Supabase customer (upsert by email)
  *   2. Supabase order + order_items rows
  *   3. Wave invoice (DRAFT — silent, not sent to customer yet)
- *   4. Clover Hosted Checkout session
+ *   4. Wave online payment link or eTransfer instructions
  *
  * Returns: { orderId, orderNumber, checkoutUrl }
  * On eTransfer: returns { orderId, orderNumber, checkoutUrl: null }
@@ -15,18 +14,10 @@ import { buildCloverOrderDescription } from "@/lib/payment/clover-order-descript
 import { NextRequest, NextResponse } from "next/server";
 import { createHash } from "node:crypto";
 import { createServiceClient } from "@/lib/supabase/server";
-import { CloverCheckoutError, createCloverCheckout } from "@/lib/payment/clover";
-import { recordPaymentAttempt } from "@/lib/payments/attempts";
-import {
-  completeOrderCheckout,
-  failOrderCheckout,
-  reserveOrderCheckout,
-} from "@/lib/payment/order-checkout";
 import {
   provisionOrderWaveInvoice,
   QuoteWaveProvisioningError,
 } from "@/lib/payment/quote-wave";
-import { encodePaymentToken } from "@/lib/payment/token";
 import type { CartItem } from "@/lib/cart/cart";
 import { sendOrderConfirmationEmail } from "@/lib/email/orderConfirmation";
 import { sendStaffOrderNotification } from "@/lib/email/staffNotification";
@@ -35,8 +26,7 @@ import { getConfigNum } from "@/lib/data/loader";
 import { sanitizeError } from "@/lib/errors/sanitize";
 import { computeOrderMinSurcharge, SMALL_ORDER_FEE_LABEL } from "@/lib/pricing/order-min";
 import { getCanonicalTaxRates } from "@/lib/pricing/canonical-rates";
-import { computeTaxCents } from "@/lib/payment/tax-math";
-import { computePstBase } from "@/lib/pricing/tax";
+import { buildCatalogWaveInvoicePlan } from "@/lib/payment/catalog-wave-plan";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
 import { classifyReferrer } from "@/lib/analytics/referrer";
 import {
@@ -50,7 +40,8 @@ import { mapAttributionToDb, mapLatestPaidAttributionToDb } from "@/lib/analytic
 import { getMetaCapiRequestContext } from "@/lib/analytics/metaCapi";
 import { recordAuditEvent, extractRequestContext } from "@/lib/audit/record";
 import { parseGa4ClientContext } from "@/lib/analytics/ga4-client-context";
-import { preflightWaveBeforeCloverCheckout } from "@/lib/payment/wave-click-preflight";
+import { resolveWaveOnlineCheckout } from "@/lib/payment/wave-online-checkout";
+import { resolveOrderPayLink } from "@/lib/orders/payLink";
 
 // `LatestPaidHintPayload` contributes the optional `latest_paid_*` fields the
 // checkout submit sends when localStorage still holds a paid touch that the
@@ -67,7 +58,7 @@ export interface CreateOrderRequest extends LatestPaidHintPayload {
     address?: string;
   };
   is_rush: boolean;
-  payment_method: "clover_card" | "etransfer";
+  payment_method: "wave" | "etransfer";
   notes?: string;
   file_storage_paths?: string[];
   discount_code?: string;   // optional — re-validated server-side before use
@@ -137,6 +128,9 @@ export async function POST(req: NextRequest) {
 
     if (!UUID_RE.test(checkout_submission_id ?? "")) {
       return NextResponse.json({ error: "A valid checkout submission ID is required" }, { status: 400 });
+    }
+    if (payment_method !== "wave" && payment_method !== "etransfer") {
+      return NextResponse.json({ error: "A valid payment method is required" }, { status: 400 });
     }
 
     if (!rawItems?.length) {
@@ -283,17 +277,27 @@ export async function POST(req: NextRequest) {
     const orderMin = computeOrderMinSurcharge(discountedItemsSubtotal + rush);
     const smallOrderFee = orderMin.surcharge;
     const discountedSubtotal = discountedItemsSubtotal + smallOrderFee;
-    // Saskatchewan PST-20 taxes the full charge for taxable printed material,
-    // including design, production, rush, and setup charges. Standalone service
-    // lines (DESIGN/SERVICE — vectorization, upscale, design with no print job)
-    // ship no tangible goods and are GST-only; computePstBase carves them out and
-    // returns 0 for a service-only order. Checkout's preview calls the same helper.
-    const pstBase = computePstBase({ items, discountedSubtotal, rush });
-    const tax = computeTaxCents(Math.round((discountedSubtotal + rush) * 100), getCanonicalTaxRates(), false, Math.round(pstBase * 100));
-    const gst = tax.gstCents / 100;
-    const pst = tax.pstCents / 100;
-    const total = tax.totalCents / 100;
-    const reviewedTotal = compareReviewedCheckoutTotal(body.expectedTotalCents, tax.totalCents);
+    // Wave rounds tax per emitted line. Build that exact line plan before
+    // persisting totals, so an approved Wave invoice cannot differ by a cent.
+    const catalogWavePlan = buildCatalogWaveInvoicePlan({
+      items: items.map((item) => ({
+        description: item.label,
+        qty: item.qty,
+        sellPrice: item.sell_price,
+        designFee: item.design_fee,
+        category: item.category,
+        materialCode: item.config.material_code,
+      })),
+      discount,
+      discountDescription: `Discount${validatedDiscountCode ? ` (${validatedDiscountCode})` : ""}`,
+      smallOrderFee,
+      rush,
+      rates: getCanonicalTaxRates(),
+    });
+    const gst = catalogWavePlan.financials.gstCents / 100;
+    const pst = catalogWavePlan.financials.pstCents / 100;
+    const total = catalogWavePlan.financials.totalCents / 100;
+    const reviewedTotal = compareReviewedCheckoutTotal(body.expectedTotalCents, catalogWavePlan.financials.totalCents);
     if (!reviewedTotal.ok) {
       return NextResponse.json({ error: reviewedTotal.error, code: reviewedTotal.code }, { status: reviewedTotal.status });
     }
@@ -761,47 +765,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 5. Provision and approve Wave under a locked, fail-closed reservation.
-    // Clover is unreachable until the approved invoice is durably linked to
-    // this order. Any outcome after a Wave call begins is treated as ambiguous
+    // 5. Online card payment provisions and approves Wave under a locked,
+    // fail-closed reservation. e-Transfer is a separate channel and must stay
+    // available when Wave is unavailable.
+    // Online payment is unreachable until the approved invoice is durably linked
+    // to this order. Any outcome after a Wave call begins is treated as ambiguous
     // and requires staff reconciliation instead of an automatic retry.
-    const waveItems = items.flatMap((item) => {
-      const fee = item.design_fee ?? 0;
-      const productAmt = item.sell_price - fee;
-      const lines = [];
-      if (productAmt > 0) {
-        lines.push({ description: item.label, unitPrice: productAmt / item.qty, qty: item.qty, applyGst: true, applyPst: true });
-      }
-      if (fee > 0) {
-        lines.push({ description: "Design / Artwork Fee", unitPrice: fee, qty: 1, applyGst: true, applyPst: true });
-      }
-      if (productAmt <= 0 && fee <= 0) {
-        lines.push({ description: item.label, unitPrice: item.sell_price / item.qty, qty: item.qty, applyGst: true, applyPst: true });
-      }
-      return lines;
-    });
-
-    if (discount > 0) {
-      waveItems.push({
-        description: `Discount${validatedDiscountCode ? ` (${validatedDiscountCode})` : ""}`,
-        unitPrice: -discount,
-        qty: 1,
-        applyGst: true,
-        applyPst: true,
-      });
-    }
-    if (smallOrderFee > 0) {
-      waveItems.push({
-        description: SMALL_ORDER_FEE_LABEL,
-        unitPrice: smallOrderFee,
-        qty: 1,
-        applyGst: true,
-        applyPst: true,
-      });
-    }
-
     let waveInvoiceId: string | null = null;
-    try {
+    if (payment_method === "wave") try {
       const wave = await provisionOrderWaveInvoice(
         supabase,
         order.id,
@@ -809,13 +780,13 @@ export async function POST(req: NextRequest) {
           orderNumber: order.order_number,
           customerEmail: emailKey,
           customerName: contact.name.trim(),
-          waveItems,
-          isRush: is_rush,
+          waveItems: catalogWavePlan.waveItems,
+          isRush: catalogWavePlan.isRush,
         },
       );
       if (wave.action !== "ready" || !wave.invoiceId) {
         return NextResponse.json(
-          { error: "Order accounting setup is still being verified. No payment was started.", orderId: order.id },
+          { error: "Order accounting setup is still being verified. No payment was started.", code: "WAVE_PROVISIONING_PENDING", orderId: order.id },
           { status: 409 },
         );
       }
@@ -830,170 +801,64 @@ export async function POST(req: NextRequest) {
         event_type: "wave.order_provision_failed",
         entity_type: "order",
         entity_id: order.id,
-        detail: { order_number: order.order_number, ambiguous, clover_called: false, error: msg.slice(0, 500) },
+        detail: { order_number: order.order_number, ambiguous, wave_online_called: false, error: msg.slice(0, 500) },
       });
       return NextResponse.json(
         { error: "Order accounting setup could not be confirmed. No payment was started.", orderId: order.id },
         { status: 503 },
       );
     }
-    if (!waveInvoiceId) {
+    if (payment_method === "wave" && !waveInvoiceId) {
       return NextResponse.json(
         { error: "Order accounting setup could not be confirmed. No payment was started.", orderId: order.id },
         { status: 503 },
       );
     }
 
-    // Only an idempotently resumed order can have a payment land between its
-    // original checkout attempt and this request. Reconcile authenticated Wave
-    // payment evidence before resuming or creating any Clover session.
-    if (resumedOrder && payment_method === "clover_card") {
-      const totalCents = Math.round(total * 100);
+    // 6. Wave is the only online-payment provider for catalog orders. The
+    // resolver re-reads the approved linked invoice and rejects a paid,
+    // changed, or unverifiable balance before returning its hosted payment URL.
+    let checkoutUrl: string | null = null;
+    let emailCheckoutUrl: string | null = null;
+    if (payment_method === "wave") {
       try {
-        const preflight = await preflightWaveBeforeCloverCheckout(supabase, {
+        const online = await resolveWaveOnlineCheckout(supabase, {
           orderId: order.id,
-          waveInvoiceId,
-          requestedAmountCents: totalCents,
+          requestedAmountCents: catalogWavePlan.financials.totalCents,
         });
-        if (preflight.action === "already_paid") {
+        if (online.action === "ready") {
+          checkoutUrl = online.checkoutUrl;
+          // The customer email must use our signed /pay gateway, which
+          // rechecks paid/voided/changed state before it opens Wave.
+          const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
+          const signed = await resolveOrderPayLink(supabase, {
+            orderId: order.id,
+            orderNumber: order.order_number,
+            total: Number(order.total),
+            customerEmail: emailKey,
+            siteUrl,
+          });
+          emailCheckoutUrl = signed.amountDueCents > 0 ? signed.paymentUrl : null;
+        } else if (online.action === "already_paid") {
           const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
           return NextResponse.json({
             orderId: order.id,
             orderNumber: order.order_number,
             checkoutUrl: `${siteUrl}/order-confirmed?oid=${order.id}`,
-            waveInvoiceId: null,
+            waveInvoiceId,
           });
-        }
-        if (preflight.action === "updated_link") {
+        } else {
           return NextResponse.json(
             { error: "This checkout amount is no longer payable. No payment was started.", orderId: order.id },
             { status: 409 },
           );
         }
-      } catch (preflightError) {
-        console.error("[orders] Wave click-time payment preflight failed:", preflightError);
+      } catch (onlineError) {
+        console.error("[orders] Wave online checkout blocked:", onlineError);
         return NextResponse.json(
           { error: "Payment verification could not be confirmed. No payment was started.", orderId: order.id },
           { status: 503 },
         );
-      }
-    }
-
-    // 6. Clover Hosted Checkout (card) or /pay/{token} fallback URL (eTransfer)
-    let checkoutUrl: string | null = null;
-    let emailCheckoutUrl: string | null = null;
-    if (payment_method === "clover_card") {
-      const totalCents = Math.round(total * 100);
-      const description = buildCloverOrderDescription({
-        orderNumber: order.order_number,
-        items: persistedItems,
-        isPartialBalance: false,
-      });
-
-      const siteUrl =
-        process.env.NEXT_PUBLIC_SITE_URL ??
-        "https://truecolorprinting.ca";
-      const redirectUrl = `${siteUrl}/order-confirmed?oid=${order.id}`;
-
-      const checkoutReservation = await reserveOrderCheckout(supabase, order.id);
-      if (checkoutReservation.action === "resume" && checkoutReservation.checkoutUrl) {
-        checkoutUrl = checkoutReservation.checkoutUrl;
-      } else if (checkoutReservation.action === "wait") {
-        return NextResponse.json(
-          { error: "Secure checkout is already being created or verified. No second session was started.", orderId: order.id },
-          { status: 409 },
-        );
-      } else {
-        if (!checkoutReservation.reservationId) {
-          return NextResponse.json(
-            { error: "Secure checkout could not be reserved. No payment was started.", orderId: order.id },
-            { status: 503 },
-          );
-        }
-        let openedCheckout: Awaited<ReturnType<typeof createCloverCheckout>> | null = null;
-        try {
-          const clover = await createCloverCheckout(totalCents, description, contact.email, redirectUrl, order.id);
-          await completeOrderCheckout(supabase, {
-            orderId: order.id,
-            reservationId: checkoutReservation.reservationId,
-            checkoutUrl: clover.checkoutUrl,
-            sessionId: clover.sessionId,
-            expiresAt: clover.expiresAt,
-          });
-          openedCheckout = clover;
-          checkoutUrl = clover.checkoutUrl;
-        } catch (cloverError) {
-          const ambiguous = !(cloverError instanceof CloverCheckoutError) || cloverError.outcome === "ambiguous";
-          await failOrderCheckout(supabase, {
-            orderId: order.id,
-            reservationId: checkoutReservation.reservationId,
-            ambiguous,
-            error: cloverError instanceof Error ? cloverError.message : "Unknown Clover checkout error",
-          }).catch((reservationError) => {
-            console.error("[orders] Clover reservation failure update failed:", reservationError);
-          });
-          return NextResponse.json(
-            {
-              error: ambiguous
-                ? "Secure checkout is being verified. No second session will be started."
-                : "Secure checkout could not be started. Please try again.",
-              orderId: order.id,
-            },
-            { status: ambiguous ? 409 : 503 },
-          );
-        }
-        // Payment-attempt telemetry must never invalidate a checkout session
-        // already durably committed by completeOrderCheckout.
-        if (openedCheckout) {
-          void recordPaymentAttempt(supabase, {
-            order_id: order.id,
-            status: "checkout_opened",
-            amount: total,
-            clover_checkout_session_id: openedCheckout.sessionId || null,
-            customer_message: "Secure Clover checkout opened. We are waiting for payment confirmation.",
-          });
-        }
-      }
-
-      // The durable email link resumes this reservation and creates a new
-      // session only after the prior one has definitely expired.
-      try {
-        const payToken = encodePaymentToken(total, description, contact.email, redirectUrl, {
-          orderId: order.id,
-        });
-        emailCheckoutUrl = `${siteUrl}/pay/${payToken}`;
-      } catch {
-        emailCheckoutUrl = checkoutUrl;
-      }
-    } else if (payment_method === "etransfer") {
-      // Generate a /pay/{token} URL as an optional card payment fallback.
-      // No Clover API call needed — /pay/ creates a fresh Clover session on each click.
-      // Stored in payment_reference (unused/null for eTransfer orders) so the
-      // /order-confirmed page and email can surface a "Pay by card instead" option.
-      try {
-        const siteUrl =
-          process.env.NEXT_PUBLIC_SITE_URL ??
-          "https://truecolorprinting.ca";
-        const redirectUrl = `${siteUrl}/order-confirmed?oid=${order.id}`;
-        const desc =
-          items.length === 1
-            ? items[0].product_name
-            : `True Color Order ${order.order_number} (${items.length} items)`;
-        const payToken = encodePaymentToken(total, desc, contact.email, redirectUrl, {
-          orderId: order.id,
-        });
-        checkoutUrl = `${siteUrl}/pay/${payToken}`;
-        emailCheckoutUrl = checkoutUrl;
-        // Note: this is the eTransfer fallback path where payment_reference stores
-        // the /pay/{token} URL (not the order.id). Used by /order-confirmed to
-        // surface a "Pay by card instead" option. Must `await`.
-        const { error: updErr } = await supabase
-          .from("orders")
-          .update({ payment_reference: checkoutUrl } as Record<string, unknown>)
-          .eq("id", order.id);
-        if (updErr) console.error("[orders] payment_reference save (eTransfer fallback) failed (non-fatal):", updErr.message);
-      } catch {
-        // Non-fatal — eTransfer still works without card fallback
       }
     }
 
@@ -1055,7 +920,7 @@ export async function POST(req: NextRequest) {
         discount_code: validatedDiscountCode ?? undefined,
         discount_amount: discount > 0 ? discount : undefined,
         is_rush,
-        payment_method: payment_method === "clover_card" ? "clover_pending" : payment_method,
+        payment_method,
         notes: notes ?? null,
         filePaths: file_storage_paths ?? [],
         siteUrl: siteUrlForEmail,

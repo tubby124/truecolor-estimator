@@ -11,5 +11,6 @@ export function reviewedPricingMatches(expected: unknown, actual: ReviewedPricin
   const amounts = ["subtotalCents", "gstCents", "pstCents", "totalCents"] as const;
   if (amounts.some((key) => !Number.isSafeInteger(input[key]) || input[key] !== actual[key])) return false;
   return input.gstRate === actual.gstRate && input.pstRate === actual.pstRate &&
-    (input.structuredTaxPolicyVersion ?? null) === (actual.structuredTaxPolicyVersion ?? null);
+    (input.structuredTaxPolicyVersion ?? null) === (actual.structuredTaxPolicyVersion ?? null) &&
+    (input.structuredTaxRoundingVersion ?? null) === (actual.structuredTaxRoundingVersion ?? null);
 }

@@ -1,3 +1,4 @@
+import { resolveWaveOnlineCheckout } from "@/lib/payment/wave-online-checkout";
 import { paymentLinkBlock } from "@/lib/orders/payment-readiness";
 /**
  * POST /api/staff/orders/[id]/resend-payment
@@ -5,10 +6,8 @@ import { paymentLinkBlock } from "@/lib/orders/payment-readiness";
  * Staff-only. Re-sends the payment link to the customer for an order
  * that is still in pending_payment status.
  *
- * All orders (Clover + Wave) re-encode a fresh /pay/{token} and send the
- * paymentRequest email. Wave invoice (if any) stays DRAFT — the Clover webhook
- * approves + records payment when the customer pays. Wave's hosted payment
- * page is no longer used (no webhooks on current plan = silent desync).
+ * Re-encodes a durable True Color /pay/{token} link to the approved Wave
+ * invoice. Provider payment is reconciled before collection; Starter uses polling.
  *
  * Guards: staff auth, order must exist, status must be pending_payment.
  */
@@ -101,10 +100,20 @@ export async function POST(req: NextRequest, { params }: Params) {
           : `${items[0].product_name} + ${items.length - 1} more (Order ${order.order_number})`
         : `True Color Order ${order.order_number}`;
 
+    // Verify the actual Wave invoice before handing out another online link.
+    // The signed link repeats this check when opened, after any later payment.
+    try {
+      const online = await resolveWaveOnlineCheckout(supabase, { orderId: id });
+      if (online.action !== "ready") {
+        return NextResponse.json({ error: online.action === "already_paid" ? "This order is already paid" : "The payment balance changed. Refresh this order before sending a link." }, { status: 409 });
+      }
+    } catch {
+      return NextResponse.json({ error: "Wave online payment is not ready. Review this order before sending a payment link." }, { status: 503 });
+    }
+
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
 
-    // All orders route through Clover gateway. Wave invoice (if any) stays
-    // DRAFT until webhook approves + records payment.
+    // Online links resolve to the approved Wave invoice.
     // Ledger-aware: a partially-paid order gets a balance link, never the raw
     // total, and the email below quotes the same amount the link charges.
     let payLink: ResolvedOrderPayLink;
@@ -156,7 +165,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       total,
       balanceDue: payLink.amountDue,
       paymentUrl,
-      paymentMethod: order.payment_method === "wave" ? "wave" : "clover",
+      paymentMethod: "wave",
       notes: order.notes as string | null,
       pstExemptionNote: pstExemptionInvoiceNote({
         enabled: order.pst_exempt === true,
@@ -177,7 +186,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         recipient: customer.email,
         total,
         amount_due: payLink.amountDue,
-        payment_method: order.payment_method ?? "clover",
+        payment_method: "wave",
       },
     });
 

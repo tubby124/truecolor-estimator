@@ -223,10 +223,10 @@ function buildStaffNotificationHtml(
       : payment_method === "wave"
       ? `<div style="background: #eff6ff; border: 1px solid #93c5fd; border-radius: 8px; padding: 14px 16px; margin-bottom: 20px;">
           <p style="margin: 0 0 2px; font-size: 13px; font-weight: 700; color: #1d4ed8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-            ⏳ Wave Invoice sent — awaiting online payment
+            ⏳ Wave invoice ready — awaiting online payment
           </p>
           <p style="margin: 0; font-size: 12px; color: #1e40af; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-            $${total.toFixed(2)} CAD. Customer was emailed a Wave hosted invoice. Start production once Wave confirms payment.
+            $${total.toFixed(2)} CAD. Online payment uses Wave. DO NOT start printing until payment is confirmed.
           </p>
         </div>`
       : `<div style="background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 14px 16px; margin-bottom: 20px;">
@@ -459,7 +459,7 @@ function buildStaffNotificationText(
       : payment_method === "clover_pending"
       ? `Clover payment request sent — $${total.toFixed(2)} CAD. Awaiting customer payment from the Clover link. DO NOT start printing until payment is confirmed.`
       : payment_method === "wave"
-      ? `Wave Invoice sent — $${total.toFixed(2)} CAD. Awaiting online payment via Wave. Start production once paid.`
+      ? `Wave invoice ready — $${total.toFixed(2)} CAD. Awaiting online payment via Wave. DO NOT start printing until payment is confirmed.`
       : `e-Transfer PENDING — $${total.toFixed(2)} to info@true-color.ca. DO NOT start printing yet.`,
     "",
     notes ? `CUSTOMER NOTES\n${notes}` : "",

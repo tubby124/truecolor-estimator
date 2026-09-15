@@ -73,6 +73,15 @@ function tier1Copy(ctx: FollowupCopyContext): FollowupCopyResult {
       foot: "Send e-Transfer to info@true-color.ca and include your order number in the message.",
     };
   }
+  if (paymentMethod === "wave") {
+    return {
+      subject: `Complete your Wave invoice — ${orderNumber}`,
+      headline: "Your Wave invoice is waiting",
+      body: `Your order is saved and waiting for payment through its Wave invoice.${partial}`,
+      cta: "View Wave invoice",
+      foot: "Open the invoice to complete payment. We verify provider payment before production; if you have already paid, reply so we can reconcile it before another payment is attempted.",
+    };
+  }
   return {
     subject: `Your True Color order ${orderNumber} is waiting`,
     headline: "Your order is waiting",
@@ -92,6 +101,15 @@ function partialLine(ctx: FollowupCopyContext): string {
 /** T2 — 24h check-in: service frame, opens changes + already-paid doors. */
 function tier2Copy(ctx: FollowupCopyContext): FollowupCopyResult {
   const partial = partialLine(ctx);
+  if (ctx.paymentMethod === "wave") {
+    return {
+      subject: `Quick check on your Wave invoice ${ctx.orderNumber}`,
+      headline: "Any changes needed",
+      body: `Your order is saved and ready for production after its Wave invoice payment is verified. If the price, specs, or files need a change, reply to this email and we'll revise it.${partial}`,
+      cta: "View Wave invoice",
+      foot: `Open the Wave invoice when ready. Already paid? Reply "paid" and we'll reconcile it before asking for another payment.`,
+    };
+  }
   return {
     subject: `Quick check on your order ${ctx.orderNumber}`,
     headline: `Any changes needed`,

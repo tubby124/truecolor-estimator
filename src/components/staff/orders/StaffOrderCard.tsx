@@ -173,7 +173,7 @@ export function StaffOrderCard({
   ).map((p) => `${SUPABASE_STORAGE_URL}/${p}`);
 
   const rushFee = order.is_rush
-    ? Number(order.total) - Number(order.subtotal) - Number(order.gst)
+    ? Number(order.total) - Number(order.subtotal) - Number(order.gst) - Number(order.pst ?? 0)
     : 0;
 
   // Current value for the status override dropdown
@@ -594,6 +594,12 @@ export function StaffOrderCard({
               </span>
             </div>
             <div>
+              <span className="text-gray-400">PST</span>{" "}
+              <span className="font-semibold tabular-nums">
+                ${Number(order.pst ?? 0).toFixed(2)}
+              </span>
+            </div>
+            <div>
               <span className="text-gray-500 font-semibold">Total</span>{" "}
               <span className="font-bold text-[#1c1712] tabular-nums">
                 ${Number(order.total).toFixed(2)} CAD
@@ -955,7 +961,7 @@ export function StaffOrderCard({
                       {payLink.message}
                     </p>
                     <p className="text-[11px] text-gray-400 mt-1">
-                      Paste into a text or Messenger · 30-day link, opens secure Clover checkout
+                      Paste into a text or Messenger · 30-day link, opens your itemized Wave invoice for secure online payment
                     </p>
                   </div>
                 )}

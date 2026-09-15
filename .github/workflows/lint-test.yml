@@ -50,6 +50,13 @@ jobs:
         run: |
           node scripts/db/structured-quote-pst20-regression.mjs |
             psql -X -v ON_ERROR_STOP=1 --host 127.0.0.1 --username postgres --dbname postgres
+      - name: Structured quote Wave per-line rounding regression
+        shell: bash
+        env:
+          PGPASSWORD: ${{ github.run_id }}
+        run: |
+          node scripts/db/structured-quote-wave-rounding-regression.mjs |
+            psql -X -v ON_ERROR_STOP=1 --host 127.0.0.1 --username postgres --dbname postgres
       - name: Wave provider payment recovery migration regression
         shell: bash
         env:

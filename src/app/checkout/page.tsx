@@ -19,8 +19,7 @@ import {
 import { metaTrackInitiateCheckout } from "@/lib/analytics/metaPixel";
 import { computeOrderMinSurcharge, SMALL_ORDER_FEE_LABEL } from "@/lib/pricing/order-min";
 import { useCanonicalRates } from "@/lib/pricing/use-canonical-rates";
-import { computeTaxCents } from "@/lib/payment/tax-math";
-import { computePstBase } from "@/lib/pricing/tax";
+import { buildCatalogWaveInvoicePlan } from "@/lib/payment/catalog-wave-plan";
 import { readLatestPaidFromStorage, readUtmFromStorage } from "@/components/site/UtmCapture";
 import { toLatestPaidHintPayload } from "@/lib/analytics/utm";
 import { captureGa4ClientContext } from "@/lib/analytics/ga4-client-context";
@@ -150,7 +149,7 @@ export default function CheckoutPage() {
 
   // Rush + payment state
   const [isRush, setIsRush] = useState(false);
-  const [payMethod, setPayMethod] = useState<"clover_card" | "etransfer">("clover_card");
+  const [payMethod, setPayMethod] = useState<"wave" | "etransfer">("wave");
   // Last payment_type sent to GA4 — keeps add_payment_info to one event per method
   const paymentInfoTrackedRef = useRef<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -359,21 +358,31 @@ export default function CheckoutPage() {
   const discountedItemsSubtotal = itemsSubtotal - discount;
   const orderMin = computeOrderMinSurcharge(discountedItemsSubtotal + rush);
   const smallOrderFee = orderMin.surcharge;
-  const discountedSubtotal = discountedItemsSubtotal + smallOrderFee;
   const subtotal = itemsSubtotal; // line items subtotal (pre-discount, pre-setup-fee) for the "Subtotal" row
-  // Saskatchewan PST-20 taxes the full customer charge for taxable printed
-  // material, including bundled design, rush, and setup charges. Standalone
-  // service lines are GST-only — shared helper so this preview can never drift
-  // from what POST /api/orders actually charges.
-  const pstBase = computePstBase({ items, discountedSubtotal, rush });
-  const tax = canonicalRates ? computeTaxCents(Math.round((discountedSubtotal + rush) * 100), canonicalRates, false, Math.round(pstBase * 100)) : null;
-  const gst = tax ? tax.gstCents / 100 : 0;
-  const pst = tax ? tax.pstCents / 100 : 0;
-  const total = tax ? tax.totalCents / 100 : 0;
+  // The API sends this same plan to Wave. Derive preview tax from emitted
+  // lines rather than a cart aggregate, because Wave rounds each line.
+  const catalogWavePlan = canonicalRates ? buildCatalogWaveInvoicePlan({
+    items: items.map((item) => ({
+      description: item.label,
+      qty: item.qty,
+      sellPrice: item.sell_price,
+      designFee: item.design_fee,
+      category: item.category,
+      materialCode: item.config.material_code,
+    })),
+    discount,
+    discountDescription: `Discount${appliedDiscount ? ` (${appliedDiscount.code})` : ""}`,
+    smallOrderFee,
+    rush,
+    rates: canonicalRates,
+  }) : null;
+  const gst = catalogWavePlan ? catalogWavePlan.financials.gstCents / 100 : 0;
+  const pst = catalogWavePlan ? catalogWavePlan.financials.pstCents / 100 : 0;
+  const total = catalogWavePlan ? catalogWavePlan.financials.totalCents / 100 : 0;
 
   // Fires GA4 add_payment_info — the only funnel signal between begin_checkout
   // and purchase. Deduped per method so re-selecting the same option is a no-op.
-  function trackPaymentMethod(method: "clover_card" | "etransfer") {
+  function trackPaymentMethod(method: "wave" | "etransfer") {
     if (paymentInfoTrackedRef.current === method) return;
     paymentInfoTrackedRef.current = method;
     trackAddPaymentInfo({
@@ -458,7 +467,7 @@ export default function CheckoutPage() {
     }
     setLoading(true);
     // Guarantee the funnel step exists even when the customer never touched the
-    // payment radios (clover_card is preselected). No-op if already sent.
+    // payment radios (Wave is preselected). No-op if already sent.
     trackPaymentMethod(payMethod);
     // Capture the browser-issued GA identity while the checkout session is still
     // active. Refresh after uploads so a long upload cannot age the session read.
@@ -541,7 +550,10 @@ export default function CheckoutPage() {
       };
       if (!res.ok) {
         if (data.code === "STALE_CHECKOUT_PRICE") throw new Error(data.error ?? "Pricing changed. Refresh and review before paying.");
-        if (res.status === 409 || res.status === 503) {
+        if (res.status === 503) {
+          throw new Error("CHECKOUT_ACCOUNTING_PENDING");
+        }
+        if (res.status === 409 && data.code !== "WAVE_PROVISIONING_PENDING") {
           try {
             sessionStorage.removeItem(CHECKOUT_SUBMISSION_KEY);
           } catch { /* ignore */ }
@@ -590,11 +602,11 @@ export default function CheckoutPage() {
         sessionStorage.removeItem(CHECKOUT_SUBMISSION_KEY);
         sessionStorage.removeItem(BEGIN_CHECKOUT_EVENT_KEY);
       } catch { /* ignore */ }
-      if (payMethod === "clover_card" && data.checkoutUrl) {
-        // Card: redirect to Clover hosted checkout (it bounces back to /order-confirmed?oid=...)
+      if (payMethod === "wave" && data.checkoutUrl) {
+        // Wave hosts the online payment page and returns to order confirmation.
         window.location.href = data.checkoutUrl;
       } else {
-        // eTransfer: skip Clover — go straight to confirmation with eTransfer instructions
+        // eTransfer goes straight to confirmation with transfer instructions.
         window.location.href = `/order-confirmed?oid=${data.orderId ?? ""}`;
       }
     } catch (err) {
@@ -1041,14 +1053,14 @@ export default function CheckoutPage() {
                   <input
                     type="radio"
                     name="pay"
-                    value="clover_card"
-                    checked={payMethod === "clover_card"}
-                    onChange={() => { setPayMethod("clover_card"); trackPaymentMethod("clover_card"); }}
+                     value="wave"
+                     checked={payMethod === "wave"}
+                     onChange={() => { setPayMethod("wave"); trackPaymentMethod("wave"); }}
                     className="accent-[#16C2F3]"
                   />
                   <div>
-                    <p className="font-semibold text-sm text-[#1c1712]">Pay by card</p>
-                    <p className="text-xs text-gray-500">Visa, Mastercard, Amex — secure Clover checkout</p>
+                     <p className="font-semibold text-sm text-[#1c1712]">Pay online</p>
+                     <p className="text-xs text-gray-500">Card or bank transfer through our secure Wave invoice</p>
                   </div>
                 </label>
 
@@ -1115,11 +1127,11 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {/* Clover redirect note */}
-            {payMethod === "clover_card" && (
-              <p className="text-xs text-gray-500 flex items-center gap-1.5">
-                <span aria-hidden="true">🔒</span>
-                You&apos;ll be redirected to Clover&apos;s secure checkout to complete payment.
+             {/* Online payment redirect note */}
+             {payMethod === "wave" && (
+               <p className="text-xs text-gray-500 flex items-center gap-1.5">
+                 <span aria-hidden="true">🔒</span>
+                 You&apos;ll be redirected to Wave&apos;s secure payment page to complete payment.
               </p>
             )}
 
@@ -1131,7 +1143,7 @@ export default function CheckoutPage() {
             </p>
 
             {/* Submit */}
-            {payMethod === "clover_card" ? (
+             {payMethod === "wave" ? (
               <button
                 onClick={handleSubmit}
                 disabled={loading || !canonicalRates}

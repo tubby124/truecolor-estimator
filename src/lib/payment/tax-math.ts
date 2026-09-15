@@ -2,6 +2,7 @@ export interface TaxRates {
   gstRate: number;
   pstRate: number;
   structuredTaxPolicyVersion?: string;
+  structuredTaxRoundingVersion?: string;
 }
 
 export interface TaxCents {

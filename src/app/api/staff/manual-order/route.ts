@@ -1,3 +1,4 @@
+import { resolveWaveOnlineCheckout } from "@/lib/payment/wave-online-checkout";
 /**
  * POST /api/staff/manual-order
  *
@@ -128,7 +129,7 @@ export async function POST(req: NextRequest) {
       // Legacy single-item (backward compat)
       description?: string;
       amount?: number;
-      payment_method: "clover";
+      payment_method: "clover" | "wave";
       quote_only?: boolean; // true = email frames as "Quote — pay to confirm or reply for changes"; false = "Payment Request"
       notes?: string;
       customMessage?: string;
@@ -143,7 +144,8 @@ export async function POST(req: NextRequest) {
       pstExemption?: PstExemptionInput;
     };
 
-    const { contact, payment_method, notes } = body;
+    const { contact, notes } = body;
+    const payment_method = "wave" as const;
     if (typeof body.submissionId !== "string" || !UUID_RE.test(body.submissionId)) {
       return NextResponse.json({ error: "A stable submissionId is required. Reload the quote form before submitting." }, { status: 400 });
     }
@@ -174,11 +176,10 @@ export async function POST(req: NextRequest) {
     if (!contact?.email?.trim()) {
       return NextResponse.json({ error: "Customer email is required" }, { status: 400 });
     }
-    // Wave-as-payment-channel was retired 2026-05-26 — Wave is now bookkeeping only.
-    // Every manual order pays through Clover (/pay/[token]); Wave draft is created
-    // server-side for the books. Customer never interacts with a Wave-hosted link.
-    if (payment_method !== "clover") {
-      return NextResponse.json({ error: "Invalid payment method (only 'clover' is supported)" }, { status: 400 });
+    // Older open staff forms may still submit the previous channel label.
+    // All new online requests now use Wave; this is not recorded payment evidence.
+    if (body.payment_method !== "wave" && body.payment_method !== "clover") {
+      return NextResponse.json({ error: "Invalid online payment method" }, { status: 400 });
     }
 
     for (const item of items) {
@@ -541,7 +542,7 @@ export async function POST(req: NextRequest) {
           pst_vendor_number: pstExemption.enabled ? pstExemption.vendorNumber : null,
           pst_resale_confirmed: pstExemption.resaleConfirmed,
           replaces_order_id: replacementOrderId,
-          payment_method: "clover_card",
+          payment_method: "wave",
           // conversion_key mirrors how /api/orders/route.ts builds it for the
           // online path: "<conversion_type>:<stable identifier>".
           quote_request_id: quoteRequestId,
@@ -718,6 +719,8 @@ export async function POST(req: NextRequest) {
       if (wave.action !== "ready" || !wave.invoiceId) {
         throw new Error("Wave invoice provisioning is still being verified");
       }
+      const online = await resolveWaveOnlineCheckout(supabase, { orderId: order.id, requestedAmountCents: Math.round(total * 100) });
+      if (online.action !== "ready") throw new Error("Wave payment is no longer payable at the reviewed amount");
       console.log(`[manual-order] Wave invoice approved and linked → order ${order.order_number} | wave_invoice_id ${wave.invoiceId}`);
     } catch (waveErr) {
       const msg = waveErr instanceof Error ? waveErr.message : String(waveErr);
@@ -804,7 +807,7 @@ export async function POST(req: NextRequest) {
         pst,
         total,
         is_rush: false,
-        payment_method: "clover_pending",
+        payment_method: "wave",
         notes: quoteOnly
           ? `[QUOTE — Pay Now included] ${notes?.trim() ?? "Customer can pay to confirm or reply for changes"}`
           : `[Manual Order] ${notes?.trim() ?? "Created via staff payment request"}`,
@@ -844,7 +847,7 @@ export async function POST(req: NextRequest) {
         order_number: order.order_number,
         customer_email: contact.email,
         item_count: items.length,
-        payment_method: body.payment_method ?? "clover",
+        payment_method: "wave",
         quote_only: quoteOnly,
         quote_request_id: quoteRequestId,
         link_source: linkSource,

@@ -47,7 +47,7 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
   const [quoteSending, setQuoteSending] = useState(false);
   const [quoteError, setQuoteError] = useState<string | null>(null);
   const [quoteSent, setQuoteSent] = useState(false);
-  const [taxRates, setTaxRates] = useState<{ gstRate: number; pstRate: number; structuredTaxPolicyVersion?: string } | null>(null);
+  const [taxRates, setTaxRates] = useState<{ gstRate: number; pstRate: number; structuredTaxPolicyVersion?: string; structuredTaxRoundingVersion?: string } | null>(null);
   const [pstExemption, setPstExemption] = useState<PstExemptionInput>({
     enabled: quote.pst_exempt === true,
     vendorNumber: quote.pst_vendor_number ?? "",
@@ -60,7 +60,7 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
     void fetch("/api/staff/pricing/tax-rates")
       .then(async (response) => {
         if (!response.ok) throw new Error("Tax configuration unavailable");
-        return response.json() as Promise<{ gstRate: number; pstRate: number; structuredTaxPolicyVersion?: string }>;
+        return response.json() as Promise<{ gstRate: number; pstRate: number; structuredTaxPolicyVersion?: string; structuredTaxRoundingVersion?: string }>;
       })
       .then(setTaxRates)
       .catch((error) => setQuoteError(error instanceof Error ? error.message : "Tax configuration unavailable"));
@@ -339,7 +339,7 @@ export function QuoteBuilderModal({ quote, open, onClose, onSent }: QuoteBuilder
                       <span>${total.toFixed(2)}</span>
                     </div>
                     <p className="text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-2 py-1.5 mt-2">
-                      ✓ Email includes a <strong>Pay ${total.toFixed(2)} now</strong> button (Clover, valid 30 days). Customer can pay immediately — no separate invoice needed.
+                      ✓ Email includes a <strong>Pay ${total.toFixed(2)} now</strong> button (Wave, valid 30 days). Customer can pay immediately — no separate invoice needed.
                     </p>
                   </div>
                 ) : null;

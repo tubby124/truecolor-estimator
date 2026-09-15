@@ -207,8 +207,8 @@ interface FormState {
   company: string;
   phone: string;
   items: OrderItem[];
-  payment_method: "clover";
-  quote_only: boolean; // true = quote email with a Clover Pay Now link
+  payment_method: "wave";
+  quote_only: boolean; // true = quote email with a Wave Pay Now link
   notes: string;
   customMessage: string;
   customSubject: string;
@@ -277,7 +277,7 @@ function toggleInList(current: string, value: string): string {
 const EMPTY_FORM: FormState = {
   name: "", email: "", company: "", phone: "",
   items: [makeItem()],
-  payment_method: "clover", quote_only: true, notes: "",
+  payment_method: "wave", quote_only: true, notes: "",
   customMessage: "", customSubject: "", overrideTotal: "", quote_request_id: "", replaces_order_id: "", acquisition_source: "",
   pstExemption: { enabled: false, vendorNumber: "", resaleConfirmed: false, rememberVendorNumber: true },
 };
@@ -1018,7 +1018,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                             <div className="flex-1">
                               <p className="text-sm font-bold text-gray-800 leading-tight">📝 Send Quote</p>
                               <p className="text-[11px] text-gray-500 leading-snug mt-1">
-                                Customer reviews the price and can use the Clover Pay Now link when ready. <strong className="text-emerald-700">Safest — use this first.</strong>
+                                Customer reviews the price and can use the Wave Pay Now link when ready. <strong className="text-emerald-700">Safest — use this first.</strong>
                               </p>
                             </div>
                           </div>
@@ -1045,7 +1045,7 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                             <div className="flex-1">
                               <p className="text-sm font-bold text-gray-800 leading-tight">💳 Send Invoice</p>
                               <p className="text-[11px] text-gray-500 leading-snug mt-1">
-                                Customer pays now. Sends a Clover Pay Now link (or e-Transfer fallback). <strong className="text-gray-700">Use after price is agreed.</strong>
+                                Customer pays now. Sends a Wave Pay Now link (or e-Transfer fallback). <strong className="text-gray-700">Use after price is agreed.</strong>
                               </p>
                             </div>
                           </div>
@@ -1705,17 +1705,17 @@ export function StaffOrdersActions({ newQuoteCount = 0 }: { newQuoteCount?: numb
                       </div>
                     </div>
 
-                    {/* ── PAYMENT METHOD (info only — Clover Pay Now is the only path) ── */}
+                    {/* ── PAYMENT METHOD (info only — Wave Pay Now is the only path) ── */}
                     <div>
                       <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
                         Step 4 · How it&apos;s billed
                       </p>
                       <div className="rounded-xl border-2 border-emerald-500 bg-emerald-50 px-4 py-3">
-                        <p className="text-sm font-semibold text-gray-800">Clover Pay Now</p>
+                        <p className="text-sm font-semibold text-gray-800">Wave Pay Now</p>
                         <p className="text-[11px] text-gray-600 leading-snug mt-0.5">
                           {form.quote_only
-                            ? "Customer gets a quote email with a Clover Pay Now button (e-Transfer to info@true-color.ca shown as fallback). They can pay to confirm or reply with changes. Your books are updated automatically when payment is confirmed."
-                            : "Customer gets a branded invoice email with a Clover Pay Now button (e-Transfer to info@true-color.ca shown as fallback). Your books are updated automatically the moment Clover confirms payment."}
+                            ? "Customer gets a quote email with a Wave Pay Now button (e-Transfer to info@true-color.ca shown as fallback). They can pay to confirm or reply with changes. Your books are updated automatically when payment is confirmed."
+                            : "Customer gets a branded invoice email with a Wave Pay Now button (e-Transfer to info@true-color.ca shown as fallback). Your books are updated automatically after Wave payment is verified."}
                         </p>
                       </div>
                     </div>

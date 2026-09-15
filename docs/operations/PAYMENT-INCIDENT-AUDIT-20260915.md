@@ -94,3 +94,24 @@ Final integrated local test run: 192 files / 1,793 tests passed. TypeScript, ESL
 The owner explicitly asked to preserve a proper payment receipt/invoice. Keep Wave as the accounting invoice and the website email as the payment confirmation. Existing automatic Clover/e-Transfer/status flows offer Wave's invoice PDF only after confirmed Wave-paid bookkeeping; other flows retain the authenticated True Color PDF. Fix the fallback PDF's provider label rather than introducing an unverified invoice redirect or sending a second invoice.
 
 The email and PDF retain the supplier's legal name, address/contact, configured GST registration number, buyer name, order/date reference, identifiable items/quantities, GST/PST and total in CAD. Paid status is conditional on the saved paid order state; unpaid PDFs remain order summaries. The review uses the [current federal supporting-document requirements](https://laws-lois.justice.gc.ca/eng/regulations/SOR-91-45/section-3.html) as a field checklist, not a blanket certification of every historical invoice or the customer's tax-credit eligibility. Wave remains the accounting source; the receipt confirms the recorded payment sources for the same job.
+
+
+## Owner-controlled send test exposed manual tax rounding — September 15
+
+An actual staff Send Quote attempt with two synthetic $0.50 taxable lines was blocked before any customer email or checkout session. The website saved subtotal $1.00, GST $0.05, PST $0.06 and total $1.11. The retained Wave draft read back GST $0.06, PST $0.06 and total $1.12: Wave rounded GST on each invoice line. The exact financial guard correctly stopped delivery and retained one invoice identity. This is a new acceptance failure after PR #100, not a completed end-to-end payment test.
+
+The bounded repair aligns the shared manual preview/API calculation with the actual emitted invoice lines. Keep exact subtotal/GST/PST/total verification; a matching grand total alone is insufficient. Tests must cover half-cent tax, equal-total/different-tax splits, standalone services, bundled printing services, resale exemption and total overrides. Existing issued invoices are not repriced. The unsent owner-controlled draft can be reconciled explicitly against its exact retained identity with zero payments/emails and an audit record, then sent through the staff resend action.
+
+[Wave's API reference](https://developer.waveapps.com/hc/en-us/articles/360019968212-API-Reference) defines taxes on invoice items and deprecates caller-supplied tax amounts. The live draft readback is the evidence for cent rounding. Normal storefront and structured quote producers are being checked independently for the same aggregate-versus-line mismatch. Their acceptance and the actual new payment/automatic inbox receipt remain open until separately verified.
+
+
+### Normal customer-flow check
+
+The same defect is confirmed in a realistic normal cart: two separately added active $337.50 banner rows yield aggregate GST $33.75, while Wave line GST is $16.88 + $16.88 = $33.76. Expected subtotal $675.00, PST $40.50 and correct Wave total $749.26. A single quantity-two invoice line is a distinct acceptance case. Card and e-Transfer both encounter the Wave prerequisite, so switching payment methods does not bypass this failure. The prior 503 handler cleared the submission identity and suggested e-Transfer, risking additional held drafts on retry. The repair must preserve identity on uncertain accounting outcomes and give accurate recovery instructions. No provider charge is reached on the financial mismatch.
+
+Structured quote revisions have the same aggregate-versus-line risk; their immutable SQL snapshot/capability contract requires a separate compatible change, never repricing already-issued revisions. A current-day production read found only the owner-controlled internal test in the ambiguous accounting state; this is a dated observation, not proof that all future cart combinations work.
+
+
+### First actual inbox acceptance
+
+The exact owner-only, unpaid and unsent retained draft was independently reviewed, reconciled from $1.11 to $1.12 before first send, approved by its existing provider identity, and linked through the guarded completion RPC with an audit record. No new invoice was created; test reminders were paused. The real staff **Resend payment link** action then delivered one $1.12 itemized request to the owner's Gmail inbox. Direct Gmail readback verified the INBOX label, recipient, both items/quantities, subtotal $1.00, GST $0.06, PST $0.06, total $1.12, Clover wording, and SPF/DKIM/DMARC pass. This confirms actual staff resend and inbox delivery, not a new successful manual create after deployment or a completed payment/receipt. The owner must complete the test payment; the normal storefront fix and live test remain in progress.

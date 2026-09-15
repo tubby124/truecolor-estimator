@@ -223,7 +223,7 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
   const methodNote = quoteOnly
     ? "Review the line items below, then use the payment button to approve and pay. Need changes first? Reply to this email or call (306) 954-8688."
     : paymentMethod === "wave"
-      ? "You can view and pay your invoice online using the button below."
+      ? "You can view your itemized invoice and pay securely through Wave using the button below."
       : "Click the button below to pay securely by credit card via Clover.";
 
   // Build item rows.
@@ -381,8 +381,8 @@ function buildPaymentRequestHtml(p: PaymentRequestEmailParams): string {
               <div style="background: #f0fbff; border: 1px solid #7de0f7; border-radius: 10px; padding: 20px 24px; margin-bottom: 24px; text-align: center;">
                 <p style="margin: 0 0 16px; font-size: 14px; color: #0c4a6e; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
                   ${quoteOnly
-                    ? `Pay <strong>$${amountDue.toFixed(2)} CAD</strong> to lock in your quote — or reply to this email if you'd like changes first.`
-                    : `Click the button below to pay <strong>$${amountDue.toFixed(2)} CAD</strong> securely online. Your payment is protected by Clover.`}
+                    ? `Pay <strong>$${amountDue.toFixed(2)} CAD</strong>${paymentMethod === "wave" ? " through Wave" : ""} to confirm your quote — or reply to this email if you'd like changes first.`
+                    : `Click the button below to pay <strong>$${amountDue.toFixed(2)} CAD</strong> securely online. Your payment is handled securely by ${paymentMethod === "wave" ? "Wave" : "Clover"}.`}
                 </p>
                 <a href="${escHtml(paymentUrl)}"
                   style="display: inline-block; background: #16C2F3; color: #ffffff; font-size: 16px; font-weight: 700; text-decoration: none; padding: 14px 36px; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.01em;">
@@ -468,13 +468,13 @@ function buildPaymentRequestText(p: PaymentRequestEmailParams): string {
   const ctaBlock = quoteOnly
     ? [
         `--- APPROVE & PAY ---`,
-        `Pay $${amountDue.toFixed(2)} CAD to lock in your quote:`,
+        `Pay $${amountDue.toFixed(2)} CAD${p.paymentMethod === "wave" ? " through Wave" : ""} to confirm your quote:`,
         paymentUrl,
         ``,
         `Need changes? Reply to this email or call (306) 954-8688.`,
       ]
     : [
-        `--- PAY NOW ---`,
+        p.paymentMethod === "wave" ? `--- PAY ONLINE WITH WAVE ---` : `--- PAY NOW ---`,
         paymentUrl,
       ];
 

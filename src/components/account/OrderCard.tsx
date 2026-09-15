@@ -100,12 +100,14 @@ export function OrderCard({ order, expandedOrder, setExpandedOrder, uploadingFil
           >
             {order.pay_url &&
               order.status === "pending_payment" &&
-              order.payment_method === "clover_card" && (
+              ["clover_card", "wave"].includes(order.payment_method) && (
                 <a
                   href={order.pay_url}
+                  target={order.payment_method === "wave" ? "_blank" : undefined}
+                  rel={order.payment_method === "wave" ? "noopener noreferrer" : undefined}
                   className="text-sm font-bold px-4 py-2 rounded-lg bg-[#16C2F3] text-white hover:bg-[#0fb0dd] transition-colors whitespace-nowrap"
                 >
-                  Pay by card &rarr;
+                  {order.payment_method === "wave" ? "View Wave invoice &rarr;" : "Pay by card &rarr;"}
                 </a>
               )}
             {order.status !== "pending_payment" && (
@@ -170,6 +172,15 @@ export function OrderCard({ order, expandedOrder, setExpandedOrder, uploadingFil
               </p>
             </div>
           )}
+
+        {order.payment_method === "wave" && order.status === "pending_payment" && (
+          <div className="mt-3 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3" onClick={(e) => e.stopPropagation()}>
+            <p className="text-xs font-bold text-blue-800 mb-1.5">Payment pending with Wave</p>
+            <p className="text-sm text-blue-900 leading-relaxed">
+              Open the current Wave invoice to complete payment. We verify the provider record before production; if the button is unavailable, contact us rather than paying a second time.
+            </p>
+          </div>
+        )}
 
         {/* eTransfer instructions — visible without expanding */}
         {order.payment_method === "etransfer" &&
