@@ -1,5 +1,10 @@
 # Current work state
 
+## Payment integration incident — September 15, 2026
+
+A read-only production investigation confirmed larger-invoice Wave parsing failures, unmatched successful Clover callbacks, customer Wave payments left pending locally, misleading processor/bookkeeping labels, and unclear automatic receipt state. The [incident audit](PAYMENT-INCIDENT-AUDIT-20260915.md) owns confirmed causes, recovery order, and regression cases. Runtime was verified at `a22876b4`; no runtime or production data was changed. Private customer/provider evidence remains outside this public repository. Next gate: contain incorrect reminders, implement focused parser/matcher repairs, reconcile existing provider records without duplicates, and verify the affected customer journeys. Existing tests passing does not establish these paths work.
+
+
 ## Search-growth operating loop prepared — September 14, 2026
 
 The SEO audit now has an executable [90-day operating plan](../seo/SEARCH-GROWTH-OPERATING-PLAN.md), an [append-only weekly scorecard](../seo/SEARCH-GROWTH-WEEKLY-LOG.md), and a point-level Maps evidence schema. Git remains the sanitized source of truth; a targeted local Vault activity receipt was prepared for private continuity, not as a second queue. Because the pre-existing Vault checkout was dirty and divergent, that receipt remains local/uncommitted and no pull, rebase, commit, or sync was attempted. The loop separates Maps, GSC Web, GSC Generative AI, GBP, GA4, commercial results, citations, Merchant, and the active organic experiment so an interaction or visibility change is never silently relabelled a sale.
