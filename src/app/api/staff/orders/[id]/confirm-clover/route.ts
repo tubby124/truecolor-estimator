@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
 import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
+import { sendStaffPaymentConfirmationNotification } from "@/lib/email/staffNotification";
 import { approveWaveInvoice, recordWavePayment, findCustomerByEmail } from "@/lib/wave/invoice";
 import { incrementCustomerOrderStats } from "@/lib/customers/incrementOrderStats";
 import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
@@ -333,6 +334,15 @@ export async function POST(req: NextRequest, { params }: Params) {
         outcome: notificationWarning ? "unconfirmed" : "accepted",
         channel: "truecolor_payment_update",
       },
+    });
+
+    await sendStaffPaymentConfirmationNotification({
+      orderId: order.id,
+      orderNumber: order.order_number,
+      total: amountDollars,
+      paymentMethod: "clover_card",
+    }).catch((staffEmailErr) => {
+      console.error("[confirm-clover] staff payment alert failed (non-fatal):", staffEmailErr);
     });
 
     try {

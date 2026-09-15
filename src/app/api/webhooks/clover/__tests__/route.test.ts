@@ -7,11 +7,13 @@ const mocks = vi.hoisted(() => ({
   approveWaveInvoice: vi.fn(),
   recordWavePayment: vi.fn(),
   sendPaymentReceipt: vi.fn(),
+  sendStaffPayment: vi.fn(),
 }));
 
 vi.mock("@/lib/supabase/server", () => ({ createServiceClient: mocks.createServiceClient }));
 vi.mock("@/lib/payment/clover", () => ({ fetchCloverPaymentAmountCents: mocks.fetchAmount }));
 vi.mock("@/lib/email/paymentReceipt", () => ({ sendPaymentReceipt: mocks.sendPaymentReceipt }));
+vi.mock("@/lib/email/staffNotification", () => ({ sendStaffPaymentConfirmationNotification: mocks.sendStaffPayment }));
 vi.mock("@/lib/wave/invoice", () => ({
   approveWaveInvoice: mocks.approveWaveInvoice,
   recordWavePayment: mocks.recordWavePayment,

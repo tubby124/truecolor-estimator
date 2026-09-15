@@ -13,8 +13,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
 import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
-import { sendEmail } from "@/lib/email/smtp";
-import { escHtml } from "@/lib/email/components/escHtml";
+import { sendStaffPaymentConfirmationNotification } from "@/lib/email/staffNotification";
 import { approveWaveInvoice, recordWavePayment, findCustomerByEmail } from "@/lib/wave/invoice";
 import { incrementCustomerOrderStats } from "@/lib/customers/incrementOrderStats";
 import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
@@ -292,37 +291,15 @@ export async function POST(_req: NextRequest, { params }: Params) {
       },
     });
 
-    // ── 3. Staff notification ────────────────────────────────────────────────────
-
-    try {
-      const staffEmail = process.env.STAFF_EMAIL ?? "info@true-color.ca";
-      await sendEmail({
-        from: "True Color Display Printing <hello@outreach.true-color.ca>",
-        to: staffEmail,
-        subject: `eTransfer confirmed — ${order.order_number} · $${totalStr}`,
-        html: `<!DOCTYPE html><html><head><meta charset="UTF-8"/></head>
-<body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:32px 16px;background:#f4efe9;">
-  <div style="max-width:480px;margin:0 auto;background:#fff;border-radius:12px;padding:28px 32px;border:1px solid #e2dbd4;">
-    <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:.06em;">✓ eTransfer Confirmed</p>
-    <p style="margin:0 0 16px;font-size:24px;font-weight:700;color:#1c1712;letter-spacing:.03em;">${escHtml(order.order_number)}</p>
-    <p style="margin:0 0 6px;font-size:14px;color:#374151;">
-      <strong>${escHtml(customer.name)}</strong> &nbsp;·&nbsp;
-      <a href="mailto:${escHtml(customer.email)}" style="color:#16C2F3;text-decoration:none;">${escHtml(customer.email)}</a>
-    </p>
-    <p style="margin:0 0 20px;font-size:20px;font-weight:700;color:#1c1712;">$${escHtml(totalStr)} CAD</p>
-    <p style="margin:0;font-size:13px;color:#6b7280;line-height:1.6;">
-      Status updated to <strong>Payment Received</strong>.<br/>
-      ${notificationWarning
-        ? "Customer payment update was not confirmed; check delivery before resending."
-        : "Customer payment update accepted. Wave is the official paid invoice."}
-    </p>
-  </div>
-</body></html>`,
-        text: `eTransfer confirmed — ${order.order_number}\nCustomer: ${customer.name} (${customer.email})\nTotal: $${totalStr} CAD\nStatus → Payment Received. ${notificationWarning ? "Customer payment update was not confirmed." : "Customer payment update accepted; Wave holds the official paid invoice."}`,
-      });
-    } catch (e) {
-      console.error("[confirm-etransfer] staff notification failed (non-fatal):", e);
-    }
+    // ── 3. Staff payment alert ───────────────────────────────────────────────────
+    await sendStaffPaymentConfirmationNotification({
+      orderId: order.id,
+      orderNumber: order.order_number,
+      total: orderTotal,
+      paymentMethod: "etransfer",
+    }).catch((staffEmailErr) => {
+      console.error("[confirm-etransfer] staff payment alert failed (non-fatal):", staffEmailErr);
+    });
 
     // Wave approval/recording is complete before the customer update, so staff
     // never see a financial-document success state for an unpaid Wave invoice.

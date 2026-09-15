@@ -1,15 +1,23 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const sendEmail = vi.hoisted(() => vi.fn().mockResolvedValue({ providerMessageId: "test" }));
 
 vi.mock("@/lib/supabase/server", () => ({ createServiceClient: vi.fn() }));
 vi.mock("../smtp", () => ({ sendEmail }));
 
-import { sendStaffOrderNotification } from "../staffNotification";
+import {
+  operationalStaffRecipients,
+  sendStaffOrderNotification,
+  sendStaffPaymentConfirmationNotification,
+} from "../staffNotification";
 
 describe("pending Clover staff notification", () => {
   beforeEach(() => {
     sendEmail.mockClear();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it("does not describe an opened checkout as captured or production-ready", async () => {
@@ -39,5 +47,37 @@ describe("pending Clover staff notification", () => {
     expect(email.text).toContain("DO NOT start printing until payment is confirmed");
     expect(email.text).not.toContain("Card charged");
     expect(email.text).not.toContain("Safe to begin production");
+  });
+
+  it("sends operational alerts only to the configured staff and admin recipients", async () => {
+    vi.stubEnv("STAFF_EMAIL", "info@true-color.ca");
+    vi.stubEnv("ADMIN_NOTIFY_EMAIL", "hasan.sharif.realtor@gmail.com");
+    vi.stubEnv("SMTP_BCC", "legacy-copy@example.com");
+
+    await sendStaffPaymentConfirmationNotification({
+      orderId: "order-123",
+      orderNumber: "TC-0123",
+      total: 111,
+      paymentMethod: "clover_card",
+    });
+
+    expect(operationalStaffRecipients()).toEqual([
+      "info@true-color.ca",
+      "hasan.sharif.realtor@gmail.com",
+    ]);
+    expect(sendEmail).toHaveBeenCalledWith(expect.objectContaining({
+      to: ["info@true-color.ca", "hasan.sharif.realtor@gmail.com"],
+      subject: "Payment confirmed — TC-0123 · $111.00",
+      orderId: "order-123",
+      idempotencyKey: "staff-payment-confirmation/order-123",
+      requireEmailLog: true,
+      includeUnsubscribeHeaders: false,
+    }));
+  });
+
+  it("deduplicates staff and admin addresses without relying on SMTP_BCC", () => {
+    vi.stubEnv("STAFF_EMAIL", "INFO@true-color.ca");
+    vi.stubEnv("ADMIN_NOTIFY_EMAIL", "info@true-color.ca");
+    expect(operationalStaffRecipients()).toEqual(["INFO@true-color.ca"]);
   });
 });

@@ -17,6 +17,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
 import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
+import { sendStaffPaymentConfirmationNotification } from "@/lib/email/staffNotification";
 import { approveWaveInvoice, recordWavePayment, findCustomerByEmail } from "@/lib/wave/invoice";
 import { incrementCustomerOrderStats } from "@/lib/customers/incrementOrderStats";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
@@ -310,6 +311,24 @@ export async function PATCH(req: NextRequest, { params }: Params) {
             }
           } else if (status === "payment_received") {
             notificationWarning = "Payment was saved, but the Wave paid invoice is not confirmed. No customer update was sent.";
+          }
+
+          if (status === "payment_received" && current.status === "pending_payment") {
+            const paymentMethod = order.payment_method === "etransfer"
+              ? "etransfer"
+              : order.payment_method === "wave"
+                ? "wave"
+                : order.payment_method === "clover_card"
+                  ? "clover_card"
+                  : "staff_manual";
+            await sendStaffPaymentConfirmationNotification({
+              orderId: id,
+              orderNumber: order.order_number,
+              total: Number(order.total),
+              paymentMethod,
+            }).catch((staffEmailErr) => {
+              console.error("[staff/orders/status] staff payment alert failed (non-fatal):", staffEmailErr);
+            });
           }
         }
       } catch (emailErr) {

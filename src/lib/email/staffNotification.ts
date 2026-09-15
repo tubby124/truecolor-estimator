@@ -46,6 +46,28 @@ export interface StaffOrderNotificationParams {
   siteUrl: string;
 }
 
+/**
+ * The only recipients for operational staff alerts. SMTP_BCC is deliberately
+ * not consulted: it was a blanket copy of every customer message, rather than
+ * an authorization for a particular alert.
+ */
+export function operationalStaffRecipients(): string[] {
+  const candidates = [
+    process.env.STAFF_EMAIL ?? "info@true-color.ca",
+    process.env.ADMIN_NOTIFY_EMAIL,
+  ];
+  const seen = new Set<string>();
+
+  return candidates.filter((candidate): candidate is string => {
+    const address = candidate?.trim();
+    if (!address) return false;
+    const normalized = address.toLowerCase();
+    if (seen.has(normalized)) return false;
+    seen.add(normalized);
+    return true;
+  });
+}
+
 
 // ─── Signed file URLs via service role ───────────────────────────────────────
 
@@ -77,8 +99,6 @@ export async function sendStaffOrderNotification(
 ): Promise<void> {
   const { orderNumber, contact, is_rush, payment_method, total, filePaths, siteUrl } = params;
 
-  const staffEmail = process.env.STAFF_EMAIL ?? "info@true-color.ca";
-  const adminEmail = process.env.ADMIN_NOTIFY_EMAIL;
   // Use outreach sender for staff notifications — Brevo blocks FROM=TO (same address).
   // hello@outreach.true-color.ca is already a verified Brevo sender (ID 2).
   const from = "True Color Display Printing <hello@outreach.true-color.ca>";
@@ -94,9 +114,7 @@ export async function sendStaffOrderNotification(
   const html = buildStaffNotificationHtml(params, fileLinks, siteUrl);
   const text = buildStaffNotificationText(params, fileLinks, siteUrl);
 
-  // Build recipient list: staff + optional admin personal email (deduped)
-  const toAddresses: string[] = [staffEmail];
-  if (adminEmail && adminEmail !== staffEmail) toAddresses.push(adminEmail);
+  const toAddresses = operationalStaffRecipients();
 
   await sendEmail({
     from,
@@ -109,6 +127,68 @@ export async function sendStaffOrderNotification(
 
   console.log(
     `[staffNotification] sent → ${toAddresses.join(", ")} | order ${orderNumber} | ${paymentLabel} | $${total.toFixed(2)}`
+  );
+}
+
+export interface StaffPaymentConfirmationParams {
+  orderId: string;
+  orderNumber: string;
+  total: number;
+  paymentMethod: "clover_card" | "etransfer" | "wave" | "staff_manual";
+  siteUrl?: string;
+}
+
+/**
+ * Sends one operational payment alert after an authoritative transition into
+ * payment_received. Call only from a transition guarded by payment evidence;
+ * the stable provider key prevents a retry from creating another alert.
+ */
+export async function sendStaffPaymentConfirmationNotification(
+  params: StaffPaymentConfirmationParams,
+): Promise<void> {
+  const methodLabel = {
+    clover_card: "Clover card",
+    etransfer: "e-Transfer",
+    wave: "Wave Payments",
+    staff_manual: "staff-confirmed payment",
+  }[params.paymentMethod];
+  const total = params.total.toFixed(2);
+  const siteUrl = params.siteUrl ?? process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
+  const subject = `Payment confirmed — ${params.orderNumber} · $${total}`;
+  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/></head>
+<body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:32px 16px;background:#f4efe9;">
+  <div style="max-width:480px;margin:0 auto;background:#fff;border-radius:12px;padding:28px 32px;border:1px solid #e2dbd4;">
+    <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:.06em;">Payment confirmed</p>
+    <p style="margin:0 0 12px;font-size:24px;font-weight:700;color:#1c1712;">${escHtml(params.orderNumber)}</p>
+    <p style="margin:0 0 6px;font-size:20px;font-weight:700;color:#1c1712;">$${escHtml(total)} CAD</p>
+    <p style="margin:0 0 20px;font-size:14px;color:#374151;">Provider: ${escHtml(methodLabel)}. Payment evidence was recorded; review the order before production.</p>
+    <a href="${escHtml(siteUrl)}/staff/orders" style="display:inline-block;background:#16C2F3;color:#fff;font-size:13px;font-weight:700;text-decoration:none;padding:10px 20px;border-radius:8px;">Open staff orders</a>
+  </div>
+</body></html>`;
+  const text = [
+    `Payment confirmed — ${params.orderNumber}`,
+    `Total: $${total} CAD`,
+    `Provider: ${methodLabel}`,
+    "Payment evidence was recorded; review the order before production.",
+    `Staff orders: ${siteUrl}/staff/orders`,
+  ].join("\n");
+
+  const recipients = operationalStaffRecipients();
+  await sendEmail({
+    from: "True Color Display Printing <hello@outreach.true-color.ca>",
+    to: recipients,
+    subject,
+    priority: "high",
+    html,
+    text,
+    orderId: params.orderId,
+    idempotencyKey: `staff-payment-confirmation/${params.orderId}`,
+    requireEmailLog: true,
+    includeUnsubscribeHeaders: false,
+  });
+
+  console.log(
+    `[staffNotification] payment confirmed → ${recipients.join(", ")} | order ${params.orderNumber} | ${methodLabel} | $${total}`,
   );
 }
 
@@ -495,7 +575,6 @@ export async function sendCustomerFileRevisionNotification(
 ): Promise<void> {
   const { orderNumber, customerName, customerEmail, fileName, fileUrl, siteUrl } = params;
 
-  const staffEmail = process.env.STAFF_EMAIL ?? "info@true-color.ca";
   // Use outreach sender for staff notifications — Brevo blocks FROM=TO (same address).
   const from = "True Color Display Printing <hello@outreach.true-color.ca>";
   const subject = `[File updated] Order ${orderNumber} — ${customerName}`;
@@ -576,8 +655,9 @@ export async function sendCustomerFileRevisionNotification(
     "True Color Display Printing — Internal staff notification",
   ].join("\n");
 
-  await sendEmail({ from, to: staffEmail, subject, html, text });
-  console.log(`[staffNotification] file revision sent → ${staffEmail} | order ${orderNumber}`);
+  const recipients = operationalStaffRecipients();
+  await sendEmail({ from, to: recipients, subject, html, text });
+  console.log(`[staffNotification] file revision sent → ${recipients.join(", ")} | order ${orderNumber}`);
 }
 
 // ─── HTML escape helper ───────────────────────────────────────────────────────
