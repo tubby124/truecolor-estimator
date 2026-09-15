@@ -240,7 +240,7 @@ function QuotePayNowPage({
       : state === "retry"
         ? "Please wait a moment, then try again."
         : state === "opened"
-          ? "A checkout is already active or being verified. Continue in the original Clover tab; after 16 minutes you can reopen this quote email to start a fresh session safely."
+          ? "Payment is being checked. Please wait a moment and refresh this page. If it does not update, please contact the shop."
         : state === "error"
           ? "Secure checkout could not be confirmed. Please contact us before trying again."
           : null;

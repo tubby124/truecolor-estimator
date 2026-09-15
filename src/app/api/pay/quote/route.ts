@@ -40,8 +40,8 @@ async function releaseQuoteCheckoutForWavePreflight(
   supabase: ReturnType<typeof createServiceClient>,
   quoteOrder: Awaited<ReturnType<typeof materializeQuoteOrder>>,
   error: string,
-): Promise<boolean> {
-  if (!quoteOrder.checkoutReservationId) return true;
+): Promise<void> {
+  if (!quoteOrder.checkoutReservationId) return;
   try {
     await failQuoteCheckoutReservation(supabase, {
       orderId: quoteOrder.orderId,
@@ -49,10 +49,8 @@ async function releaseQuoteCheckoutForWavePreflight(
       ambiguous: false,
       error,
     });
-    return true;
   } catch (reservationError) {
     console.error("[api/pay/quote] Clover reservation release failed:", reservationError);
-    return false;
   }
 }
 
@@ -179,29 +177,29 @@ export async function POST(req: NextRequest) {
       requestedAmountCents: payload.amountCents,
     });
     if (preflight.action === "already_paid") {
-      const released = await releaseQuoteCheckoutForWavePreflight(
+      await releaseQuoteCheckoutForWavePreflight(
         supabase,
         quoteOrder,
         "Clover checkout was released because verified Wave payment already settled the order",
       );
-      return released ? NextResponse.redirect(redirectUrl, 303) : quotePage(req, token, "opened");
+      return NextResponse.redirect(redirectUrl, 303);
     }
     if (preflight.action === "updated_link") {
-      const released = await releaseQuoteCheckoutForWavePreflight(
+      await releaseQuoteCheckoutForWavePreflight(
         supabase,
         quoteOrder,
         "Clover checkout was released because verified Wave payment changed the balance due",
       );
-      return quotePage(req, token, released ? "stale" : "opened");
+      return quotePage(req, token, "stale");
     }
   } catch (preflightError) {
     console.error("[api/pay/quote] Wave click-time payment preflight failed:", preflightError);
-    const released = await releaseQuoteCheckoutForWavePreflight(
+    await releaseQuoteCheckoutForWavePreflight(
       supabase,
       quoteOrder,
       "Clover checkout was released because Wave payment verification could not be confirmed",
     );
-    return quotePage(req, token, released ? "error" : "opened");
+    return quotePage(req, token, "error");
   }
 
   if (quoteOrder.checkoutAction === "resume" && quoteOrder.checkoutUrl) {
