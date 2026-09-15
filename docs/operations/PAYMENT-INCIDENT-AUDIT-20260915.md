@@ -68,12 +68,12 @@ The [provider decision proposal](PAYMENT-PROVIDER-DECISION-20260915.md) separate
 
 ## Email reconciliation follow-up — PR #100
 
-The owner required a complete review of outgoing order emails before closing the incident. Review found four content defects despite existing tests passing: a new Clover checkout notice implied a captured payment; receipts could use the originally selected provider instead of recorded payments; the first reminder did not explain a partial balance; and the manual quote UI incorrectly promised no payment link.
+The owner required a complete review of outgoing order emails before closing the incident. Review found four content defects despite existing tests passing: a new Clover checkout notice implied a captured payment; receipts could use the originally selected provider instead of recorded payments; the first reminder did not explain a partial balance; and the manual quote UI incorrectly promised no payment link. Final review also caught the downloadable receipt PDF using the original provider choice; its display must use the same recorded sources as the email.
 
 | Email/workflow | Required accepted behavior |
 |---|---|
 | Staff new-order notice | New checkout is payment pending; never claim captured or safe to begin production before confirmation |
-| Automatic and staff/customer-requested receipts | Use positive recorded ledger payments, identify all actual providers for mixed payments, and use a neutral recorded-payment label when provider evidence is unavailable; preserve receipt history and idempotency |
+| Automatic and staff/customer-requested receipts, including the linked PDF | Use positive recorded ledger payments, identify all actual providers for mixed payments, and use a neutral recorded-payment label when provider evidence is unavailable; preserve receipt history and idempotency |
 | Partial-payment reminders | Distinguish order total, paid amount and remaining balance; unfinished checkout wording must not deny an earlier recorded partial payment |
 | Structured quotes and payment requests | Preserve stored items, GST/PST, totals, quote revisions and correct remaining-balance link |
 | Manual quote modal | State that its existing payable email includes Pay Now; match actual server behavior |
@@ -82,8 +82,15 @@ The owner required a complete review of outgoing order emails before closing the
 | New Wave captures discovered by poll/click | Queue normal effects only for authenticated captures within 24 hours (up to five minutes future clock skew); atomic transition/outbox guards prevent duplicate historical replay |
 | Historical recovery | Explicit effects disabled; old recovered captures do not generate customer receipts |
 
-A read-only seven-day email-log check found 120 logged messages with recorded delivery events, zero recorded bounces/complaints, zero unresolved delays and no missing provider message IDs. This is delivery-event evidence, not proof of inbox placement or reading. No customer test mail or manual resend was used for this audit. Direct fresh mail-provider API readback was unavailable, so it is not claimed.
+A read-only seven-day email-log check found 120 logged messages with recorded delivery events, zero recorded bounces/complaints, zero unresolved delays and no missing provider message IDs. This is delivery-event evidence, not proof of inbox placement or reading. No customer test mail or manual resend was used for this audit. The configured mail-provider key returned `restricted_api_key` for a read-only message lookup; fresh direct provider API readback is not claimed.
 
 The 24-hour receipt window is an operational boundary for Starter polling, not a payment-validity rule. Older verified payments still update the ledger and staff state; customer effects stay suppressed. Signed webhook behavior is unchanged. The existing five-minute Wave effect worker processes queued receipts/staff notices. A later Pro upgrade still needs actual webhook authorization and delivery proof.
 
-Integrated local test run: 190 files / 1,786 tests passed. Final review, remaining checks, CI, deployment and live readback must pass before this follow-up is marked released. [PR #100](https://github.com/tubby124/truecolor-estimator/pull/100) holds the change; [issue #98](https://github.com/tubby124/truecolor-estimator/issues/98) holds the final release receipt and remaining historical holds.
+Final integrated local test run: 192 files / 1,793 tests passed. TypeScript, ESLint (zero errors; existing warnings), records and diff checks passed; production dependency audit reported zero vulnerabilities. Independent review accepted code `168aa9ad` after 16 focused files / 94 tests. The final release receipt in issue #98 records required CI, exact-commit deployment and live checkout/PDF/reconciliation readback; those are separate from this local acceptance. [PR #100](https://github.com/tubby124/truecolor-estimator/pull/100) holds the change; [issue #98](https://github.com/tubby124/truecolor-estimator/issues/98) holds the final release receipt and remaining historical holds.
+
+
+### Receipt and invoice document check
+
+The owner explicitly asked to preserve a proper payment receipt/invoice. Keep Wave as the accounting invoice and the website email as the payment confirmation. Existing automatic Clover/e-Transfer/status flows offer Wave's invoice PDF only after confirmed Wave-paid bookkeeping; other flows retain the authenticated True Color PDF. Fix the fallback PDF's provider label rather than introducing an unverified invoice redirect or sending a second invoice.
+
+The email and PDF retain the supplier's legal name, address/contact, configured GST registration number, buyer name, order/date reference, identifiable items/quantities, GST/PST and total in CAD. Paid status is conditional on the saved paid order state; unpaid PDFs remain order summaries. The review uses the [current federal supporting-document requirements](https://laws-lois.justice.gc.ca/eng/regulations/SOR-91-45/section-3.html) as a field checklist, not a blanket certification of every historical invoice or the customer's tax-credit eligibility. Wave remains the accounting source; the receipt confirms the recorded payment sources for the same job.
