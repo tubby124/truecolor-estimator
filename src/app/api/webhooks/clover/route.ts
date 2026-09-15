@@ -28,6 +28,7 @@ import { sendMeasurementProtocolPurchase } from "@/lib/analytics/measurementProt
 import { sendMetaCapiEvent } from "@/lib/analytics/metaCapi";
 import { recordAuditEvent } from "@/lib/audit/record";
 import { fetchCloverPaymentAmountCents } from "@/lib/payment/clover";
+import { hasVerifiedCloverAmount, resolveCloverWebhookIdentity } from "@/lib/payment/clover-webhook-identity";
 import { summarizeOrderPayments, type OrderPaymentLedgerEntry } from "@/lib/payments/order-ledger";
 import { sendEmail } from "@/lib/email/smtp";
 import { DECLINE_LABELS, recordPaymentAttempt } from "@/lib/payments/attempts";
@@ -83,6 +84,8 @@ function pickNumber(obj: Record<string, unknown> | undefined, keys: string[]): n
   }
   return 0;
 }
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export async function POST(req: NextRequest) {
   let bodyText: string;
@@ -169,6 +172,81 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  async function resolveWebhookOrderIdentity(input: {
+    checkoutSessionId: string | undefined;
+    externalReferenceId: string | undefined;
+    cloverOrderId: string | undefined;
+  }) {
+    async function orderIdForReference(reference: string | undefined): Promise<string | null> {
+      if (!reference) return null;
+
+      const { data: paymentReferenceOrder, error: paymentReferenceError } = await supabase
+        .from("orders")
+        .select("id")
+        .eq("payment_reference", reference)
+        .maybeSingle();
+      if (paymentReferenceError) throw new Error(`payment reference lookup failed: ${paymentReferenceError.message}`);
+
+      const paymentReferenceOrderId = typeof paymentReferenceOrder?.id === "string"
+        ? paymentReferenceOrder.id
+        : null;
+      if (!UUID_RE.test(reference)) return paymentReferenceOrderId;
+
+      const { data: idOrder, error: idOrderError } = await supabase
+        .from("orders")
+        .select("id")
+        .eq("id", reference)
+        .maybeSingle();
+      if (idOrderError) throw new Error(`order id lookup failed: ${idOrderError.message}`);
+
+      const idOrderId = typeof idOrder?.id === "string" ? idOrder.id : null;
+      if (paymentReferenceOrderId && idOrderId && paymentReferenceOrderId !== idOrderId) {
+        throw new Error("payment reference resolves to a different order than the supplied order id");
+      }
+      return idOrderId ?? paymentReferenceOrderId;
+    }
+
+    let durableSessionOrderId: string | null = null;
+    if (input.checkoutSessionId) {
+      const { data, error } = await supabase
+        .from("orders")
+        .select("id")
+        .eq("quote_checkout_session_id", input.checkoutSessionId)
+        .maybeSingle();
+      if (error) throw new Error(`checkout session lookup failed: ${error.message}`);
+      durableSessionOrderId = typeof data?.id === "string" ? data.id : null;
+    }
+
+    const [externalReferenceOrderId, cloverOrderReferenceOrderId] = await Promise.all([
+      orderIdForReference(input.externalReferenceId),
+      orderIdForReference(input.cloverOrderId),
+    ]);
+
+    // Payment attempts are historical evidence only. A durable session on the
+    // order wins; when it is absent, ignore orphan rows with a NULL order_id.
+    let historicalSessionOrderId: string | null = null;
+    if (!durableSessionOrderId && input.checkoutSessionId) {
+      const { data, error } = await supabase
+        .from("payment_attempts")
+        .select("order_id")
+        .eq("provider", "clover")
+        .eq("clover_checkout_session_id", input.checkoutSessionId)
+        .not("order_id", "is", null)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw new Error(`historical checkout attempt lookup failed: ${error.message}`);
+      historicalSessionOrderId = typeof data?.order_id === "string" ? data.order_id : null;
+    }
+
+    return resolveCloverWebhookIdentity({
+      durableSessionOrderId,
+      externalReferenceOrderId,
+      cloverOrderReferenceOrderId,
+      historicalSessionOrderId,
+    });
+  }
+
   // Handle payment capture events
   // Clover sends type=PAYMENT with object.status=captured when card is charged
   if (normalizedEventType === "PAYMENT") {
@@ -209,10 +287,10 @@ export async function POST(req: NextRequest) {
           // without amount on event.object, while the REST payment record has the
           // correct captured amount. Don't reject good payments as $0.00; hydrate
           // the amount by payment id before doing the safety comparison.
-          if ((!Number.isFinite(reportedAmountCents) || reportedAmountCents <= 0) && paymentId) {
+          if (!hasVerifiedCloverAmount(reportedAmountCents) && paymentId) {
             try {
               const hydratedAmount = await fetchCloverPaymentAmountCents(paymentId);
-              if (typeof hydratedAmount === "number" && hydratedAmount > 0) {
+              if (typeof hydratedAmount === "number" && hasVerifiedCloverAmount(hydratedAmount)) {
                 reportedAmountCents = hydratedAmount;
               }
             } catch (amountErr) {
@@ -223,26 +301,48 @@ export async function POST(req: NextRequest) {
             }
           }
 
-          let attemptOrderId: string | null = null;
-          if (!matchRef && checkoutSessionId) {
-            const { data: attemptRow } = await supabase
-              .from("payment_attempts")
-              .select("order_id")
-              .eq("provider", "clover")
-              .eq("clover_checkout_session_id", checkoutSessionId)
-              .order("created_at", { ascending: false })
-              .limit(1)
-              .maybeSingle();
-            attemptOrderId = (attemptRow?.order_id as string | null | undefined) ?? null;
+          const identity = await resolveWebhookOrderIdentity({
+            checkoutSessionId,
+            externalReferenceId: extRef,
+            cloverOrderId,
+          });
+          if (identity.kind === "conflict") {
+            console.error(`[clover-webhook] conflicting payment identities: ${identity.orderIds.join(", ")}`);
+            await logWebhookEvent({
+              eventType: eventTypeStr,
+              resourceId: paymentId ?? matchRef ?? checkoutSessionId ?? null,
+              matchedOrderId: null,
+              ok: false,
+              detail: "conflicting checkout session/reference identities; payment not applied",
+            });
+            return NextResponse.json({ ok: true });
+          }
+          if (identity.kind === "unmatched") {
+            console.warn(`[clover-webhook] no order found for payment_reference/session=${matchRef ?? checkoutSessionId}`);
+            await logWebhookEvent({
+              eventType: eventTypeStr,
+              resourceId: paymentId ?? matchRef ?? checkoutSessionId ?? null,
+              matchedOrderId: null,
+              ok: false,
+              detail: `no order found for payment_reference/session=${matchRef ?? checkoutSessionId}`,
+            });
+            await recordPaymentAttempt(supabase, {
+              status: "payment_captured",
+              amount: hasVerifiedCloverAmount(reportedAmountCents) ? reportedAmountCents / 100 : null,
+              clover_checkout_session_id: checkoutSessionId ?? null,
+              clover_order_id: cloverOrderId ?? null,
+              clover_payment_id: paymentId ?? null,
+              raw_event: event,
+              customer_message: "Payment received, but the order could not be matched automatically.",
+            });
+            return NextResponse.json({ ok: true });
           }
 
           let pendingOrderQuery = supabase
             .from("orders")
             .select("id, order_number, total, status, customer_id, customers ( name, email, company )");
           pendingOrderQuery = pendingOrderQuery.is("voided_at", null);
-          pendingOrderQuery = attemptOrderId
-            ? pendingOrderQuery.eq("id", attemptOrderId)
-            : pendingOrderQuery.eq("payment_reference", matchRef);
+          pendingOrderQuery = pendingOrderQuery.eq("id", identity.orderId);
           const { data: pendingOrder, error: fetchErr } = await pendingOrderQuery.maybeSingle();
 
           if (fetchErr) {
@@ -257,29 +357,42 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ ok: true });
           }
           if (!pendingOrder) {
-            console.warn(`[clover-webhook] no order found for payment_reference/session=${matchRef ?? checkoutSessionId}`);
             await logWebhookEvent({
               eventType: eventTypeStr,
               resourceId: paymentId ?? matchRef ?? checkoutSessionId ?? null,
-              matchedOrderId: null,
+              matchedOrderId: identity.orderId,
               ok: false,
-              detail: `no order found for payment_reference/session=${matchRef ?? checkoutSessionId}`,
+              detail: "matched Clover identity refers to a voided or unavailable order",
             });
+            return NextResponse.json({ ok: true });
+          }
+          if (!hasVerifiedCloverAmount(reportedAmountCents)) {
             await recordPaymentAttempt(supabase, {
-              status: "payment_captured",
-              amount: reportedAmountCents > 0 ? reportedAmountCents / 100 : null,
+              order_id: pendingOrder.id,
+              status: "ambiguous",
               clover_checkout_session_id: checkoutSessionId ?? null,
               clover_order_id: cloverOrderId ?? null,
               clover_payment_id: paymentId ?? null,
+              failure_label: "Clover payment amount could not be confirmed",
+              failure_detail: "Captured payment amount was absent and Clover payment lookup was unavailable.",
               raw_event: event,
-              customer_message: "Payment received, but the order could not be matched automatically.",
             });
-            return NextResponse.json({ ok: true });
+            await logWebhookEvent({
+              eventType: eventTypeStr,
+              resourceId: paymentId ?? matchRef ?? checkoutSessionId ?? null,
+              matchedOrderId: pendingOrder.id,
+              ok: false,
+              detail: "captured payment amount unresolved; retry requested before any payment side effects",
+            });
+            return NextResponse.json(
+              { ok: false, error: "Payment amount could not be confirmed" },
+              { status: 503 },
+            );
           }
           await recordPaymentAttempt(supabase, {
             order_id: pendingOrder.id,
             status: "payment_captured",
-            amount: reportedAmountCents > 0 ? reportedAmountCents / 100 : Number(pendingOrder.total ?? 0),
+            amount: reportedAmountCents / 100,
             clover_checkout_session_id: checkoutSessionId ?? null,
             clover_order_id: cloverOrderId ?? null,
             clover_payment_id: paymentId ?? null,
@@ -526,9 +639,10 @@ export async function POST(req: NextRequest) {
                   total: totalNum,
                 }).catch(() => {});
                 void sendTelegramNotification(
-                  `💰 <b>Order paid</b>\n` +
+                  `💰 <b>Paid via Clover</b>\n` +
                   `<b>${safeOrderRef}</b> · $${totalNum.toFixed(2)}` +
-                  (updated.is_rush ? "\n⚡ RUSH" : "")
+                  (updated.is_rush ? "\n⚡ RUSH" : ""),
+                  "payment:received",
                 ).catch(() => {});
                 // Increment customer lifetime stats now that payment is confirmed
                 // (moved from order-creation to here so abandoned orders don't inflate)
@@ -813,31 +927,32 @@ export async function POST(req: NextRequest) {
         const voidLabel = voidDetail ? (DECLINE_LABELS[voidDetail] ?? voidDetail) : (voidReason ? (DECLINE_LABELS[voidReason] ?? voidReason) : "Payment did not complete");
 
         const extRef = pickString(objRecord, ["externalReferenceId", "external_reference_id", "ExternalReferenceId"]);
+        const cloverOrderId = pickString(objRecord, ["orderId", "order_id", "OrderId"]);
         let matchedOrderId: string | null = null;
         let orderNumber: string | null = null;
         let orderTotal: number | null = null;
         let custEmail: string | null = null;
 
-        let attemptOrderId: string | null = null;
-        if (!extRef && checkoutSessionId) {
-          const { data: attemptRow } = await supabase
-            .from("payment_attempts")
-            .select("order_id")
-            .eq("provider", "clover")
-            .eq("clover_checkout_session_id", checkoutSessionId)
-            .order("created_at", { ascending: false })
-            .limit(1)
-            .maybeSingle();
-          attemptOrderId = (attemptRow?.order_id as string | null | undefined) ?? null;
-        }
-
-        if (extRef || attemptOrderId) {
+        const identity = await resolveWebhookOrderIdentity({
+          checkoutSessionId,
+          externalReferenceId: extRef,
+          cloverOrderId,
+        });
+        if (identity.kind === "conflict") {
+          console.error(`[clover-webhook] conflicting declined-payment identities: ${identity.orderIds.join(", ")}`);
+          await logWebhookEvent({
+            eventType: eventTypeStr,
+            resourceId: paymentId ?? extRef ?? checkoutSessionId ?? null,
+            matchedOrderId: null,
+            ok: false,
+            detail: "conflicting checkout session/reference identities; decline not linked",
+          });
+          return NextResponse.json({ ok: true });
+        } else if (identity.kind === "matched") {
           let voidedOrderQuery = supabase
             .from("orders")
             .select("id, order_number, total, customers ( name, email )");
-          voidedOrderQuery = attemptOrderId
-            ? voidedOrderQuery.eq("id", attemptOrderId)
-            : voidedOrderQuery.eq("payment_reference", extRef);
+          voidedOrderQuery = voidedOrderQuery.eq("id", identity.orderId);
           const { data: voidedOrder } = await voidedOrderQuery.maybeSingle();
 
           if (voidedOrder) {

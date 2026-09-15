@@ -15,6 +15,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createHash } from "node:crypto";
 import { createServiceClient } from "@/lib/supabase/server";
 import { CloverCheckoutError, createCloverCheckout } from "@/lib/payment/clover";
+import { recordPaymentAttempt } from "@/lib/payments/attempts";
 import {
   completeOrderCheckout,
   failOrderCheckout,
@@ -873,6 +874,13 @@ export async function POST(req: NextRequest) {
             checkoutUrl: clover.checkoutUrl,
             sessionId: clover.sessionId,
             expiresAt: clover.expiresAt,
+          });
+          await recordPaymentAttempt(supabase, {
+            order_id: order.id,
+            status: "checkout_opened",
+            amount: total,
+            clover_checkout_session_id: clover.sessionId || null,
+            customer_message: "Secure Clover checkout opened. We are waiting for payment confirmation.",
           });
           checkoutUrl = clover.checkoutUrl;
         } catch (cloverError) {
