@@ -17,9 +17,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
 import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
-import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
-import { loadReceiptPaymentSources } from "@/lib/payment/receipt-payment-sources";
-import { approveWaveInvoice, recordWavePayment, findCustomerByEmail, getWaveInvoicePublicUrl } from "@/lib/wave/invoice";
+import { approveWaveInvoice, recordWavePayment, findCustomerByEmail } from "@/lib/wave/invoice";
 import { incrementCustomerOrderStats } from "@/lib/customers/incrementOrderStats";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
 import { recordAuditEvent } from "@/lib/audit/record";
@@ -173,7 +171,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     // Status persistence and notification acceptance are separate outcomes.
     let notificationWarning: string | undefined;
-    const expectsNotification = status === "payment_received" || status === "ready_for_pickup";
+    const expectsNotification = NOTIFY_STATUSES.has(status);
     const warningText = "Order status saved, but the customer email could not be confirmed. Check email delivery before resending; the message may already have been accepted.";
 
     // Standard status notification emails (payment_received / in_production / ready_for_pickup)
@@ -199,35 +197,9 @@ export async function PATCH(req: NextRequest, { params }: Params) {
           const customer = customerRaw as { name: string; email: string } | null;
           if (expectsNotification && !customer?.email) notificationWarning = warningText;
 
-          // Only email the customer at ready_for_pickup.
-          // payment_received: receipt below is sufficient (was duplicate).
-          // in_production: dead noise — customer doesn't care about the middle stage.
-          // Reducing customer-facing emails from 9 → 4 per order (2026-05-14).
-          if (customer?.email && status === "ready_for_pickup") {
-            const statusItems = Array.isArray(order.order_items) ? order.order_items : [];
-            await sendOrderStatusEmail({
-              orderId: id,
-              status: "ready_for_pickup",
-              orderNumber: order.order_number,
-              customerName: customer.name,
-              customerEmail: customer.email,
-              total: Number(order.total),
-              isRush: Boolean(order.is_rush),
-              paymentMethod: order.payment_method ?? undefined,
-              items: statusItems.map((i) => ({
-                product_name: i.product_name,
-                qty: i.qty,
-                width_in: i.width_in,
-                height_in: i.height_in,
-                sides: i.sides,
-                line_total: Number(i.line_total),
-              })),
-            });
-          }
-
           // ── Wave: approve invoice + record payment ──────────────────────────
-          // Runs BEFORE the receipt email so the email's Wave PDF link only
-          // appears when the invoice is actually marked PAID.
+          // Runs BEFORE the customer update so Wave is genuinely marked PAID
+          // before the financial document is made available to the customer.
           //
           // Previously skipped for clover_card (assumed the Clover webhook would
           // handle it). Fixed 2026-06-27: if the card was declined or the webhook
@@ -300,21 +272,25 @@ export async function PATCH(req: NextRequest, { params }: Params) {
             }
           }
 
-          // Itemized receipt on payment_received (non-fatal) — covers manual status override
-          // and any orders where the webhook/confirm-etransfer didn't fire the receipt.
-          // waveInvoiceUrl only attached when Wave knows the invoice is PAID — otherwise
-          // customer falls back to the TC branded PDF (bug fix 2026-05-22).
-          if (status === "payment_received" && customer?.email) {
+          // Wave owns the paid invoice/receipt. The True Color message is a
+          // service update, and only follows a manual payment confirmation when
+          // its Wave bookkeeping invoice is also paid.
+          const canSendPaymentConfirmation =
+            status !== "payment_received" || !order.wave_invoice_id || wavePaid;
+          const emailStatus = status === "payment_received" || status === "in_production" || status === "ready_for_pickup"
+            ? status
+            : null;
+          if (customer?.email && canSendPaymentConfirmation && emailStatus) {
             try {
               const items = Array.isArray(order.order_items) ? order.order_items : [];
-              const waveInvoiceUrl = wavePaid && order.wave_invoice_id
-                ? await getWaveInvoicePublicUrl(order.wave_invoice_id).catch(() => null)
-                : null;
-              await sendPaymentReceipt({
+              await sendOrderStatusEmail({
+                orderId: id,
+                idempotencyKey: `order-status:${id}:${status}:v1`,
+                requireEmailLog: true,
+                status: emailStatus,
                 orderNumber: order.order_number,
                 customerName: customer.name,
                 customerEmail: customer.email,
-                createdAt: order.created_at,
                 items: items.map((i) => ({
                   product_name: i.product_name,
                   qty: i.qty,
@@ -323,29 +299,18 @@ export async function PATCH(req: NextRequest, { params }: Params) {
                   sides: i.sides,
                   line_total: Number(i.line_total),
                 })),
-                subtotal: Number(order.subtotal),
-                gst: Number(order.gst),
-                pst: Number(order.pst ?? 0),
                 total: Number(order.total),
                 isRush: Boolean(order.is_rush),
-                discountCode: order.discount_code ?? null,
-                discountAmount: order.discount_amount ? Number(order.discount_amount) : null,
-                paymentSources: await loadReceiptPaymentSources(supabase, id),
-                oid: id,
-                receiptToken: (order as { receipt_token?: string | null }).receipt_token ?? null,
-                waveInvoiceUrl,
+                paymentMethod: order.payment_method ?? undefined,
               });
-              console.log(`[staff/orders/status] receipt sent at payment_received → ${customer.email}${waveInvoiceUrl ? " (with Wave PDF)" : ""}`);
-            } catch (receiptErr) {
+              console.log(`[staff/orders/status] ${status} update accepted → ${customer.email}`);
+            } catch (statusEmailErr) {
               notificationWarning = warningText;
-              console.error("[staff/orders/status] receipt at payment_received failed (non-fatal):", receiptErr);
+              console.error(`[staff/orders/status] ${status} update failed (non-fatal):`, statusEmailErr);
             }
+          } else if (status === "payment_received") {
+            notificationWarning = "Payment was saved, but the Wave paid invoice is not confirmed. No customer update was sent.";
           }
-
-          // Wave invoice approval still happens upstream (line ~154), so accounting
-          // is intact — we just don't email the Wave PDF separately. Customer
-          // already received our itemized receipt at payment_received. Customers
-          // who need the Wave invoice can download it from their account dashboard.
         }
       } catch (emailErr) {
         if (expectsNotification) notificationWarning = warningText;

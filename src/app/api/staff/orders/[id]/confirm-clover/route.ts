@@ -8,9 +8,8 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
-import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
-import { loadReceiptPaymentSources } from "@/lib/payment/receipt-payment-sources";
-import { approveWaveInvoice, recordWavePayment, findCustomerByEmail, getWaveInvoicePublicUrl } from "@/lib/wave/invoice";
+import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
+import { approveWaveInvoice, recordWavePayment, findCustomerByEmail } from "@/lib/wave/invoice";
 import { incrementCustomerOrderStats } from "@/lib/customers/incrementOrderStats";
 import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
@@ -288,35 +287,52 @@ export async function POST(req: NextRequest, { params }: Params) {
         },
       }).catch((err) => console.error("[confirm-clover] Meta CAPI failed (non-fatal):", err));
     }
-    const waveInvoiceUrl = wavePaid && order.wave_invoice_id
-      ? await getWaveInvoicePublicUrl(order.wave_invoice_id).catch(() => null)
-      : null;
-    await sendPaymentReceipt({
-      orderNumber: order.order_number,
-      customerName: customer.name,
-      customerEmail: customer.email,
-      createdAt: order.created_at,
-      items: items.map((i) => ({
-        product_name: i.product_name,
-        qty: i.qty,
-        width_in: i.width_in,
-        height_in: i.height_in,
-        sides: i.sides,
-        line_total: Number(i.line_total),
-      })),
-      subtotal: Number(order.subtotal),
-      gst: Number(order.gst),
-      pst: Number(order.pst ?? 0),
-      total: Number(order.total),
-      isRush: Boolean(order.is_rush),
-      discountCode: order.discount_code ?? null,
-      discountAmount: order.discount_amount ? Number(order.discount_amount) : null,
-      paymentSources: await loadReceiptPaymentSources(supabase, order.id),
-      oid: order.id,
-      receiptToken: order.receipt_token ?? null,
-      waveInvoiceUrl,
-    }).catch((receiptErr) => {
-      console.error("[confirm-clover] receipt failed (non-fatal):", receiptErr);
+    // A staff-confirmed Clover payment must have a matching Wave paid invoice
+    // before any customer-facing payment update. Wave remains the official
+    // financial document; True Color only explains the next service step.
+    let notificationWarning: string | undefined;
+    if (order.wave_invoice_id && !wavePaid) {
+      notificationWarning = "Clover payment was confirmed, but the Wave paid invoice is not confirmed. No customer update was sent.";
+    } else {
+      try {
+        await sendOrderStatusEmail({
+          orderId: order.id,
+          idempotencyKey: `payment-confirmation:${order.id}:v1`,
+          requireEmailLog: true,
+          status: "payment_received",
+          orderNumber: order.order_number,
+          customerName: customer.name,
+          customerEmail: customer.email,
+          items: items.map((i) => ({
+            product_name: i.product_name,
+            qty: i.qty,
+            width_in: i.width_in,
+            height_in: i.height_in,
+            sides: i.sides,
+            line_total: Number(i.line_total),
+          })),
+          total: Number(order.total),
+          isRush: Boolean(order.is_rush),
+          paymentMethod: "clover_card",
+        });
+      } catch (emailErr) {
+        notificationWarning = "Clover payment was confirmed, but the customer payment update could not be confirmed. Check delivery before resending.";
+        console.error("[confirm-clover] payment update failed (non-fatal):", emailErr);
+      }
+    }
+
+    await recordAuditEvent({
+      actor_type: "staff",
+      actor_id: staffCheck.email,
+      event_type: "order.notification_outcome",
+      entity_type: "order",
+      entity_id: order.id,
+      detail: {
+        order_number: order.order_number,
+        status: "payment_received",
+        outcome: notificationWarning ? "unconfirmed" : "accepted",
+        channel: "truecolor_payment_update",
+      },
     });
 
     try {
@@ -342,7 +358,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       `Resolved manually from ambiguous Clover match.`
     ).catch(() => {});
 
-    return NextResponse.json({ ok: true, status: "payment_received" });
+    return NextResponse.json({ ok: true, status: "payment_received", ...(notificationWarning ? { notificationWarning } : {}) });
   } catch (err) {
     console.error("[confirm-clover]", err instanceof Error ? err.message : err);
     return NextResponse.json({ error: sanitizeError(err) }, { status: 500 });

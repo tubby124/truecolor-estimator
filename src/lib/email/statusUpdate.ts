@@ -29,6 +29,10 @@ import {
 
 export interface StatusUpdateParams {
   orderId?: string;
+  /** Stable key for a provider retry of the same lifecycle message. */
+  idempotencyKey?: string;
+  /** Treat missing lifecycle logging as an uncertain delivery result. */
+  requireEmailLog?: boolean;
   status: "payment_received" | "in_production" | "ready_for_pickup";
   orderNumber: string;
   customerName: string;
@@ -53,7 +57,17 @@ export async function sendOrderStatusEmail(params: StatusUpdateParams): Promise<
   const html = buildHtml(params);
   const text = buildText(params);
 
-  await sendEmail({ from, to: params.customerEmail, subject, html, text, orderId: params.orderId, includeUnsubscribeHeaders: false });
+  await sendEmail({
+    from,
+    to: params.customerEmail,
+    subject,
+    html,
+    text,
+    orderId: params.orderId,
+    idempotencyKey: params.idempotencyKey,
+    requireEmailLog: params.requireEmailLog,
+    includeUnsubscribeHeaders: false,
+  });
 
   console.log(
     `[statusUpdate] email sent → ${params.customerEmail} | ${params.orderNumber} | status: ${params.status}`

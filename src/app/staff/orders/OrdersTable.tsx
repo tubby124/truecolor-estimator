@@ -45,7 +45,7 @@ export interface Order {
   total: number;
   payment_method: string;
   actual_payment_label?: string | null;
-  receipt_sent_at?: string | null;
+  payment_confirmation_sent_at?: string | null;
   wave_invoice_id: string | null;
   wave_invoice_number: string | null;
   wave_invoice_approved_at: string | null;
@@ -416,7 +416,7 @@ export function OrdersTable({ initialOrders, initialDashboardOrders, newQuoteCou
         prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
       );
       if (newStatus === "payment_received" && !data.notificationWarning) {
-        setReceiptSentIds(prev => new Set(prev).add(orderId));
+        setPaymentConfirmationSentIds(prev => new Set(prev).add(orderId));
       }
       router.refresh();
       if (data.notificationWarning) {
@@ -446,27 +446,65 @@ export function OrdersTable({ initialOrders, initialDashboardOrders, newQuoteCou
     }
   }
 
-  // ── Send receipt ─────────────────────────────────────────────────────────────
+  // ── Resend True Color payment update ─────────────────────────────────────────
 
-  const [sendingReceiptId, setSendingReceiptId] = useState<string | null>(null);
-  const [receiptSentIds, setReceiptSentIds] = useState<Set<string>>(new Set(initialOrders.filter(o => o.receipt_sent_at).map(o => o.id)));
+  const [sendingPaymentConfirmationId, setSendingPaymentConfirmationId] = useState<string | null>(null);
+  const [paymentConfirmationSentIds, setPaymentConfirmationSentIds] = useState<Set<string>>(new Set(initialOrders.filter(o => o.payment_confirmation_sent_at).map(o => o.id)));
 
-  async function handleSendReceipt(orderId: string, orderNumber: string, customerEmail: string) {
-    const resend = receiptSentIds.has(orderId) || Boolean(orders.find(o => o.id === orderId)?.receipt_sent_at);
-    if (resend && !window.confirm(`A receipt was already sent for ${orderNumber}. Send another copy?`)) return;
+  async function handleSendPaymentConfirmation(orderId: string, orderNumber: string, customerEmail: string) {
+    const resend = paymentConfirmationSentIds.has(orderId) || Boolean(orders.find(o => o.id === orderId)?.payment_confirmation_sent_at);
+    if (resend && !window.confirm(`A payment update was already sent for ${orderNumber}. Send another copy?`)) return;
     const requestId = crypto.randomUUID();
-    setSendingReceiptId(orderId);
+    setSendingPaymentConfirmationId(orderId);
     try {
-      const res = await fetch(`/api/staff/orders/${orderId}/receipt`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ resend, requestId, requestCreatedAt: Date.now() }) });
+      const res = await fetch(`/api/staff/orders/${orderId}/payment-confirmation`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ resend, requestId, requestCreatedAt: Date.now() }) });
       const data = (await res.json()) as { ok?: boolean; error?: string; alreadySent?: boolean };
-      if (!res.ok) throw new Error(data.error ?? "Failed to send receipt");
-      setReceiptSentIds((prev) => new Set(prev).add(orderId));
-      showToast(data.alreadySent ? `A receipt was already sent for ${orderNumber}` : `Receipt sent to ${customerEmail} for ${orderNumber}`, "success");
+      if (!res.ok) throw new Error(data.error ?? "Failed to send payment update");
+      setPaymentConfirmationSentIds((prev) => new Set(prev).add(orderId));
+      showToast(data.alreadySent ? `A payment update was already sent for ${orderNumber}` : `Payment update sent to ${customerEmail} for ${orderNumber}`, "success");
       router.refresh();
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "Failed to send receipt — try again", "error");
+      showToast(err instanceof Error ? err.message : "Failed to send payment update — try again", "error");
     } finally {
-      setSendingReceiptId(null);
+      setSendingPaymentConfirmationId(null);
+    }
+  }
+
+  const [openingWaveDocumentId, setOpeningWaveDocumentId] = useState<string | null>(null);
+  const [sendingWaveDocumentId, setSendingWaveDocumentId] = useState<string | null>(null);
+
+  async function handleOpenWaveDocument(orderId: string, orderNumber: string) {
+    const popup = window.open("about:blank", "_blank");
+    if (popup) popup.opener = null;
+    setOpeningWaveDocumentId(orderId);
+    try {
+      const res = await fetch(`/api/staff/orders/${orderId}/wave-document`);
+      const data = (await res.json()) as { ok?: boolean; error?: string; documentUrl?: string };
+      if (!res.ok || !data.documentUrl) throw new Error(data.error ?? "Wave paid invoice is unavailable");
+      if (popup) popup.location.replace(data.documentUrl);
+      else window.open(data.documentUrl, "_blank", "noopener,noreferrer");
+      showToast(`${orderNumber} — opened Wave paid invoice`, "success");
+    } catch (err) {
+      popup?.close();
+      showToast(err instanceof Error ? err.message : "Could not open Wave paid invoice", "error");
+    } finally {
+      setOpeningWaveDocumentId(null);
+    }
+  }
+
+  async function handleEmailWaveDocument(orderId: string, orderNumber: string, customerEmail: string) {
+    if (!window.confirm(`Email the official Wave paid invoice to ${customerEmail}?`)) return;
+    setSendingWaveDocumentId(orderId);
+    try {
+      const res = await fetch(`/api/staff/orders/${orderId}/wave-document`, { method: "POST" });
+      const data = (await res.json()) as { ok?: boolean; error?: string; accepted?: boolean };
+      if (!res.ok || !data.accepted) throw new Error(data.error ?? "Wave did not accept the paid-invoice email");
+      showToast(`Wave accepted the paid invoice email for ${orderNumber}`, "success");
+      router.refresh();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Wave paid invoice could not be emailed", "error");
+    } finally {
+      setSendingWaveDocumentId(null);
     }
   }
 
@@ -476,7 +514,7 @@ export function OrdersTable({ initialOrders, initialDashboardOrders, newQuoteCou
     setResendingPaymentId(orderId);
     try {
       const res = await fetch(`/api/staff/orders/${orderId}/resend-payment`, { method: "POST" });
-      const data = (await res.json()) as { ok?: boolean; error?: string };
+      const data = (await res.json()) as { ok?: boolean; error?: string; notificationWarning?: string };
       if (!res.ok) throw new Error(data.error ?? "Resend failed");
       setResendSuccessIds((prev) => new Set(prev).add(orderId));
       showToast(`Payment link resent for ${orderNumber}`, "success");
@@ -532,7 +570,7 @@ export function OrdersTable({ initialOrders, initialDashboardOrders, newQuoteCou
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ paused, ...(paused ? { reason } : {}) }),
       });
-      const data = (await res.json()) as { ok?: boolean; error?: string };
+      const data = (await res.json()) as { ok?: boolean; error?: string; notificationWarning?: string };
       if (!res.ok) throw new Error(data.error ?? "Pause failed");
       setOrders((prev) =>
         prev.map((o) =>
@@ -555,7 +593,7 @@ export function OrdersTable({ initialOrders, initialDashboardOrders, newQuoteCou
     setConfirmingEtransferId(orderId);
     try {
       const res = await fetch(`/api/staff/orders/${orderId}/confirm-etransfer`, { method: "POST" });
-      const data = (await res.json()) as { ok?: boolean; error?: string };
+      const data = (await res.json()) as { ok?: boolean; error?: string; notificationWarning?: string };
       if (!res.ok) throw new Error(data.error ?? "Confirmation failed");
       setOrders((prev) =>
         prev.map((o) =>
@@ -565,7 +603,12 @@ export function OrdersTable({ initialOrders, initialDashboardOrders, newQuoteCou
         )
       );
       setConfirmedEtransferIds((prev) => new Set(prev).add(orderId));
-      showToast(`${orderNumber} — eTransfer confirmed, receipt sent`, "success");
+      if (data.notificationWarning) {
+        showToast(`${orderNumber} — ${data.notificationWarning}`, "error");
+      } else {
+        setPaymentConfirmationSentIds((prev) => new Set(prev).add(orderId));
+        showToast(`${orderNumber} — eTransfer confirmed; payment update accepted`, "success");
+      }
       setTimeout(
         () => setConfirmedEtransferIds((prev) => { const s = new Set(prev); s.delete(orderId); return s; }),
         10000
@@ -590,7 +633,7 @@ export function OrdersTable({ initialOrders, initialDashboardOrders, newQuoteCou
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ clover_payment_id: cloverPaymentId, reason }),
       });
-      const data = (await res.json()) as { ok?: boolean; error?: string };
+      const data = (await res.json()) as { ok?: boolean; error?: string; notificationWarning?: string };
       if (!res.ok) throw new Error(data.error ?? "Clover confirmation failed");
       setOrders((prev) =>
         prev.map((o) =>
@@ -600,7 +643,10 @@ export function OrdersTable({ initialOrders, initialDashboardOrders, newQuoteCou
         )
       );
       setConfirmedCloverIds((prev) => new Set(prev).add(orderId));
-      showToast(`${orderNumber} — Clover payment confirmed, receipt sent`, "success");
+      showToast(
+        data.notificationWarning ?? `${orderNumber} — Clover payment confirmed; customer update accepted`,
+        data.notificationWarning ? "error" : "success",
+      );
       setTimeout(
         () => setConfirmedCloverIds((prev) => { const s = new Set(prev); s.delete(orderId); return s; }),
         10000
@@ -909,9 +955,13 @@ export function OrdersTable({ initialOrders, initialDashboardOrders, newQuoteCou
                 onVoidAndReplace={() => handleVoidAndReplace(order.id, order.order_number)}
                 pausingFollowup={pausingFollowupId === order.id}
                 onFollowupPause={(paused) => handleFollowupPause(order.id, order.order_number, paused)}
-                sendingReceipt={sendingReceiptId === order.id}
-                receiptSent={receiptSentIds.has(order.id) || Boolean(order.receipt_sent_at)}
-                onSendReceipt={() => handleSendReceipt(order.id, order.order_number, customer?.email ?? "")}
+                sendingPaymentConfirmation={sendingPaymentConfirmationId === order.id}
+                paymentConfirmationSent={paymentConfirmationSentIds.has(order.id) || Boolean(order.payment_confirmation_sent_at)}
+                onSendPaymentConfirmation={() => handleSendPaymentConfirmation(order.id, order.order_number, customer?.email ?? "")}
+                openingWaveDocument={openingWaveDocumentId === order.id}
+                sendingWaveDocument={sendingWaveDocumentId === order.id}
+                onOpenWaveDocument={() => handleOpenWaveDocument(order.id, order.order_number)}
+                onEmailWaveDocument={() => handleEmailWaveDocument(order.id, order.order_number, customer?.email ?? "")}
                 confirmingEtransfer={confirmingEtransferId === order.id}
                 etransferConfirmed={confirmedEtransferIds.has(order.id)}
                 onConfirmEtransfer={() => handleConfirmEtransfer(order.id, order.order_number)}

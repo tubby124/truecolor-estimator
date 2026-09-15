@@ -445,6 +445,58 @@ export function parseWaveMinorUnitValue(value: unknown): number {
   return Number(exact);
 }
 
+/**
+ * Return only a customer-facing Wave document that Wave confirms is paid in
+ * full. Staff actions must not expose a draft, a partially paid invoice, or a
+ * generic True Color receipt as an "official" financial document.
+ */
+export async function getWavePaidInvoiceDocument(
+  invoiceId: string,
+): Promise<{ invoiceNumber: string; viewUrl: string }> {
+  type Money = { minorUnitValue: string };
+  const data = await waveQuery<{
+    business: {
+      invoice: {
+        id: string;
+        invoiceNumber: string;
+        status: string;
+        viewUrl: string | null;
+        currency: { code: string };
+        total: Money;
+        amountDue: Money;
+        amountPaid: Money;
+      } | null;
+    } | null;
+  }>(
+    `query WavePaidInvoiceDocument($businessId: ID!, $invoiceId: ID!) {
+      business(id: $businessId) {
+        invoice(id: $invoiceId) {
+          id invoiceNumber status viewUrl
+          currency { code }
+          total { minorUnitValue }
+          amountDue { minorUnitValue }
+          amountPaid { minorUnitValue }
+        }
+      }
+    }`,
+    { businessId: WAVE_BUSINESS_ID, invoiceId },
+  );
+  const invoice = data.business?.invoice;
+  if (
+    !invoice || invoice.id !== invoiceId || invoice.currency?.code !== "CAD" ||
+    invoice.status !== "PAID" || !invoice.invoiceNumber?.trim() || !invoice.viewUrl?.trim()
+  ) {
+    throw new Error("Wave paid invoice document is unavailable");
+  }
+  const totalCents = parseWaveMinorUnitValue(invoice.total?.minorUnitValue);
+  const amountDueCents = parseWaveMinorUnitValue(invoice.amountDue?.minorUnitValue);
+  const amountPaidCents = parseWaveMinorUnitValue(invoice.amountPaid?.minorUnitValue);
+  if (totalCents <= 0 || amountDueCents !== 0 || amountPaidCents < totalCents) {
+    throw new Error("Wave invoice is not paid in full");
+  }
+  return { invoiceNumber: invoice.invoiceNumber, viewUrl: invoice.viewUrl };
+}
+
 /** Read actual provider cents, including each named tax. Never infer tax from a grand total.
  * Fields verified against Wave's official API Reference September 6, 2026. */
 export async function getWaveInvoiceFinancials(invoiceId: string): Promise<WaveInvoiceFinancials> {

@@ -1,5 +1,11 @@
 # Current work state
 
+## Wave receipt and work-start updates — implementation pending release, September 15, 2026
+
+The local branch `codex/wave-receipt-flow-20260915` changes newly confirmed online Wave payments so the durable True Color email is a payment-confirmation/service update, while Wave remains the official paid financial document. It requires an authenticated paid-in-full Wave readback before the customer update, adds staff-only **Open / print Wave paid invoice** and **Email Wave paid invoice** actions, and exposes their accepted/unconfirmed outcomes in lifecycle activity. Selecting **In production** now sends its existing one-time work-started update through the same status transition guard. E-transfer confirmation no longer claims a receipt was sent when Wave bookkeeping or the customer update is unconfirmed.
+
+Focused tests, TypeScript, and targeted ESLint pass locally; no database migration, deployment, customer email, provider send, or payment has occurred. The remaining acceptance is a controlled owner mailbox payment and provider/browser readback after release. Broader staff-versus-customer notification reduction is tracked separately and must not be inferred from this payment-flow change.
+
 ## Payment integration incident — September 15, 2026
 
 The [incident audit](PAYMENT-INCIDENT-AUDIT-20260915.md) owns the confirmed payment defects and recovery. The first repair, PR #99, deployed at `d304ca7f` (Railway `6cd92352-9b32-4666-b01e-520ba9d1cdb6` SUCCESS), with required PR/main CI green. Live Clover checkout now shows saved items/quantities at the unchanged total. Wave's existing poll runs every 15 minutes and a manual production run returned 5 scanned / 0 errors with a healthy heartbeat. One customer Wave capture and seventeen Clover captures have single provider-specific ledger entries; four archived/refund-risk records remain held. No recovery emails, test charges or added provider payments. The two incident follow-ups were paused during repair; the final issue receipt records their restoration status.

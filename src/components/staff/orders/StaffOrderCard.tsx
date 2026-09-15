@@ -42,9 +42,13 @@ interface StaffOrderCardProps {
   onVoidAndReplace: () => void;
   pausingFollowup: boolean;
   onFollowupPause: (paused: boolean) => void;
-  sendingReceipt: boolean;
-  receiptSent: boolean;
-  onSendReceipt: () => void;
+  sendingPaymentConfirmation: boolean;
+  paymentConfirmationSent: boolean;
+  onSendPaymentConfirmation: () => void;
+  openingWaveDocument: boolean;
+  sendingWaveDocument: boolean;
+  onOpenWaveDocument: () => void;
+  onEmailWaveDocument: () => void;
   confirmingEtransfer: boolean;
   etransferConfirmed: boolean;
   onConfirmEtransfer: () => void;
@@ -96,9 +100,13 @@ export function StaffOrderCard({
   onVoidAndReplace,
   pausingFollowup,
   onFollowupPause,
-  sendingReceipt,
-  receiptSent,
-  onSendReceipt,
+  sendingPaymentConfirmation,
+  paymentConfirmationSent,
+  onSendPaymentConfirmation,
+  openingWaveDocument,
+  sendingWaveDocument,
+  onOpenWaveDocument,
+  onEmailWaveDocument,
   confirmingEtransfer,
   etransferConfirmed,
   onConfirmEtransfer,
@@ -1013,22 +1021,43 @@ export function StaffOrderCard({
             </div>
           )}
 
-          {/* Send receipt — only for paid orders */}
+          {/* Wave owns the official paid invoice; True Color owns service updates. */}
           {order.status !== "pending_payment" && customer?.email && (
-            <div>
+            <div className="space-y-2">
+              {order.wave_invoice_id && (
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={onOpenWaveDocument}
+                    disabled={openingWaveDocument}
+                    className="text-sm font-semibold px-4 py-2 rounded-lg border border-emerald-400 text-emerald-700 hover:bg-emerald-50 disabled:opacity-50 transition-colors"
+                  >
+                    {openingWaveDocument ? "Opening…" : "🧾 Open / print Wave paid invoice"}
+                  </button>
+                  <button
+                    onClick={onEmailWaveDocument}
+                    disabled={sendingWaveDocument}
+                    className="text-sm font-semibold px-4 py-2 rounded-lg border border-emerald-400 text-emerald-700 hover:bg-emerald-50 disabled:opacity-50 transition-colors"
+                  >
+                    {sendingWaveDocument ? "Sending…" : "✉ Email Wave paid invoice"}
+                  </button>
+                </div>
+              )}
               <button
-                onClick={() => onSendReceipt()}
-                disabled={sendingReceipt}
+                onClick={onSendPaymentConfirmation}
+                disabled={sendingPaymentConfirmation}
                 className="text-sm font-semibold px-4 py-2 rounded-lg border border-violet-400 text-violet-600 hover:bg-violet-50 disabled:opacity-50 transition-colors"
               >
-                {sendingReceipt
+                {sendingPaymentConfirmation
                   ? "Sending…"
-                  : receiptSent
-                  ? "🧾 Resend receipt"
-                  : "🧾 Send receipt"}
+                  : paymentConfirmationSent
+                  ? "✉ Resend payment update"
+                  : "✉ Send payment update"}
               </button>
-              <p className="text-xs text-gray-400 mt-1">
-                {receiptSent ? "A receipt has already been sent. Resend sends another copy to " : "Emails a payment receipt to "}{customer.email}
+              <p className="text-xs text-gray-400">
+                {order.wave_invoice_id
+                  ? "Wave is the official paid invoice. This separate True Color email confirms next steps for "
+                  : "Sends the True Color payment update to "}
+                {customer.email}
               </p>
             </div>
           )}

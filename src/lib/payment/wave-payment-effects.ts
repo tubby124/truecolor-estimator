@@ -1,9 +1,10 @@
 import { buildPurchaseAmounts } from "@/lib/analytics/purchase-amounts";
 import { sendMeasurementProtocolPurchase } from "@/lib/analytics/measurementProtocol";
-import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
-import { loadReceiptPaymentSources } from "@/lib/payment/receipt-payment-sources";
+import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
 import { escapeTelegramHtml, sendTelegramNotification } from "@/lib/notifications/telegram";
 import { createServiceClient } from "@/lib/supabase/server";
+import { parseWaveMinorUnitValue } from "@/lib/wave/invoice";
+import { getWaveInvoicePaymentSnapshot } from "@/lib/wave/payments";
 
 export type WavePaymentEffectType =
   | "receipt"
@@ -32,6 +33,7 @@ export interface WavePaymentOrder {
   created_at: string;
   paid_at: string;
   receipt_token: string | null;
+  wave_invoice_id: string | null;
   ga_client_id: string | null;
   ga_session_id: string | null;
   ga_session_number: string | null;
@@ -94,7 +96,7 @@ async function loadOrder(
       id, order_number, customer_id,
       subtotal, gst, pst, total, is_rush,
       discount_code, discount_amount,
-      created_at, paid_at, receipt_token,
+      created_at, paid_at, receipt_token, wave_invoice_id,
       ga_client_id, ga_session_id, ga_session_number, ga_context_captured_at,
       customers ( email, name, company ),
       order_items ( merchant_offer_id, commerce_product_id, product_name, qty, width_in, height_in, sides, line_total )
@@ -111,7 +113,6 @@ async function loadOrder(
 export async function performWavePaymentEffect(
   job: WavePaymentEffectJob,
   order: WavePaymentOrder,
-  supabase?: ServiceClient,
 ): Promise<void> {
   const customer = singleCustomer(order);
   const items = Array.isArray(order.order_items) ? order.order_items : [];
@@ -128,12 +129,24 @@ export async function performWavePaymentEffect(
   }
 
   if (job.effect_type === "receipt") {
-    if (!customer?.email) throw new Error("Wave receipt customer email is missing");
-    await sendPaymentReceipt({
+    if (!customer?.email) throw new Error("Wave payment confirmation customer email is missing");
+    if (!order.wave_invoice_id) throw new Error("Wave payment confirmation invoice is missing");
+    const invoice = await getWaveInvoicePaymentSnapshot(order.wave_invoice_id);
+    if (parseWaveMinorUnitValue(invoice.amountDue.minorUnitValue) !== 0) {
+      throw new Error("Wave payment confirmation invoice is not paid in full");
+    }
+
+    // Wave owns the financial receipt for an online Wave capture. This durable
+    // application effect is intentionally a fulfilment update, not a second
+    // invoice/receipt with competing tax or payment wording.
+    await sendOrderStatusEmail({
+      orderId: order.id,
+      idempotencyKey: `payment-confirmation:${order.id}:v1`,
+      requireEmailLog: true,
+      status: "payment_received",
       orderNumber: order.order_number,
       customerName: customer.name ?? customer.company ?? "Customer",
       customerEmail: customer.email,
-      createdAt: order.created_at,
       items: items.map((item) => ({
         product_name: item.product_name,
         qty: Number(item.qty),
@@ -142,18 +155,9 @@ export async function performWavePaymentEffect(
         sides: Number(item.sides),
         line_total: Number(item.line_total),
       })),
-      subtotal: Number(order.subtotal),
-      gst: Number(order.gst),
-      pst: Number(order.pst ?? 0),
       total: Number(order.total),
       isRush: Boolean(order.is_rush),
-      discountCode: order.discount_code,
-      discountAmount:
-        order.discount_amount === null ? null : Number(order.discount_amount),
-      paymentSources: await loadReceiptPaymentSources(supabase ?? createServiceClient(), order.id),
-      oid: order.id,
-      receiptToken: order.receipt_token,
-      idempotencyKey: `wave-receipt/${order.id}`,
+      paymentMethod: "wave",
     });
     return;
   }
@@ -223,7 +227,7 @@ export async function processWavePaymentEffects(options: {
 
     try {
       const order = await loadOrder(supabase, job.order_id);
-      await performWavePaymentEffect(job, order, supabase);
+      await performWavePaymentEffect(job, order);
     } catch (effectError) {
       const { data: retryStatus, error: retryError } = await supabase.rpc(
         "retry_wave_payment_effect",
