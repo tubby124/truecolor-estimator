@@ -354,7 +354,10 @@ export async function POST(req: NextRequest) {
               ok: false,
               detail: `order lookup failed: ${fetchErr.message}`,
             });
-            return NextResponse.json({ ok: true });
+            return NextResponse.json(
+              { ok: false, error: "Order lookup failed" },
+              { status: 503 },
+            );
           }
           if (!pendingOrder) {
             await logWebhookEvent({
@@ -423,18 +426,6 @@ export async function POST(req: NextRequest) {
             clover_payment_id: paymentId ?? null,
             raw_event: event,
           });
-          if (pendingOrder.status !== "pending_payment") {
-            console.log(`[clover-webhook] order ${pendingOrder.order_number} already in status=${pendingOrder.status} — idempotent ack`);
-            await logWebhookEvent({
-              eventType: eventTypeStr,
-              resourceId: paymentId ?? matchRef ?? null,
-              matchedOrderId: pendingOrder.id,
-              ok: true,
-              detail: `order ${pendingOrder.order_number} already ${pendingOrder.status} — skipped`,
-            });
-            return NextResponse.json({ ok: true });
-          }
-
           const expectedCents = Math.round(Number(pendingOrder.total) * 100);
           const orderTotalDollars = Number(pendingOrder.total);
           const reportedDollars = reportedAmountCents / 100;
@@ -510,6 +501,55 @@ export async function POST(req: NextRequest) {
             );
           }
 
+          // A unique conflict is safe only when the row already stored for this
+          // Clover payment has the exact same durable identity. Do not let a
+          // provider ID attached to another order (or a different amount) turn
+          // into an idempotent acknowledgement.
+          if (ledgerAlreadyRecorded) {
+            const { data: existingCloverLedgerRow, error: duplicateLookupError } = await supabase
+              .from("order_payments")
+              .select("order_id, amount, currency, method, status, external_reference")
+              .match({ method: "clover", external_reference: paymentId })
+              .maybeSingle();
+            if (duplicateLookupError || !existingCloverLedgerRow) {
+              const detail = duplicateLookupError?.message ?? "duplicate Clover ledger row was not found";
+              console.error("[clover-webhook] duplicate ledger identity lookup failed:", detail);
+              await logWebhookEvent({
+                eventType: eventTypeStr,
+                resourceId: paymentId,
+                matchedOrderId: pendingOrder.id,
+                ok: false,
+                detail: `duplicate ledger identity lookup failed; retry requested: ${detail}`,
+              });
+              return NextResponse.json(
+                { ok: false, error: "Payment ledger duplicate could not be verified" },
+                { status: 503 },
+              );
+            }
+
+            const sameExistingPayment =
+              existingCloverLedgerRow.order_id === pendingOrder.id &&
+              Math.round(Number(existingCloverLedgerRow.amount) * 100) === reportedAmountCents &&
+              existingCloverLedgerRow.currency === "CAD" &&
+              existingCloverLedgerRow.method === "clover" &&
+              existingCloverLedgerRow.status === "recorded" &&
+              existingCloverLedgerRow.external_reference === paymentId;
+            if (!sameExistingPayment) {
+              console.error("[clover-webhook] duplicate Clover payment identity conflicts with existing ledger row", {
+                orderId: pendingOrder.id,
+                paymentId,
+              });
+              await logWebhookEvent({
+                eventType: eventTypeStr,
+                resourceId: paymentId,
+                matchedOrderId: pendingOrder.id,
+                ok: false,
+                detail: "duplicate Clover payment identity conflict; manual review required; no order effects applied",
+              });
+              return NextResponse.json({ ok: true });
+            }
+          }
+
           // Read the full ledger AFTER our insert so the sum includes this payment.
           const { data: ledgerRows, error: ledgerReadErr } = await supabase
             .from("order_payments")
@@ -537,6 +577,26 @@ export async function POST(req: NextRequest) {
           }));
           const ledgerSummary = summarizeOrderPayments(orderTotalDollars, ledgerEntries);
           const isFullyPaid = ledgerSummary.status === "paid" || ledgerSummary.status === "overpaid";
+
+          // Capture evidence must be durably recorded even when staff or another
+          // process moved the order forward before this webhook arrived. Keep its
+          // existing status and paid_at intact, and never replay fulfillment,
+          // accounting, receipt, or analytics effects from this path.
+          if (pendingOrder.status !== "pending_payment") {
+            const captureKind = ledgerAlreadyRecorded ? "duplicate Clover payment" : "Clover payment recorded";
+            const detail = ledgerSummary.status === "overpaid"
+              ? `${captureKind} on already ${pendingOrder.status}; overpaid ambiguity: ledger=$${ledgerSummary.amountPaid.toFixed(2)}/$${orderTotalDollars.toFixed(2)}; manual review required; order effects suppressed`
+              : `${captureKind} on already ${pendingOrder.status}; ledger=$${ledgerSummary.amountPaid.toFixed(2)}/$${orderTotalDollars.toFixed(2)}; order effects suppressed`;
+            console.log(`[clover-webhook] ${detail}`);
+            await logWebhookEvent({
+              eventType: eventTypeStr,
+              resourceId: paymentId,
+              matchedOrderId: pendingOrder.id,
+              ok: ledgerSummary.status !== "overpaid",
+              detail,
+            });
+            return NextResponse.json({ ok: true });
+          }
 
           // If ledger sum hasn't reached order total, leave the order pending.
           // Telegram alert tells staff a partial landed and what's left.
@@ -956,6 +1016,10 @@ export async function POST(req: NextRequest) {
             ok: false,
             detail: `unexpected error: ${err instanceof Error ? err.message : String(err)}`,
           });
+          return NextResponse.json(
+            { ok: false, error: "Clover webhook processing failed" },
+            { status: 503 },
+          );
         }
       }
     } else {

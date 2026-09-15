@@ -61,16 +61,22 @@ function captured(overrides: Record<string, unknown> = {}) {
 function createHarness(options: {
   durableSessionOrderId?: string | null;
   historicalSessionOrderId?: string | null;
-  referenceOrderId?: string | null;
+  identityLookupError?: { message: string } | null;
+  orderLookupError?: { message: string } | null;
   orderStatus?: string;
   ledgerInsertError?: { code?: string; message: string } | null;
   ledgerReadError?: { message: string } | null;
+  duplicateLookupError?: { message: string } | null;
+  duplicateExistingRow?: Record<string, unknown> | null;
+  initialLedgerRows?: Array<Record<string, unknown>>;
   orderUpdateError?: { message: string } | null;
 } = {}) {
   const paymentAttempts: Array<Record<string, unknown>> = [];
   const webhookEvents: Array<Record<string, unknown>> = [];
   const ledgerInserts: Array<Record<string, unknown>> = [];
+  const ledgerRows = [...(options.initialLedgerRows ?? [])];
   let ledgerReads = 0;
+  let duplicateLedgerReads = 0;
   let orderUpdates = 0;
   let paymentAttemptSelects = 0;
 
@@ -101,12 +107,18 @@ function createHarness(options: {
           },
           async maybeSingle() {
             if (filters.has("quote_checkout_session_id")) {
+              if (options.identityLookupError) return { data: null, error: options.identityLookupError };
               const id = options.durableSessionOrderId === undefined ? ORDER_A : options.durableSessionOrderId;
               return { data: id ? { id } : null, error: null };
             }
             if (filters.has("payment_reference")) return { data: null, error: null };
             if (filters.get("id") === ORDER_B) return { data: { id: ORDER_B }, error: null };
-            if (filters.has("id")) return { data: order, error: null };
+            if (filters.has("id")) {
+              if (filters.has("is:voided_at") && options.orderLookupError) {
+                return { data: null, error: options.orderLookupError };
+              }
+              return { data: order, error: null };
+            }
             throw new Error(`Unexpected orders lookup: ${JSON.stringify([...filters])}`);
           },
         };
@@ -126,14 +138,61 @@ function createHarness(options: {
         return {
           async insert(row: Record<string, unknown>) {
             ledgerInserts.push(row);
-            return { error: options.ledgerInsertError ?? null };
+            if (options.ledgerInsertError) return { error: options.ledgerInsertError };
+            const duplicate = ledgerRows.some((existing) =>
+              existing.method === "clover" &&
+              existing.status === "recorded" &&
+              existing.external_reference === row.external_reference,
+            );
+            if (duplicate) return { error: { code: "23505", message: "duplicate payment reference" } };
+            ledgerRows.push(row);
+            return { error: null };
           },
-          select() {
+          select(columns?: string) {
+            if (columns?.includes("external_reference")) {
+              return {
+                match(criteria: Record<string, unknown>) {
+                  duplicateLedgerReads += 1;
+                  return {
+                    async maybeSingle() {
+                      if (options.duplicateLookupError) {
+                        return { data: null, error: options.duplicateLookupError };
+                      }
+                      const defaultExisting = ledgerRows.find((row) =>
+                        row.method === "clover" && row.status === "recorded" && row.external_reference === criteria.external_reference,
+                      ) ?? {
+                        order_id: ORDER_A,
+                        amount: 10,
+                        currency: "CAD",
+                        method: "clover",
+                        status: "recorded",
+                        external_reference: "payment-1",
+                      };
+                      return { data: options.duplicateExistingRow ?? defaultExisting, error: null };
+                    },
+                  };
+                },
+              };
+            }
             ledgerReads += 1;
             return {
               async eq() {
+                const rowsForRead = ledgerRows.length > 0
+                  ? ledgerRows
+                  : (options.ledgerInsertError?.code === "23505" ? [options.duplicateExistingRow ?? {
+                    order_id: ORDER_A,
+                    amount: 10,
+                    currency: "CAD",
+                    method: "clover",
+                    status: "recorded",
+                    external_reference: "payment-1",
+                  }] : []);
                 return {
-                  data: options.ledgerReadError ? null : [{ amount: 10, method: "clover", status: "recorded" }],
+                  data: options.ledgerReadError ? null : rowsForRead.map((row) => ({
+                    amount: row.amount,
+                    method: row.method,
+                    status: row.status,
+                  })),
                   error: options.ledgerReadError ?? null,
                 };
               },
@@ -153,7 +212,9 @@ function createHarness(options: {
     paymentAttempts,
     webhookEvents,
     ledgerInserts,
+    get storedLedgerRows() { return ledgerRows; },
     get ledgerReads() { return ledgerReads; },
+    get duplicateLedgerReads() { return duplicateLedgerReads; },
     get orderUpdates() { return orderUpdates; },
     get paymentAttemptSelects() { return paymentAttemptSelects; },
   };
@@ -225,15 +286,57 @@ describe("Clover webhook durable identity", () => {
     }));
   });
 
-  it("keeps duplicate captures out of payment side effects after the order is already paid", async () => {
+  it("durably counts a new capture on an already-paid order without replaying payment effects", async () => {
     const harness = createHarness();
     mocks.createServiceClient.mockReturnValue(harness.supabase);
 
-    const [first, second] = await Promise.all([POST(request(captured())), POST(request(captured()))]);
+    const response = await POST(request(captured({ id: "payment-already-paid" })));
+
+    expect(response.status).toBe(200);
+    expect(harness.storedLedgerRows).toContainEqual(expect.objectContaining({
+      order_id: ORDER_A,
+      external_reference: "payment-already-paid",
+      amount: 10,
+      currency: "CAD",
+    }));
+    expect(harness.orderUpdates).toBe(0);
+    expect(mocks.recordWavePayment).not.toHaveBeenCalled();
+    expect(mocks.sendPaymentReceipt).not.toHaveBeenCalled();
+    expect(harness.webhookEvents).toContainEqual(expect.objectContaining({
+      detail: expect.stringContaining("Clover payment recorded on already payment_received"),
+    }));
+  });
+
+  it("acknowledges an exact duplicate on an already-paid order without another ledger row", async () => {
+    const harness = createHarness();
+    mocks.createServiceClient.mockReturnValue(harness.supabase);
+
+    const first = await POST(request(captured({ id: "payment-already-paid" })));
+    const second = await POST(request(captured({ id: "payment-already-paid" })));
 
     expect(first.status).toBe(200);
     expect(second.status).toBe(200);
-    expect(harness.webhookEvents.filter((row) => String(row.detail).includes("already payment_received"))).toHaveLength(2);
+    expect(harness.storedLedgerRows).toHaveLength(1);
+    expect(harness.duplicateLedgerReads).toBe(1);
+    expect(harness.orderUpdates).toBe(0);
+    expect(mocks.recordWavePayment).not.toHaveBeenCalled();
+  });
+
+  it("flags an overpaid ambiguity on an already-paid order without changing its state", async () => {
+    const harness = createHarness({
+      initialLedgerRows: [{ amount: 10, currency: "CAD", method: "cash", status: "recorded", external_reference: "cash-1" }],
+    });
+    mocks.createServiceClient.mockReturnValue(harness.supabase);
+
+    const response = await POST(request(captured({ id: "payment-overpaid" })));
+
+    expect(response.status).toBe(200);
+    expect(harness.orderUpdates).toBe(0);
+    expect(mocks.recordWavePayment).not.toHaveBeenCalled();
+    expect(harness.webhookEvents).toContainEqual(expect.objectContaining({
+      ok: false,
+      detail: expect.stringContaining("overpaid ambiguity"),
+    }));
   });
 
   it("returns retryable unresolved processing for a missing amount until a later retry verifies it", async () => {
@@ -318,6 +421,97 @@ describe("Clover webhook durable identity", () => {
     expect(harness.ledgerReads).toBe(1);
     expect(harness.orderUpdates).toBe(0);
     expect(mocks.recordWavePayment).not.toHaveBeenCalled();
+  });
+
+  it("returns retryable failure when the matched order lookup fails", async () => {
+    const harness = createHarness({ orderLookupError: { message: "database unavailable" } });
+    mocks.createServiceClient.mockReturnValue(harness.supabase);
+
+    const response = await POST(request(captured()));
+
+    expect(response.status).toBe(503);
+    expect(harness.ledgerInserts).toHaveLength(0);
+    expect(harness.orderUpdates).toBe(0);
+  });
+
+  it("returns retryable failure when durable identity lookup rejects", async () => {
+    const harness = createHarness({ identityLookupError: { message: "database unavailable" } });
+    mocks.createServiceClient.mockReturnValue(harness.supabase);
+
+    const response = await POST(request(captured()));
+
+    expect(response.status).toBe(503);
+    expect(harness.ledgerInserts).toHaveLength(0);
+    expect(harness.webhookEvents).toContainEqual(expect.objectContaining({
+      ok: false,
+      detail: expect.stringContaining("unexpected error: checkout session lookup failed"),
+    }));
+  });
+
+  it("returns retryable failure when duplicate Clover identity cannot be read", async () => {
+    const harness = createHarness({
+      orderStatus: "pending_payment",
+      ledgerInsertError: { code: "23505", message: "duplicate payment reference" },
+      duplicateLookupError: { message: "read timeout" },
+    });
+    mocks.createServiceClient.mockReturnValue(harness.supabase);
+
+    const response = await POST(request(captured()));
+
+    expect(response.status).toBe(503);
+    expect(harness.duplicateLedgerReads).toBe(1);
+    expect(harness.ledgerReads).toBe(0);
+    expect(harness.orderUpdates).toBe(0);
+  });
+
+  it("holds a duplicate Clover payment ID linked to another order for manual review", async () => {
+    const harness = createHarness({
+      orderStatus: "pending_payment",
+      ledgerInsertError: { code: "23505", message: "duplicate payment reference" },
+      duplicateExistingRow: {
+        order_id: ORDER_B,
+        amount: 10,
+        currency: "CAD",
+        method: "clover",
+        status: "recorded",
+        external_reference: "payment-1",
+      },
+    });
+    mocks.createServiceClient.mockReturnValue(harness.supabase);
+
+    const response = await POST(request(captured()));
+
+    expect(response.status).toBe(200);
+    expect(harness.ledgerReads).toBe(0);
+    expect(harness.orderUpdates).toBe(0);
+    expect(mocks.recordWavePayment).not.toHaveBeenCalled();
+    expect(harness.webhookEvents).toContainEqual(expect.objectContaining({
+      ok: false,
+      detail: expect.stringContaining("identity conflict; manual review required"),
+    }));
+  });
+
+  it("holds a duplicate Clover payment ID with a different recorded amount for manual review", async () => {
+    const harness = createHarness({
+      orderStatus: "pending_payment",
+      ledgerInsertError: { code: "23505", message: "duplicate payment reference" },
+      duplicateExistingRow: {
+        order_id: ORDER_A,
+        amount: 9.99,
+        currency: "CAD",
+        method: "clover",
+        status: "recorded",
+        external_reference: "payment-1",
+      },
+    });
+    mocks.createServiceClient.mockReturnValue(harness.supabase);
+
+    const response = await POST(request(captured()));
+
+    expect(response.status).toBe(200);
+    expect(harness.ledgerReads).toBe(0);
+    expect(harness.orderUpdates).toBe(0);
+    expect(mocks.sendPaymentReceipt).not.toHaveBeenCalled();
   });
 
   it("re-reads the ledger after a same-reference duplicate so a retry can finish a prior committed payment", async () => {
