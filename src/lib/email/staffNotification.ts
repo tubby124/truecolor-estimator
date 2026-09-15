@@ -456,6 +456,8 @@ function buildStaffNotificationText(
     "PAYMENT",
     payment_method === "clover_card"
       ? `Card charged — $${total.toFixed(2)} via Clover. Safe to begin production.`
+      : payment_method === "clover_pending"
+      ? `Clover payment request sent — $${total.toFixed(2)} CAD. Awaiting customer payment from the Clover link. DO NOT start printing until payment is confirmed.`
       : payment_method === "wave"
       ? `Wave Invoice sent — $${total.toFixed(2)} CAD. Awaiting online payment via Wave. Start production once paid.`
       : `e-Transfer PENDING — $${total.toFixed(2)} to info@true-color.ca. DO NOT start printing yet.`,

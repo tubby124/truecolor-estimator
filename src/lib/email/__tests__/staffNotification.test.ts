@@ -34,6 +34,9 @@ describe("pending Clover staff notification", () => {
     expect(email.html).toContain("Clover payment link sent to customer");
     expect(email.html).not.toContain("Card payment captured");
     expect(email.html).not.toContain("Safe to begin production");
+    expect(email.text).toContain("Clover payment request sent");
+    expect(email.text).toContain("Awaiting customer payment from the Clover link");
+    expect(email.text).toContain("DO NOT start printing until payment is confirmed");
     expect(email.text).not.toContain("Card charged");
     expect(email.text).not.toContain("Safe to begin production");
   });
