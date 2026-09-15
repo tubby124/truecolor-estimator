@@ -41,3 +41,11 @@ Wave's current API exposes invoice payment origin/provider/state plus `Money.min
 Current verification: the first combined provider/UI revision passed 182 test files / 1,716 tests, TypeScript and ESLint (zero errors; existing warnings). Follow-up review fixes are undergoing final checks. The PostgreSQL regression now uses the exact production order-status enum. Final release evidence will replace this interim checkpoint.
 
 Historical scope: 21 unmatched Clover capture events were read back at the provider. Sixteen have one safe identity; five remain identity gaps. No additional active, unarchived pending order was provider-paid. Archived/voided-side records are preserved. Historical captures need reconciliation even if staff already completed their orders.
+
+## Production recovery checkpoint
+
+The reviewed additive migration `20260915141000_wave_provider_payment_recovery.sql` was applied with migration history and schema-cache reload. The service role can execute the ingestion procedure; anonymous access is denied. The reported customer-origin Wave payment now has exactly one Wave ledger entry and a paid website order. Two recent Clover captures have exactly one Clover entry each, linked to their existing manual Wave bookkeeping entries; existing production status and receipt history were preserved. Recovery created zero Wave effect-outbox rows and sent no customer messages.
+
+The five older identity gaps were subsequently resolved from exact app-generated order numbers inside the authenticated Clover order line items. Archived/voided records remain excluded; other historical repairs are still being prepared.
+
+Receipt reliability limit: the UI/history guard prevents routine duplicate sends and intentional resend requests expire after five minutes. If the mail provider accepts an automatic receipt but writing its email log fails, the application reports uncertainty. Exactly-once email is not guaranteed beyond the provider's 24-hour idempotency retention; verify provider delivery before manually resending an uncertain older message.

@@ -2,7 +2,7 @@
 
 ## Prepared state
 
-The Wave repair is implemented on `codex/payment-wave-repair-20260915` from baseline `71180684`. It has not been pushed, merged, deployed, applied to production, or used to change any Wave or customer record. Production recovery remains a separate controlled step.
+The Wave repair is integrated in [PR #99](https://github.com/tubby124/truecolor-estimator/pull/99). The reviewed migration is applied in production, with service-role access verified and anonymous access denied. Guarded recovery corrected the reported paid/pending mismatch without customer effects. Runtime merge/deployment remains pending final integrated checks. The parent [incident audit](PAYMENT-INCIDENT-AUDIT-20260915.md) owns combined recovery and release evidence.
 
 The exact database proposal is `supabase/migrations/20260915141000_wave_provider_payment_recovery.sql`. Apply and review that migration before deploying the runtime which calls `accept_wave_provider_payment` and `record_quote_wave_provisional`. The old production RPC remains present during the transition, so applying the additive migration first does not break the current runtime.
 
@@ -36,4 +36,4 @@ The SQL regression covers retained provisional identity, exact same-ID completio
 4. Run the historical recovery with customer effects suppressed, then verify the single provider-keyed ledger row, derived order state, Wave timestamp, outbox rows, and staff provider label.
 5. Verify the signed Wave webhook configuration and delivery history separately. A local test or successful provider query is not delivery proof.
 
-No customer communication is authorized by this prepared repair. Historic recovery keeps customer effects suppressed by default.
+Historical recovery keeps customer effects suppressed. No recovery customer communication has been sent.
