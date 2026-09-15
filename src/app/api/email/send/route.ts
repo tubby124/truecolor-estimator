@@ -281,7 +281,6 @@ export async function POST(req: Request) {
 
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
       const from = process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
-      const bcc = process.env.SMTP_BCC ?? undefined;
 
       const paymentUrl: string | undefined = undefined;
       const qrCodeCid: string | undefined = undefined;
@@ -298,7 +297,6 @@ export async function POST(req: Request) {
         requireEmailLog: true,
         from,
         to,
-        bcc,
         subject,
         html,
         text,
@@ -318,7 +316,6 @@ export async function POST(req: Request) {
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://truecolorprinting.ca";
     const from = process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
-    const bcc = process.env.SMTP_BCC ?? undefined;
 
     const paymentUrl: string | undefined = undefined;
 
@@ -366,7 +363,6 @@ export async function POST(req: Request) {
       requireEmailLog: true,
       from,
       to,
-      bcc,
       subject,
       html,
       text: buildPlainText({ customerName, note, quoteData, jobDetails, hasProofAttachment, paymentUrl }),

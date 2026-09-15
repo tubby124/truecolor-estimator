@@ -65,7 +65,6 @@ export async function sendOrderConfirmationEmail(
 
   const from =
     process.env.SMTP_FROM ?? "True Color Display Printing <info@true-color.ca>";
-  const bcc = process.env.SMTP_BCC ?? undefined;
   // Product-anchored subject — customers don't remember TC-XXXXX, they remember
   // what they bought. First-item anchor (e.g. "50 business cards") + verb.
   const anchor = productAnchor(items);
@@ -95,7 +94,6 @@ export async function sendOrderConfirmationEmail(
   await sendEmail({
     from,
     to: contact.email,
-    bcc,
     subject,
     html,
     text,

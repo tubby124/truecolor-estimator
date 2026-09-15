@@ -17,7 +17,8 @@
  * Required env var: RESEND_API_KEY  (Resend Dashboard → API Keys → Create)
  * Sender display: SMTP_FROM env var (e.g. 'True Color Display Printing <hello@outreach.true-color.ca>')
  * Reply-to fallback: SMTP_REPLY_TO env var (e.g. info@true-color.ca)
- * Auto-BCC: SMTP_BCC env var (comma-separated)
+ * Staff-facing operational notices choose their recipients explicitly in
+ * staffNotification.ts. Customer mail is never copied implicitly.
  */
 
 export interface SendEmailAttachment {
@@ -131,20 +132,12 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
     process.env.SMTP_FROM ??
     "True Color Display Printing <hello@outreach.true-color.ca>";
 
-  // Auto-BCC staff on every outgoing email. SMTP_BCC supports comma-separated:
-  // "a@b.com,c@d.com". Skip BCC if caller already set one, or if the primary
-  // recipient IS one of the BCC addresses.
-  const globalBccRaw = process.env.SMTP_BCC;
-  const globalBcc = globalBccRaw
-    ? globalBccRaw.split(",").map((s) => s.trim()).filter(Boolean)
-    : undefined;
+  // A BCC can still be chosen deliberately by a caller for a specifically
+  // authorized message. Do not consult SMTP_BCC here: a global copy turns
+  // every customer lifecycle email into a staff email and defeats the routing
+  // policy.
+  const effectiveBcc = options.bcc === undefined ? undefined : toEmailList(options.bcc);
   const toAddresses = toEmailList(options.to).map(extractEmail);
-  const effectiveBcc =
-    options.bcc !== undefined
-      ? toEmailList(options.bcc)
-      : globalBcc?.length && !globalBcc.some((b) => toAddresses.includes(extractEmail(b)))
-        ? globalBcc
-        : undefined;
 
   // Reply-To: caller override, then SMTP_REPLY_TO env var fallback.
   // Without this, customer "reply" goes to the From address (unmonitored).

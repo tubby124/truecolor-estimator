@@ -18,6 +18,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "crypto";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
+import { sendStaffPaymentConfirmationNotification } from "@/lib/email/staffNotification";
 import { loadReceiptPaymentSources } from "@/lib/payment/receipt-payment-sources";
 import { approveWaveInvoice, recordWavePayment, findCustomerByEmail, getWaveInvoicePublicUrl } from "@/lib/wave/invoice";
 import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
@@ -747,6 +748,18 @@ export async function POST(req: NextRequest) {
                   order_number: updated.order_number,
                   total: totalNum,
                 }).catch(() => {});
+                // The status compare-and-swap above proves a first transition
+                // from pending_payment. The alert uses the order ID again as a
+                // provider idempotency key, so a post-send retry cannot create
+                // a second operational email.
+                void sendStaffPaymentConfirmationNotification({
+                  orderId: updated.id,
+                  orderNumber: updated.order_number,
+                  total: totalNum,
+                  paymentMethod: "clover_card",
+                }).catch((staffEmailErr) => {
+                  console.error("[clover-webhook] staff payment alert failed (non-fatal):", staffEmailErr);
+                });
                 void sendTelegramNotification(
                   `💰 <b>Paid via Clover</b>\n` +
                   `<b>${safeOrderRef}</b> · $${totalNum.toFixed(2)}` +

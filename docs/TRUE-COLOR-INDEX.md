@@ -30,6 +30,7 @@ Read the guide for your task; these preserve decisions and incident lessons, not
 
 - [Platform audit continuation after account switch](operations/PLATFORM-AUDIT-HANDOFF-20260911.md)
 - [Order-email audit and verified release](operations/ORDER-EMAIL-AUDIT-20260911.md)
+- [Transactional email recipient policy and release boundary](operations/TRANSACTIONAL-EMAIL-ROLES-20260915.md)
 
 - [Daily 7 p.m. evening creative: current plan and execution handoff](social/EVENING-LAUNCH-20260909.md)
 - [Gallery batch two: deployed assets and release evidence](operations/GALLERY-BATCH-TWO-20260909.md)

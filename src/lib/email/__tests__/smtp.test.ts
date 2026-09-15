@@ -56,6 +56,23 @@ describe("sendEmail", () => {
     expect(body.tags).toEqual([{ name: "order_message_id", value: "message-123" }]);
   });
 
+  it("does not turn the retired SMTP_BCC setting into a copy of customer mail", async () => {
+    vi.stubEnv("SMTP_BCC", "hasan.sharif.realtor@gmail.com, staff@example.com");
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ id: "customer-only" }), { status: 200 }),
+    );
+
+    await sendEmail({
+      to: "customer@example.com",
+      subject: "Customer lifecycle notice",
+      html: "<p>Customer only</p>",
+    });
+
+    const body = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
+    expect(body.to).toEqual(["customer@example.com"]);
+    expect(body).not.toHaveProperty("bcc");
+  });
+
   it("keeps a successful delivery successful when secondary email_log fails", async () => {
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://supabase.test");
     vi.stubEnv("SUPABASE_SECRET_KEY", "service-key");

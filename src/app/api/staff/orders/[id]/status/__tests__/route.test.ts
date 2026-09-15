@@ -1,11 +1,12 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const harness = vi.hoisted(() => ({ currentStatus: "ready_for_pickup", sendReview: vi.fn(), sendStatus: vi.fn(), audit: vi.fn() }));
+const harness = vi.hoisted(() => ({ currentStatus: "ready_for_pickup", sendReview: vi.fn(), sendStatus: vi.fn(), sendStaffPayment: vi.fn(), audit: vi.fn() }));
 const ORDER_ID = "11111111-1111-4111-8111-111111111111";
 
 vi.mock("@/lib/email/reviewRequest", () => ({ sendReviewRequestEmail: harness.sendReview }));
 vi.mock("@/lib/email/statusUpdate", () => ({ sendOrderStatusEmail: harness.sendStatus }));
+vi.mock("@/lib/email/staffNotification", () => ({ sendStaffPaymentConfirmationNotification: harness.sendStaffPayment }));
 vi.mock("@/lib/customers/incrementOrderStats", () => ({ incrementCustomerOrderStats: vi.fn() }));
 vi.mock("@/lib/notifications/telegram", () => ({ sendTelegramNotification: vi.fn(), escapeTelegramHtml: (value: string) => value }));
 vi.mock("@/lib/audit/record", () => ({ recordAuditEvent: harness.audit }));
