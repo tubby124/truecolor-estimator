@@ -1,3 +1,4 @@
+import { paymentLinkBlock } from "@/lib/orders/payment-readiness";
 /**
  * POST /api/staff/orders/[id]/payment-link
  *
@@ -38,8 +39,9 @@ export async function POST(_req: NextRequest, { params }: Params) {
         id,
         order_number,
         status,
-        total,
-        voided_at,
+        total, wave_invoice_id,
+        voided_at, is_archived, paid_at, wave_payment_recorded_at,
+        wave_invoice_approved_at, quote_wave_state, quote_checkout_state, quote_request_id,
         customers ( name, email )
       `)
       .eq("id", id)
@@ -60,6 +62,12 @@ export async function POST(_req: NextRequest, { params }: Params) {
         { error: "This payment request was voided — its link cannot be shared" },
         { status: 409 }
       );
+    }
+
+    const blocked = paymentLinkBlock(order);
+    if (blocked) {
+      await recordAuditEvent({ actor_type: "staff", actor_id: staffCheck.email, event_type: "order.payment_link_blocked", entity_type: "order", entity_id: id, detail: { reason: blocked } });
+      return NextResponse.json({ error: blocked }, { status: 409 });
     }
 
     const customerRaw = Array.isArray(order.customers) ? order.customers[0] : order.customers;

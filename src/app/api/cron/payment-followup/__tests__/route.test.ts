@@ -73,6 +73,7 @@ describe("payment-followup human-touch deferral", () => {
         id: "order-id",
         order_number: "TC-TEST-1",
         total: 68.82,
+        wave_invoice_id: "invoice", wave_invoice_approved_at: "2026-01-01", quote_wave_state: "ready",
         payment_method: "card",
         created_at: "2026-01-01T00:00:00.000Z",
         followup_count: 0,
@@ -113,6 +114,7 @@ describe("payment-followup human-touch deferral", () => {
       skipped: { humanTouch: 1 },
     });
     expect(auditEvents.select).toHaveBeenCalledWith("entity_id, event_type, at");
+    expect(auditEvents.in).toHaveBeenCalledWith("event_type", expect.arrayContaining(["order.payment_link_resent", "order.proof_sent"]));
     expect(auditEvents.gte).toHaveBeenCalledWith("at", expect.any(String));
     expect(mocks.buildPayLink).not.toHaveBeenCalled();
     expect(mocks.sendEmail).not.toHaveBeenCalled();
@@ -122,4 +124,18 @@ describe("payment-followup human-touch deferral", () => {
       expect.stringContaining("human=1"),
     );
   });
+  it("does not build or send a zero-balance reminder when the ledger covers a still-pending order", async () => {
+    const rows = builder({ data: [{ id: "order-id", order_number: "TC-TEST", total: 100, payment_method: "clover_card", created_at: "2026-01-01T00:00:00Z", followup_count: 0,
+      wave_invoice_id: "invoice", wave_invoice_approved_at: "2026-01-01", quote_wave_state: "ready", customers: { name: "Test", email: "test@example.test" }, order_items: [] }], error: null });
+    const empty = () => builder({ data: [], error: null });
+    const from = vi.fn().mockReturnValueOnce(rows).mockReturnValueOnce(empty())
+      .mockReturnValueOnce(builder({ data: [{ order_id: "order-id", amount: 100, method: "clover", status: "recorded" }], error: null }))
+      .mockReturnValueOnce(empty()).mockReturnValueOnce(empty()).mockReturnValueOnce(empty());
+    mocks.createServiceClient.mockReturnValue({ from });
+    const response = await GET(request());
+    expect(await response.json()).toMatchObject({ skipped: { fullyCovered: 1 } });
+    expect(mocks.buildPayLink).not.toHaveBeenCalled();
+    expect(mocks.sendEmail).not.toHaveBeenCalled();
+  });
+
 });

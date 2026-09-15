@@ -1,12 +1,14 @@
 import { buildPurchaseAmounts } from "@/lib/analytics/purchase-amounts";
 import { sendMeasurementProtocolPurchase } from "@/lib/analytics/measurementProtocol";
 import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
+import { escapeTelegramHtml, sendTelegramNotification } from "@/lib/notifications/telegram";
 import { createServiceClient } from "@/lib/supabase/server";
 
 export type WavePaymentEffectType =
   | "receipt"
   | "ga4_purchase"
-  | "brevo_payment_date";
+  | "brevo_payment_date"
+  | "staff_paid";
 
 export interface WavePaymentEffectJob {
   id: string;
@@ -111,6 +113,17 @@ export async function performWavePaymentEffect(
 ): Promise<void> {
   const customer = singleCustomer(order);
   const items = Array.isArray(order.order_items) ? order.order_items : [];
+
+  if (job.effect_type === "staff_paid") {
+    const delivered = await sendTelegramNotification(
+      `💰 <b>Order paid</b>\n` +
+        `<b>${escapeTelegramHtml(order.order_number)}</b> · $${Number(order.total).toFixed(2)}\n` +
+        `Provider: Wave Payments`,
+      "payment:received",
+    );
+    if (!delivered) throw new Error("Wave Payments staff notification was not delivered");
+    return;
+  }
 
   if (job.effect_type === "receipt") {
     if (!customer?.email) throw new Error("Wave receipt customer email is missing");

@@ -64,8 +64,9 @@ export async function sendPaymentReceipt(
     subject,
     html,
     text,
-    idempotencyKey: params.idempotencyKey,
+    idempotencyKey: params.idempotencyKey ?? (params.oid ? `payment-receipt:${params.oid}:v1` : undefined),
     orderId: params.oid,
+    requireEmailLog: true,
     includeUnsubscribeHeaders: false,
   });
 

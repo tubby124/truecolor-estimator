@@ -46,8 +46,28 @@ export async function POST(req: NextRequest, { params }: Params) {
       return NextResponse.json({ error: "No customer email on this order" }, { status: 400 });
     }
 
+    if (!["payment_received", "in_production", "ready_for_pickup", "complete"].includes(order.status)) {
+      return NextResponse.json({ error: "Payment must be confirmed before a receipt can be sent" }, { status: 409 });
+    }
+    const body = await req.json().catch(() => ({})) as { resend?: boolean; requestId?: string; requestCreatedAt?: number };
+    const { data: previous, error: receiptError } = await supabase.from("email_log")
+      .select("sent_at").eq("order_id", id).like("subject", "Receipt —%")
+      .in("status", ["sent", "delivered", "opened", "clicked"])
+      .order("sent_at", { ascending: false }).limit(1).maybeSingle();
+    if (receiptError) return NextResponse.json({ error: "Receipt history could not be verified. No email was sent." }, { status: 503 });
+    if (previous && body.resend !== true) return NextResponse.json({ ok: true, alreadySent: true, sentAt: previous.sent_at });
+    if (body.resend === true && (typeof body.requestId !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.requestId))) {
+      return NextResponse.json({ error: "A unique resend request is required" }, { status: 400 });
+    }
+
+    if (body.resend === true && (typeof body.requestCreatedAt !== "number" || !Number.isFinite(body.requestCreatedAt) ||
+      Date.now() - body.requestCreatedAt > 5 * 60_000 || body.requestCreatedAt - Date.now() > 30_000)) {
+      return NextResponse.json({ error: "This resend request expired. Confirm a new resend to continue." }, { status: 400 });
+    }
+
     const items = Array.isArray(order.order_items) ? order.order_items : [];
     await sendPaymentReceipt({
+      idempotencyKey: body.resend === true ? `receipt-resend:${id}:${body.requestId}` : `payment-receipt:${id}:v1`,
       orderNumber: order.order_number,
       customerName: customer.name,
       customerEmail: customer.email,

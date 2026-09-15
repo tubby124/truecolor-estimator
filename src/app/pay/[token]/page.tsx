@@ -16,6 +16,7 @@ import {
   resolveStoredQuotePaymentBreakdown,
   type QuotePaymentBreakdown,
 } from "@/lib/payment/quote-order";
+import { loadCloverOrderDescription } from "@/lib/payment/clover-order-description";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -100,24 +101,25 @@ export default async function PaymentGatewayPage({ params, searchParams }: Props
   try {
     const orderId = signedOrderId;
     if (!orderId) return <ExpiredPage />;
+    let isPartialBalance = false;
 
     // Stale-link and payment-ledger checks for order-scoped tokens.
     if (orderId) {
       const supabase = createServiceClient();
       const { data: orderCheck, error: orderCheckError } = await supabase
         .from("orders")
-        .select("total, status, voided_at, conversion_type, wave_invoice_id, wave_invoice_approved_at, quote_wave_state")
+        .select("total, status, voided_at, conversion_type, paid_at, wave_payment_recorded_at, is_archived, wave_invoice_id, wave_invoice_approved_at, quote_wave_state")
         .eq("id", orderId)
         .maybeSingle();
       if (orderCheckError || !orderCheck) {
         console.error("[pay/token] order readiness lookup failed:", orderCheckError?.message ?? "order not found");
         return <ErrorPage />;
       }
-      if (orderCheck.voided_at) {
+      if (orderCheck.voided_at || orderCheck.is_archived) {
         return <UpdatedLinkPage />;
       }
       // Block if already paid — prevents duplicate charges when customer clicks link again
-      if (["payment_received", "in_production", "ready_for_pickup", "complete"].includes(orderCheck?.status ?? "")) {
+      if (orderCheck.paid_at || orderCheck.wave_payment_recorded_at || ["payment_received", "in_production", "ready_for_pickup", "complete"].includes(orderCheck?.status ?? "")) {
         return <AlreadyPaidPage />;
       }
       // Orders are never allowed to create or resume Clover unless the
@@ -147,8 +149,18 @@ export default async function PaymentGatewayPage({ params, searchParams }: Props
         if (remainingCents !== amountCents) {
           return <UpdatedLinkPage />;
         }
+        isPartialBalance = remainingCents < Math.round(Number(orderCheck.total) * 100);
       }
     }
+
+    // Build the customer-facing Clover label from the saved order rows. The
+    // signed token still controls the amount, and the ledger guard above still
+    // requires that amount to equal the balance due.
+    description = await loadCloverOrderDescription(
+      createServiceClient(),
+      orderId,
+      isPartialBalance,
+    );
 
     let createdSessionId: string | null = null;
     {

@@ -5,105 +5,74 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   createServiceClient: vi.fn(),
   processWavePaymentEffects: vi.fn(),
+  reconcileWaveInvoicePayments: vi.fn(),
 }));
 
-vi.mock("@/lib/supabase/server", () => ({
-  createServiceClient: mocks.createServiceClient,
-}));
-
+vi.mock("@/lib/supabase/server", () => ({ createServiceClient: mocks.createServiceClient }));
 vi.mock("@/lib/payment/wave-payment-effects", () => ({
   processWavePaymentEffects: mocks.processWavePaymentEffects,
+}));
+vi.mock("@/lib/wave/payments", () => ({
+  reconcileWaveInvoicePayments: mocks.reconcileWaveInvoicePayments,
 }));
 
 import { POST } from "../route";
 
 const SECRET = "wave-test-secret";
-const WAVE_INVOICE_ID = "wave-invoice-123";
+import { WAVE_BUSINESS_ID } from "@/lib/wave/client";
+const RAW_BUSINESS_ID = Buffer.from(WAVE_BUSINESS_ID, "base64").toString().slice(9);
+const INVOICE_ID = Buffer.from(`Business:${RAW_BUSINESS_ID};Invoice:123`).toString("base64");
 
-function signedRequest(signatureOverride?: string) {
-  const body = JSON.stringify({
-    data: {
-      resourceType: "invoice",
-      resource: {
-        id: WAVE_INVOICE_ID,
-        status: "paid",
-      },
-    },
-  });
-  const signature =
-    signatureOverride ??
-    `sha256=${createHmac("sha256", SECRET).update(body).digest("hex")}`;
+function signedRequest(signatureOverride?: string, eventType = "invoice.paid", businessId = RAW_BUSINESS_ID) {
+  const body = JSON.stringify({ event_id: "fixture-event", event_type: eventType, business_id: businessId, data: { invoice_id: "123", amount_paid: "111.00", currency_code: "CAD" } });
+  const timestamp = String(Math.floor(Date.now() / 1000));
+  const signature = signatureOverride ?? `t=${timestamp},v1=${createHmac("sha256", SECRET).update(`${timestamp}.${body}`).digest("hex")}`;
   return new NextRequest("https://truecolorprinting.ca/api/webhooks/wave", {
-    method: "POST",
-    body,
-    headers: {
-      "content-type": "application/json",
-      "x-wave-signature": signature,
-    },
+    method: "POST", body,
+    headers: { "content-type": "application/json", "x-wave-signature": signature, "x-wave-timestamp": timestamp },
   });
 }
 
-function acceptance(
-  outcome:
-    | "transitioned"
-    | "already_processed"
-    | "not_wave_order"
-    | "legacy_already_paid",
-) {
+function result(outcome = "transitioned", effectsPending = 4) {
   return {
-    outcome,
-    order_id: "order-123",
-    order_number: "TC-0123",
-    payment_transitioned: outcome === "transitioned",
-    effects_pending:
-      outcome === "not_wave_order" || outcome === "legacy_already_paid" ? 0 : 3,
+    snapshot: { id: INVOICE_ID },
+    verifiedPayments: [{ paymentId: "wave-payment-1" }],
+    ignoredPayments: 1,
+    acceptances: [{
+      outcome,
+      order_id: "order-123",
+      order_number: "TC-0123",
+      source_payment_method: "clover_card",
+      actual_payment_provider: "wave_payments",
+      payment_transitioned: outcome === "transitioned",
+      amount_paid_cents: 11100,
+      balance_due_cents: 0,
+      effects_pending: effectsPending,
+    }],
   };
 }
 
-function createHarness(
-  acceptances: Array<ReturnType<typeof acceptance>>,
-  rpcError: { message: string } | null = null,
-) {
-  const webhookEvents: Array<Record<string, unknown>> = [];
-  const rpcCalls: Array<{ name: string; args: Record<string, unknown> }> = [];
-
+function harness() {
+  const webhookEvents: Record<string, unknown>[] = [];
   return {
     webhookEvents,
-    rpcCalls,
     supabase: {
-      async rpc(name: string, args: Record<string, unknown>) {
-        rpcCalls.push({ name, args });
-        if (rpcError) return { data: null, error: rpcError };
-        return { data: [acceptances.shift()], error: null };
-      },
       from(table: string) {
-        if (table !== "webhook_events") {
-          throw new Error(`Unexpected table: ${table}`);
-        }
-        return {
-          async insert(row: Record<string, unknown>) {
-            webhookEvents.push(row);
-            return { error: null };
-          },
-        };
+        if (table !== "webhook_events") throw new Error(`Unexpected table ${table}`);
+        return { async insert(row: Record<string, unknown>) { webhookEvents.push(row); return { error: null }; } };
       },
     },
   };
 }
 
-describe("Wave paid-invoice durable acceptance", () => {
+describe("Wave paid-invoice verified readback", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.env.WAVE_WEBHOOK_SECRET = SECRET;
-    mocks.processWavePaymentEffects.mockResolvedValue({
-      claimed: 3,
-      sent: 3,
-      retried: 0,
-      dead: 0,
-    });
     vi.spyOn(console, "log").mockImplementation(() => undefined);
     vi.spyOn(console, "warn").mockImplementation(() => undefined);
     vi.spyOn(console, "error").mockImplementation(() => undefined);
+    mocks.processWavePaymentEffects.mockResolvedValue({ claimed: 4, sent: 4, retried: 0, dead: 0 });
   });
 
   afterEach(() => {
@@ -111,107 +80,81 @@ describe("Wave paid-invoice durable acceptance", () => {
     vi.restoreAllMocks();
   });
 
-  it("sends duplicate deliveries through the same atomic database boundary", async () => {
-    const harness = createHarness([
-      acceptance("transitioned"),
-      acceptance("already_processed"),
-    ]);
-    mocks.createServiceClient.mockReturnValue(harness.supabase);
+  it("uses the signed event only to trigger provider readback with normal live effects", async () => {
+    const h = harness();
+    mocks.createServiceClient.mockReturnValue(h.supabase);
+    mocks.reconcileWaveInvoicePayments.mockResolvedValue(result());
 
-    const [first, duplicate] = await Promise.all([
-      POST(signedRequest()),
-      POST(signedRequest()),
-    ]);
+    const response = await POST(signedRequest());
 
+    expect(response.status).toBe(200);
+    expect(mocks.reconcileWaveInvoicePayments).toHaveBeenCalledWith(h.supabase, INVOICE_ID, {
+      enqueueCustomerEffects: true,
+      enqueueStaffEffect: true,
+    });
+    expect(mocks.processWavePaymentEffects).toHaveBeenCalledWith({
+      supabase: h.supabase,
+      orderId: "order-123",
+      maxJobs: 4,
+    });
+    expect(h.webhookEvents[0]).toEqual(expect.objectContaining({
+      ok: true,
+      detail: expect.stringContaining("provider=Wave Payments"),
+    }));
+  });
+
+  it("replays duplicate deliveries through the same idempotent readback boundary", async () => {
+    const h = harness();
+    mocks.createServiceClient.mockReturnValue(h.supabase);
+    mocks.reconcileWaveInvoicePayments
+      .mockResolvedValueOnce(result("transitioned"))
+      .mockResolvedValueOnce(result("already_processed"));
+    const first = await POST(signedRequest());
+    const duplicate = await POST(signedRequest());
     expect(first.status).toBe(200);
     expect(duplicate.status).toBe(200);
-    expect(harness.rpcCalls).toEqual([
-      {
-        name: "accept_wave_paid_invoice",
-        args: { p_wave_invoice_id: WAVE_INVOICE_ID },
-      },
-      {
-        name: "accept_wave_paid_invoice",
-        args: { p_wave_invoice_id: WAVE_INVOICE_ID },
-      },
-    ]);
-    expect(harness.webhookEvents).toHaveLength(2);
+    expect(mocks.reconcileWaveInvoicePayments).toHaveBeenCalledTimes(2);
   });
 
-  it("recovers after a crash immediately following the committed transition", async () => {
-    const harness = createHarness([
-      acceptance("transitioned"),
-      acceptance("already_processed"),
-    ]);
-    mocks.createServiceClient.mockReturnValue(harness.supabase);
-    mocks.processWavePaymentEffects
-      .mockRejectedValueOnce(new Error("worker crashed"))
-      .mockResolvedValueOnce({
-        claimed: 3,
-        sent: 3,
-        retried: 0,
-        dead: 0,
-      });
-
-    const transitionResponse = await POST(signedRequest());
-    const replayResponse = await POST(signedRequest());
-
-    expect(transitionResponse.status).toBe(200);
-    expect(replayResponse.status).toBe(200);
-    expect(mocks.processWavePaymentEffects).toHaveBeenCalledTimes(2);
-    expect(mocks.processWavePaymentEffects).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        orderId: "order-123",
-        maxJobs: 3,
-      }),
-    );
-    expect(harness.webhookEvents.map((row) => row.detail)).toEqual([
-      "order TC-0123 transitioned; durable effects=3",
-      "order TC-0123 already_processed; durable effects=3",
-    ]);
-  });
-
-  it("returns a retryable response when the atomic database transaction fails", async () => {
-    const harness = createHarness([], { message: "database unavailable" });
-    mocks.createServiceClient.mockReturnValue(harness.supabase);
-
+  it("acknowledges a manual-only paid invoice without touching the ledger or effects", async () => {
+    const h = harness();
+    mocks.createServiceClient.mockReturnValue(h.supabase);
+    mocks.reconcileWaveInvoicePayments.mockResolvedValue({
+      snapshot: { id: INVOICE_ID },
+      verifiedPayments: [],
+      ignoredPayments: 2,
+      acceptances: [],
+    });
     const response = await POST(signedRequest());
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ outcome: "no_verified_provider_payment" });
+    expect(mocks.processWavePaymentEffects).not.toHaveBeenCalled();
+  });
 
+  it("returns retryable 503 when provider readback or atomic acceptance fails", async () => {
+    const h = harness();
+    mocks.createServiceClient.mockReturnValue(h.supabase);
+    mocks.reconcileWaveInvoicePayments.mockRejectedValue(new Error("ledger conflict"));
+    const response = await POST(signedRequest());
     expect(response.status).toBe(503);
     expect(mocks.processWavePaymentEffects).not.toHaveBeenCalled();
-    expect(harness.webhookEvents).toContainEqual(
-      expect.objectContaining({
-        ok: false,
-        detail: "atomic payment acceptance failed",
-      }),
-    );
+    expect(h.webhookEvents[0]).toEqual(expect.objectContaining({ ok: false }));
   });
 
-  it("does not run Wave customer effects for a non-Wave payment order", async () => {
-    const harness = createHarness([acceptance("not_wave_order")]);
-    mocks.createServiceClient.mockReturnValue(harness.supabase);
-
-    const response = await POST(signedRequest());
-
-    expect(response.status).toBe(200);
-    expect(mocks.processWavePaymentEffects).not.toHaveBeenCalled();
-  });
-
-  it("does not guess whether legacy paid-order effects were already delivered", async () => {
-    const harness = createHarness([acceptance("legacy_already_paid")]);
-    mocks.createServiceClient.mockReturnValue(harness.supabase);
-
-    const response = await POST(signedRequest());
-
-    expect(response.status).toBe(200);
-    expect(mocks.processWavePaymentEffects).not.toHaveBeenCalled();
-  });
-
-  it("rejects an invalid signature before accessing the database", async () => {
+  it("rejects an invalid signature before database or provider access", async () => {
     const response = await POST(signedRequest("sha256=forged"));
-
     expect(response.status).toBe(401);
     expect(mocks.createServiceClient).not.toHaveBeenCalled();
-    expect(mocks.processWavePaymentEffects).not.toHaveBeenCalled();
+    expect(mocks.reconcileWaveInvoicePayments).not.toHaveBeenCalled();
   });
+  it.each(["invoice.partially_paid", "invoice.overpaid"])("reads provider truth for documented %s events", async type => {
+    const h = harness(); mocks.createServiceClient.mockReturnValue(h.supabase); mocks.reconcileWaveInvoicePayments.mockResolvedValue(result("partial", 0));
+    expect((await POST(signedRequest(undefined, type))).status).toBe(200);
+    expect(mocks.reconcileWaveInvoicePayments).toHaveBeenCalledWith(h.supabase, INVOICE_ID, expect.any(Object));
+  });
+  it("rejects a correctly signed event for another business before provider access", async () => {
+    expect((await POST(signedRequest(undefined, "invoice.paid", "other-business"))).status).toBe(400);
+    expect(mocks.reconcileWaveInvoicePayments).not.toHaveBeenCalled();
+  });
+
 });

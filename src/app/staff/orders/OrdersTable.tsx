@@ -43,6 +43,8 @@ export interface Order {
   gst: number;
   total: number;
   payment_method: string;
+  actual_payment_label?: string | null;
+  receipt_sent_at?: string | null;
   wave_invoice_id: string | null;
   wave_invoice_number: string | null;
   wave_invoice_approved_at: string | null;
@@ -412,6 +414,10 @@ export function OrdersTable({ initialOrders, initialDashboardOrders, newQuoteCou
       setOrders((prev) =>
         prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
       );
+      if (newStatus === "payment_received" && !data.notificationWarning) {
+        setReceiptSentIds(prev => new Set(prev).add(orderId));
+      }
+      router.refresh();
       if (data.notificationWarning) {
         showToast(`${orderNumber}: ${data.notificationWarning}`, "error");
         setStatusError(`${orderNumber}: ${data.notificationWarning}`);
@@ -442,17 +448,20 @@ export function OrdersTable({ initialOrders, initialDashboardOrders, newQuoteCou
   // ── Send receipt ─────────────────────────────────────────────────────────────
 
   const [sendingReceiptId, setSendingReceiptId] = useState<string | null>(null);
-  const [receiptSentIds, setReceiptSentIds] = useState<Set<string>>(new Set());
+  const [receiptSentIds, setReceiptSentIds] = useState<Set<string>>(new Set(initialOrders.filter(o => o.receipt_sent_at).map(o => o.id)));
 
   async function handleSendReceipt(orderId: string, orderNumber: string, customerEmail: string) {
+    const resend = receiptSentIds.has(orderId) || Boolean(orders.find(o => o.id === orderId)?.receipt_sent_at);
+    if (resend && !window.confirm(`A receipt was already sent for ${orderNumber}. Send another copy?`)) return;
+    const requestId = crypto.randomUUID();
     setSendingReceiptId(orderId);
     try {
-      const res = await fetch(`/api/staff/orders/${orderId}/receipt`, { method: "POST" });
-      const data = (await res.json()) as { ok?: boolean; error?: string };
+      const res = await fetch(`/api/staff/orders/${orderId}/receipt`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ resend, requestId, requestCreatedAt: Date.now() }) });
+      const data = (await res.json()) as { ok?: boolean; error?: string; alreadySent?: boolean };
       if (!res.ok) throw new Error(data.error ?? "Failed to send receipt");
       setReceiptSentIds((prev) => new Set(prev).add(orderId));
-      showToast(`Receipt sent to ${customerEmail} for ${orderNumber}`, "success");
-      setTimeout(() => setReceiptSentIds((prev) => { const s = new Set(prev); s.delete(orderId); return s; }), 10000);
+      showToast(data.alreadySent ? `A receipt was already sent for ${orderNumber}` : `Receipt sent to ${customerEmail} for ${orderNumber}`, "success");
+      router.refresh();
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Failed to send receipt — try again", "error");
     } finally {
@@ -900,7 +909,7 @@ export function OrdersTable({ initialOrders, initialDashboardOrders, newQuoteCou
                 pausingFollowup={pausingFollowupId === order.id}
                 onFollowupPause={(paused) => handleFollowupPause(order.id, order.order_number, paused)}
                 sendingReceipt={sendingReceiptId === order.id}
-                receiptSent={receiptSentIds.has(order.id)}
+                receiptSent={receiptSentIds.has(order.id) || Boolean(order.receipt_sent_at)}
                 onSendReceipt={() => handleSendReceipt(order.id, order.order_number, customer?.email ?? "")}
                 confirmingEtransfer={confirmingEtransferId === order.id}
                 etransferConfirmed={confirmedEtransferIds.has(order.id)}

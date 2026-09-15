@@ -7,6 +7,7 @@ import type {
 const mocks = vi.hoisted(() => ({
   sendPaymentReceipt: vi.fn(),
   sendMeasurementProtocolPurchase: vi.fn(),
+  sendTelegramNotification: vi.fn(),
 }));
 
 vi.mock("@/lib/email/paymentReceipt", () => ({
@@ -15,6 +16,11 @@ vi.mock("@/lib/email/paymentReceipt", () => ({
 
 vi.mock("@/lib/analytics/measurementProtocol", () => ({
   sendMeasurementProtocolPurchase: mocks.sendMeasurementProtocolPurchase,
+}));
+
+vi.mock("@/lib/notifications/telegram", () => ({
+  sendTelegramNotification: mocks.sendTelegramNotification,
+  escapeTelegramHtml: (value: string) => value,
 }));
 
 import {
@@ -90,6 +96,7 @@ describe("Wave payment effect worker", () => {
     vi.clearAllMocks();
     mocks.sendPaymentReceipt.mockResolvedValue(undefined);
     mocks.sendMeasurementProtocolPurchase.mockResolvedValue(true);
+    mocks.sendTelegramNotification.mockResolvedValue(true);
   });
 
   it("retries a transient GA4 failure and completes the same durable job later", async () => {
@@ -216,5 +223,13 @@ describe("Wave payment effect worker", () => {
     });
     fetchMock.mockRestore();
     delete process.env.BREVO_API_KEY;
+  });
+
+  it("sends a provider-labelled staff payment effect with a stable category", async () => {
+    await performWavePaymentEffect(job("staff_paid"), ORDER);
+    expect(mocks.sendTelegramNotification).toHaveBeenCalledWith(
+      expect.stringContaining("Provider: Wave Payments"),
+      "payment:received",
+    );
   });
 });

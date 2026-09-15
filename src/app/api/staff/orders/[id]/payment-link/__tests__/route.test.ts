@@ -47,6 +47,7 @@ const baseOrder = {
   id: ORDER_ID,
   order_number: "TC-2026-1042",
   status: "pending_payment",
+  wave_invoice_id: "invoice", wave_invoice_approved_at: "2026-09-01", quote_wave_state: "ready",
   total: 245.55,
   voided_at: null as string | null,
   customers: [{ name: "Dana Smith", email: "dana@example.com" }],
@@ -131,6 +132,8 @@ describe("staff copyable payment link", () => {
 
   it.each([
     { patch: { status: "payment_received" }, status: 400 },
+    { patch: { wave_payment_recorded_at: "2026-09-01" }, status: 409 },
+    { patch: { wave_invoice_id: null, quote_wave_state: "ambiguous" }, status: 409 },
     { patch: { voided_at: "2026-09-01T00:00:00.000Z" }, status: 409 },
     { patch: { customers: [{ name: "Dana Smith", email: "" }] }, status: 400 },
   ])("refuses an order that is not payable %j", async ({ patch, status }) => {

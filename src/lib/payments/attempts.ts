@@ -63,7 +63,7 @@ export function customerMessageForAttempt(status: PaymentAttemptStatus, label?: 
 export async function recordPaymentAttempt(
   supabase: SupabaseLike,
   input: PaymentAttemptInput,
-): Promise<void> {
+): Promise<boolean> {
   const row: Record<string, unknown> = {
     order_id: input.order_id ?? null,
     provider: input.provider ?? "clover",
@@ -83,7 +83,9 @@ export async function recordPaymentAttempt(
   const { error } = await supabase.from("payment_attempts").insert(row);
   if (error) {
     console.error("[payment-attempts] insert failed (non-fatal):", error.message);
+    return false;
   }
+  return true;
 }
 
 export function formatAttemptAge(createdAt: string, now = Date.now()): string {

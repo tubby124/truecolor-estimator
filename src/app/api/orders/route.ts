@@ -1,3 +1,4 @@
+import { buildCloverOrderDescription } from "@/lib/payment/clover-order-description";
 /**
  * POST /api/orders
  *
@@ -15,6 +16,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createHash } from "node:crypto";
 import { createServiceClient } from "@/lib/supabase/server";
 import { CloverCheckoutError, createCloverCheckout } from "@/lib/payment/clover";
+import { recordPaymentAttempt } from "@/lib/payments/attempts";
 import {
   completeOrderCheckout,
   failOrderCheckout,
@@ -730,7 +732,7 @@ export async function POST(req: NextRequest) {
 
     const { data: persistedItems, error: persistedItemsError } = await supabase
       .from("order_items")
-      .select("checkout_line_key, line_total")
+      .select("checkout_line_key, line_total, product_name, qty, width_in, height_in, sides, addons")
       .eq("order_id", order.id);
     if (persistedItemsError) {
       return NextResponse.json(
@@ -840,10 +842,11 @@ export async function POST(req: NextRequest) {
     let emailCheckoutUrl: string | null = null;
     if (payment_method === "clover_card") {
       const totalCents = Math.round(total * 100);
-      const description =
-        items.length === 1
-          ? `True Color Order ${order.order_number} — ${items[0].product_name}`
-          : `True Color Order ${order.order_number} (${items.length} items)`;
+      const description = buildCloverOrderDescription({
+        orderNumber: order.order_number,
+        items: persistedItems,
+        isPartialBalance: false,
+      });
 
       const siteUrl =
         process.env.NEXT_PUBLIC_SITE_URL ??
@@ -865,6 +868,7 @@ export async function POST(req: NextRequest) {
             { status: 503 },
           );
         }
+        let openedCheckout: Awaited<ReturnType<typeof createCloverCheckout>> | null = null;
         try {
           const clover = await createCloverCheckout(totalCents, description, contact.email, redirectUrl, order.id);
           await completeOrderCheckout(supabase, {
@@ -874,6 +878,7 @@ export async function POST(req: NextRequest) {
             sessionId: clover.sessionId,
             expiresAt: clover.expiresAt,
           });
+          openedCheckout = clover;
           checkoutUrl = clover.checkoutUrl;
         } catch (cloverError) {
           const ambiguous = !(cloverError instanceof CloverCheckoutError) || cloverError.outcome === "ambiguous";
@@ -894,6 +899,17 @@ export async function POST(req: NextRequest) {
             },
             { status: ambiguous ? 409 : 503 },
           );
+        }
+        // Payment-attempt telemetry must never invalidate a checkout session
+        // already durably committed by completeOrderCheckout.
+        if (openedCheckout) {
+          void recordPaymentAttempt(supabase, {
+            order_id: order.id,
+            status: "checkout_opened",
+            amount: total,
+            clover_checkout_session_id: openedCheckout.sessionId || null,
+            customer_message: "Secure Clover checkout opened. We are waiting for payment confirmation.",
+          });
         }
       }
 

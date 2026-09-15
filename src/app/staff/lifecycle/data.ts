@@ -5,6 +5,7 @@
  * the derivation functions then build the panel-shaped objects.
  */
 
+import { countPendingPaymentConflicts } from "@/lib/lifecycle/payment-integrity";
 import { createServiceClient } from "@/lib/supabase/server";
 import { resolveOrderPayLink } from "@/lib/orders/payLink";
 import type { LifecycleRow } from "./LifecycleTable";
@@ -75,7 +76,7 @@ const EXPECTED_CRONS: Array<{ name: string; maxAgeHours: number }> = [
   { name: "gsc-sync",               maxAgeHours: 26 },  // daily
   { name: "ga4-sync",               maxAgeHours: 26 },  // daily — Phase 9d defense-in-depth alongside gsc-sync
   { name: "dashboard-alerts",       maxAgeHours: 2  },  // hourly Telegram push layer
-  { name: "wave-poll",              maxAgeHours: 7  },  // every 6h — backfills Wave state changes the webhook missed
+  { name: "wave-poll",              maxAgeHours: 0.5 }, // every 15m — verified provider recovery when a webhook is missed
   { name: "wave-payment-effects",   maxAgeHours: 0.5 }, // every 5m — crash recovery for Wave receipts/analytics/CRM
   { name: "google-ads-monitor",     maxAgeHours: 0.2 }, // primary every 5m; alert after two missed runs
   { name: "google-ads-conversions", maxAgeHours: 0.5 }, // every 15m — revenue + quote measurement delivery
@@ -1593,7 +1594,14 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     const key = `${event.entity_id}/${detail.status}`;
     if (!latestNotificationOutcomes.has(key)) latestNotificationOutcomes.set(key, detail.outcome);
   }
+  const [unmatchedCaptures, paidPending] = await Promise.all([
+    supabase.from("payment_attempts").select("id", { count: "exact", head: true }).eq("status", "payment_captured").is("order_id", null),
+    supabase.from("orders").select("id,total,wave_payment_recorded_at,order_payments(amount,method,status)", { count: "exact" }).eq("status", "pending_payment").is("voided_at", null).or("is_archived.is.null,is_archived.eq.false").limit(1000),
+  ]);
+  const paymentIntegrity = { unmatchedCaptures: unmatchedCaptures.count ?? 0, paidPending: countPendingPaymentConflicts(paidPending.data ?? []), queryFailed: Boolean(unmatchedCaptures.error || paidPending.error || (paidPending.count ?? 0) > (paidPending.data?.length ?? 0)) };
+
   const rollup: StatusRollup = buildRollup({
+    paymentIntegrity,
     unconfirmedOrderNotifications: [...latestNotificationOutcomes.values()].filter((outcome) => outcome === "unconfirmed").length,
     orderNotificationQueryFailed: Boolean(notificationQueryError),
     bookkeepingRisks,

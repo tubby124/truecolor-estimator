@@ -56,6 +56,7 @@ export interface QuoteDeliveryHealth {
 }
 
 export interface RollupInputs {
+  paymentIntegrity?: { unmatchedCaptures: number; paidPending: number; queryFailed: boolean };
   /** Staff transitions whose latest email attempt needs operator reconciliation. */
   unconfirmedOrderNotifications?: number;
   orderNotificationQueryFailed?: boolean;
@@ -454,6 +455,10 @@ export function buildRollup(inputs: RollupInputs): StatusRollup {
       });
     }
   }
+
+  if (inputs.paymentIntegrity?.queryFailed) reds.push({ key: "payments:integrity-query", panel: "panel-payments", label: "Payment reconciliation checks could not be read" });
+  if (inputs.paymentIntegrity?.unmatchedCaptures) reds.push({ key: "payments:unmatched-captures", panel: "panel-payments", label: `${inputs.paymentIntegrity.unmatchedCaptures} captured payment(s) need order reconciliation` });
+  if (inputs.paymentIntegrity?.paidPending) reds.push({ key: "payments:paid-pending", panel: "panel-payments", label: `${inputs.paymentIntegrity.paidPending} order(s) show provider payment but remain pending` });
 
   // ── Quote email provider reconciliation ──────────────────────────────────
   // These rows survive request failures and later healthy traffic. Surface

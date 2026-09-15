@@ -8,6 +8,7 @@ import {
   type WaveInvoiceFinancials,
   type WaveLineItem,
 } from "@/lib/wave/invoice";
+import { getWaveInvoicePaymentSnapshot } from "@/lib/wave/payments";
 import { pstExemptionInvoiceNote } from "@/lib/payment/pst-exemption";
 
 type WaveAction = "create" | "ready" | "wait";
@@ -106,6 +107,21 @@ async function completeQuoteWaveProvisioning(
   });
   if (error || data !== true) {
     throw new Error(error?.message || "Wave invoice linkage could not be finalized");
+  }
+}
+
+async function recordProvisionalQuoteWaveProvisioning(
+  supabase: SupabaseClient,
+  input: { orderId: string; reservationId: string; invoiceId: string; invoiceNumber: string },
+): Promise<void> {
+  const { data, error } = await supabase.rpc("record_quote_wave_provisional", {
+    p_order_id: input.orderId,
+    p_reservation_id: input.reservationId,
+    p_wave_invoice_id: input.invoiceId,
+    p_wave_invoice_number: input.invoiceNumber,
+  });
+  if (error || data !== true) {
+    throw new Error(error?.message || "Created Wave invoice identity could not be retained");
   }
 }
 
@@ -302,6 +318,43 @@ async function verifyInvoiceFinancials(invoiceId: string, expected: WaveInvoiceF
   }
 }
 
+/** Resume a durably retained Wave invoice. This path can approve/link the
+ * existing provider invoice, but can never create another one. */
+export async function recoverProvisionalOrderWaveInvoice(
+  supabase: SupabaseClient,
+  orderId: string,
+): Promise<QuoteWaveProvisioningResult> {
+  const { data, error } = await supabase
+    .from("orders")
+    .select("id, status, paid_at, wave_invoice_id, quote_wave_state, quote_wave_reservation_id")
+    .eq("id", orderId)
+    .single();
+  if (error || !data) throw new Error(error?.message || "Provisional Wave order is unavailable");
+  if (
+    data.status !== "pending_payment" || data.paid_at != null ||
+    data.quote_wave_state !== "ambiguous" ||
+    typeof data.wave_invoice_id !== "string" || !data.wave_invoice_id ||
+    typeof data.quote_wave_reservation_id !== "string" || !data.quote_wave_reservation_id
+  ) {
+    return { action: "wait", invoiceId: null };
+  }
+
+  await verifyInvoiceFinancials(data.wave_invoice_id, await loadSavedFinancials(supabase, orderId));
+  const snapshot = await getWaveInvoicePaymentSnapshot(data.wave_invoice_id);
+  if (snapshot.status === "DRAFT") {
+    await approveWaveInvoice(data.wave_invoice_id);
+  } else if (!["SAVED", "UNPAID", "OVERDUE", "PARTIAL", "PAID", "OVERPAID"].includes(snapshot.status)) {
+    throw new Error(`Wave invoice ${data.wave_invoice_id} cannot be recovered from status ${snapshot.status}`);
+  }
+  await completeQuoteWaveProvisioning(supabase, {
+    orderId,
+    reservationId: data.quote_wave_reservation_id,
+    invoiceId: data.wave_invoice_id,
+    invoiceNumber: snapshot.invoiceNumber,
+  });
+  return { action: "ready", invoiceId: data.wave_invoice_id };
+}
+
 export async function provisionOrderWaveInvoice(
   supabase: SupabaseClient,
   orderId: string,
@@ -346,6 +399,14 @@ export async function provisionOrderWaveInvoice(
       orderNumber: order.orderNumber,
       isRush: order.isRush,
       memo,
+    });
+    // invoiceCreate has already mutated provider state. Retain that identity
+    // before any readback or approval so a crash cannot cause a duplicate.
+    await recordProvisionalQuoteWaveProvisioning(supabase, {
+      orderId,
+      reservationId: reservation.reservationId,
+      invoiceId: invoice.invoiceId,
+      invoiceNumber: invoice.invoiceNumber,
     });
     await verifyInvoiceFinancials(invoice.invoiceId, expectedFinancials);
     await approveWaveInvoice(invoice.invoiceId);
