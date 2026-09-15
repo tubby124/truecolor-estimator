@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
   const cutoff = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(); // 2 hours ago
   let tc9Sent = 0;
   const byTier: Record<string, number> = { t1: 0, t2: 0, t3: 0 };
-  const skipped: Record<string, number> = { paused: 0, ambiguous: 0, notDue: 0, humanTouch: 0 };
+  const skipped: Record<string, number> = { paused: 0, ambiguous: 0, notDue: 0, humanTouch: 0, fullyCovered: 0 };
   let chaseSignaled = false;
   let failureCount = 0;
 
@@ -226,6 +226,10 @@ export async function GET(req: NextRequest) {
 
         const ledger = ledgerByOrder.get(order.id) ?? [];
         const summary = summarizeOrderPayments(Number(order.total), ledger);
+        if (summary.balanceDue <= 0) {
+          skipped.fullyCovered++;
+          continue;
+        }
         let payUrl: string;
         try {
           payUrl = buildPayLink({
@@ -503,7 +507,7 @@ export async function GET(req: NextRequest) {
   await recordCronRun(
     "payment-followup",
     ok,
-    `tc9=${tc9Sent} t1=${byTier.t1} t2=${byTier.t2} t3=${byTier.t3} pause=${skipped.paused} amb=${skipped.ambiguous} human=${skipped.humanTouch} notdue=${skipped.notDue} errors=${failureCount}${chaseSignaled ? " chase_signal=1" : ""}`,
+    `tc9=${tc9Sent} t1=${byTier.t1} t2=${byTier.t2} t3=${byTier.t3} pause=${skipped.paused} amb=${skipped.ambiguous} human=${skipped.humanTouch} notdue=${skipped.notDue} covered=${skipped.fullyCovered} errors=${failureCount}${chaseSignaled ? " chase_signal=1" : ""}`,
   );
   return NextResponse.json({
     ok,

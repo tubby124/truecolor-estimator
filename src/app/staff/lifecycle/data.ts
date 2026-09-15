@@ -5,6 +5,7 @@
  * the derivation functions then build the panel-shaped objects.
  */
 
+import { countPendingPaymentConflicts } from "@/lib/lifecycle/payment-integrity";
 import { createServiceClient } from "@/lib/supabase/server";
 import { resolveOrderPayLink } from "@/lib/orders/payLink";
 import type { LifecycleRow } from "./LifecycleTable";
@@ -1595,9 +1596,9 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
   }
   const [unmatchedCaptures, paidPending] = await Promise.all([
     supabase.from("payment_attempts").select("id", { count: "exact", head: true }).eq("status", "payment_captured").is("order_id", null),
-    supabase.from("orders").select("id", { count: "exact", head: true }).eq("status", "pending_payment").is("voided_at", null).or("is_archived.is.null,is_archived.eq.false").not("wave_payment_recorded_at", "is", null),
+    supabase.from("orders").select("id,total,wave_payment_recorded_at,order_payments(amount,method,status)", { count: "exact" }).eq("status", "pending_payment").is("voided_at", null).or("is_archived.is.null,is_archived.eq.false").limit(1000),
   ]);
-  const paymentIntegrity = { unmatchedCaptures: unmatchedCaptures.count ?? 0, paidPending: paidPending.count ?? 0, queryFailed: Boolean(unmatchedCaptures.error || paidPending.error) };
+  const paymentIntegrity = { unmatchedCaptures: unmatchedCaptures.count ?? 0, paidPending: countPendingPaymentConflicts(paidPending.data ?? []), queryFailed: Boolean(unmatchedCaptures.error || paidPending.error || (paidPending.count ?? 0) > (paidPending.data?.length ?? 0)) };
 
   const rollup: StatusRollup = buildRollup({
     paymentIntegrity,

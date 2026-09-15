@@ -27,5 +27,15 @@ describe("staff receipt delivery", () => {
   it("fails closed when receipt history cannot be checked", async () => { historyError = { message: "offline" }; expect((await request()).status).toBe(503); expect(m.send).not.toHaveBeenCalled(); });
   it("gives first delivery a stable key", async () => { expect((await request()).status).toBe(200); expect(m.send).toHaveBeenCalledWith(expect.objectContaining({ idempotencyKey: "payment-receipt:order:v1" })); });
   it("requires a request identity for an intentional resend", async () => { previous = { sent_at: "2026-01-01" }; expect((await request({ resend: true })).status).toBe(400); expect(m.send).not.toHaveBeenCalled(); });
-  it("keys an intentional resend independently for safe request retries", async () => { const requestId = "22222222-2222-4222-8222-222222222222"; expect((await request({ resend: true, requestId })).status).toBe(200); expect(m.send).toHaveBeenCalledWith(expect.objectContaining({ idempotencyKey: `receipt-resend:order:${requestId}` })); });
+  it("keys an intentional resend independently for safe request retries", async () => { const requestId = "22222222-2222-4222-8222-222222222222"; expect((await request({ resend: true, requestId, requestCreatedAt: Date.now() })).status).toBe(200); expect(m.send).toHaveBeenCalledWith(expect.objectContaining({ idempotencyKey: `receipt-resend:order:${requestId}` })); });
+  it.each([undefined, "invalid", NaN, Date.now() - 301_000, Date.now() + 60_000])("rejects expired or invalid resend timestamp %s", async requestCreatedAt => {
+    expect((await request({ resend: true, requestId: "22222222-2222-4222-8222-222222222222", requestCreatedAt })).status).toBe(400);
+    expect(m.send).not.toHaveBeenCalled();
+  });
+  it("retains the provider key for a same-request retry within the freshness window", async () => {
+    const body = { resend: true, requestId: "22222222-2222-4222-8222-222222222222", requestCreatedAt: Date.now() };
+    await request(body); await request(body);
+    expect(m.send.mock.calls.map(c => c[0].idempotencyKey)).toEqual(["receipt-resend:order:22222222-2222-4222-8222-222222222222", "receipt-resend:order:22222222-2222-4222-8222-222222222222"]);
+  });
+
 });

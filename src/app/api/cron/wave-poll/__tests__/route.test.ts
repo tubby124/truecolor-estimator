@@ -33,7 +33,7 @@ function database(orders = [{
     id: "order-1",
     order_number: "TC-1",
     wave_invoice_id: "invoice-1",
-    wave_invoice_approved_at: null,
+    wave_invoice_approved_at: null as string | null,
     wave_payment_recorded_at: null,
     quote_wave_state: "ambiguous",
     quote_wave_reservation_id: "reservation-1",

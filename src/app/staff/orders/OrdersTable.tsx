@@ -456,7 +456,7 @@ export function OrdersTable({ initialOrders, initialDashboardOrders, newQuoteCou
     const requestId = crypto.randomUUID();
     setSendingReceiptId(orderId);
     try {
-      const res = await fetch(`/api/staff/orders/${orderId}/receipt`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ resend, requestId }) });
+      const res = await fetch(`/api/staff/orders/${orderId}/receipt`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ resend, requestId, requestCreatedAt: Date.now() }) });
       const data = (await res.json()) as { ok?: boolean; error?: string; alreadySent?: boolean };
       if (!res.ok) throw new Error(data.error ?? "Failed to send receipt");
       setReceiptSentIds((prev) => new Set(prev).add(orderId));

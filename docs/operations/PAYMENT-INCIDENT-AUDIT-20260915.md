@@ -2,7 +2,7 @@
 
 ## State
 
-Read-only production investigation confirmed independent defects in Wave invoice provisioning, Clover callback identity matching, payment reconciliation, and staff receipt visibility. Runtime was verified at `a22876b4b019058f5efb8d379f7530411ef1c0cd`, Railway deployment `0c984057-a521-44d9-8621-233ac082881d` (SUCCESS). No runtime fix, production mutation, invoice creation, customer message, or test payment was performed. Customer evidence stays outside this public repository.
+Production investigation confirmed independent defects in Wave invoice provisioning, Clover callback identity matching, payment reconciliation, and staff receipt visibility. The verified baseline is `a22876b4b019058f5efb8d379f7530411ef1c0cd`, Railway deployment `0c984057-a521-44d9-8621-233ac082881d` (SUCCESS). [GitHub incident #98](https://github.com/tubby124/truecolor-estimator/issues/98) tracks repair acceptance. Incorrect follow-ups have been paused on the two reported affected orders with guarded writes and audit records. Clover identity, request preflight, provider display, receipt visibility and Wave reconciliation fixes are integrated locally. Independent review is correcting remaining failure paths before release. The reported orphan draft has been recovered in production using exact customer/item/tax matching, approval/readback of the existing invoice, and guarded linkage. A real browser reached the correct merchant Clover checkout with the exact order total; no charge was submitted. No customer messages or test charges have been sent during recovery. Customer evidence stays outside this public repository.
 
 ## Confirmed findings
 
@@ -25,6 +25,19 @@ Additional code-confirmed defects, not established as the specific triggers abov
 
 ## Evidence and limitations
 
-Verified production configuration and deployment, application logs, active pending-order inventory, targeted order/attempt/ledger/audit/email/webhook records, recent Wave invoice and payment histories, recent Clover transactions, and current source. Existing related tests passed 27/27 but omit these incident payloads. Clover payment amount lookup returned 404 at callback time and the same read succeeds now; do not misdiagnose the current credentials as invalid. Recipient delivery events do not prove inbox placement or reading. The system remains unrepaired by this audit.
+Verified production configuration and deployment, application logs, active pending-order inventory, targeted order/attempt/ledger/audit/email/webhook records, recent Wave invoice and payment histories, recent Clover transactions, and current source. Existing related tests passed 27/27 but omit these incident payloads. Clover payment amount lookup returned 404 at callback time and the same read succeeds now; do not misdiagnose the current credentials as invalid. Recipient delivery events do not prove inbox placement or reading. Production runtime repair remains pending; local checks are not live acceptance.
 
 Wave's current API exposes invoice payment origin/provider/state plus `Money.minorUnitValue`; historical comments saying individual invoice payments are unavailable are outdated. References: [Wave API](https://developer.waveapps.com/hc/en-us/articles/360019968212-API-Reference), [Clover hosted-checkout webhooks](https://docs.clover.com/dev/docs/ecomm-hosted-checkout-webhook).
+
+## Recovery and release contract
+
+- Re-read each payment from the correct provider immediately before repair. Match durable session/reference or exact invoice/customer identity; never infer identity from equal totals.
+- Recover an existing orphan draft only after matching customer, item, quantity, subtotal and both taxes. Approve and re-read that exact draft, then attach it with guarded local state. Do not create a replacement invoice.
+- Ingest confirmed Wave customer captures through the reviewed atomic procedure. A manual Wave bookkeeping payment must not be counted as a second collection. Historical recovery disables customer receipt effects.
+- Append missing Clover ledger rows using unique provider payment references, attach captured attempts, and retain already-recorded Wave accounting entries. Preserve staff production progress and receipt history.
+- Review the older unmatched-capture backlog separately. Unresolved identity stays visible rather than being guessed or silently cleared.
+- Complete focused provider/database regressions, independent review, required PR CI, exact-commit deployment and live checkout/readback. A checkout landing page is evidence of checkout availability; no real card charge is used as a test.
+
+Current verification: the first combined provider/UI revision passed 182 test files / 1,716 tests, TypeScript and ESLint (zero errors; existing warnings). Follow-up review fixes are undergoing final checks. The PostgreSQL regression now uses the exact production order-status enum. Final release evidence will replace this interim checkpoint.
+
+Historical scope: 21 unmatched Clover capture events were read back at the provider. Sixteen have one safe identity; five remain identity gaps. No additional active, unarchived pending order was provider-paid. Archived/voided-side records are preserved. Historical captures need reconciliation even if staff already completed their orders.
