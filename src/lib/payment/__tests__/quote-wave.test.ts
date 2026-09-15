@@ -5,13 +5,18 @@ const wave = vi.hoisted(() => ({
   createOrFindWaveCustomer: vi.fn(),
   createWaveInvoice: vi.fn(),
   getWaveInvoiceFinancials: vi.fn(),
+  getWaveInvoicePaymentSnapshot: vi.fn(),
 }));
 
 vi.mock("@/lib/wave/invoice", () => wave);
+vi.mock("@/lib/wave/payments", () => ({
+  getWaveInvoicePaymentSnapshot: wave.getWaveInvoicePaymentSnapshot,
+}));
 
 import {
   provisionOrderWaveInvoice,
   provisionQuoteWaveInvoice,
+  recoverProvisionalOrderWaveInvoice,
   QuoteWaveProvisioningError,
   storedOrderItemToWaveLine,
 } from "../quote-wave";
@@ -36,6 +41,7 @@ function clientFor(input: {
         error: null,
       };
     }
+    if (name === "record_quote_wave_provisional") return { data: true, error: null };
     if (name === "complete_quote_wave_provisioning") return { data: true, error: null };
     if (name === "fail_quote_wave_provisioning") return { data: true, error: null };
     throw new Error(`Unexpected RPC ${name}: ${JSON.stringify(args)}`);
@@ -85,6 +91,11 @@ describe("quote Wave provisioning", () => {
       viewUrl: null,
     });
     wave.approveWaveInvoice.mockResolvedValue(undefined);
+    wave.getWaveInvoicePaymentSnapshot.mockResolvedValue({
+      id: "wave-invoice",
+      invoiceNumber: "1234",
+      status: "DRAFT",
+    });
   });
 
   it("returns an existing linked invoice as ready without another Wave call", async () => {
@@ -110,7 +121,7 @@ describe("quote Wave provisioning", () => {
     expect(wave.createOrFindWaveCustomer).not.toHaveBeenCalled();
   });
 
-  it("creates, approves, then durably links the invoice for the reservation owner", async () => {
+  it("retains the created identity before readback, approval, and final linkage", async () => {
     const { client, rpc } = clientFor({ action: "create", order: storedOrder });
 
     await expect(provisionQuoteWaveInvoice(client, orderId)).resolves.toEqual({
@@ -126,6 +137,12 @@ describe("quote Wave provisioning", () => {
       applyPst: true,
     }], { orderNumber: "TC-2026-0123", isRush: false });
     expect(wave.approveWaveInvoice).toHaveBeenCalledWith("wave-invoice");
+    expect(rpc).toHaveBeenCalledWith("record_quote_wave_provisional", {
+      p_order_id: orderId,
+      p_reservation_id: reservationId,
+      p_wave_invoice_id: "wave-invoice",
+      p_wave_invoice_number: "1234",
+    });
     expect(rpc).toHaveBeenCalledWith("complete_quote_wave_provisioning", {
       p_order_id: orderId,
       p_reservation_id: reservationId,
@@ -133,6 +150,10 @@ describe("quote Wave provisioning", () => {
       p_wave_invoice_number: "1234",
     });
     expect(wave.createWaveInvoice.mock.invocationCallOrder[0])
+      .toBeLessThan(rpc.mock.invocationCallOrder.find((_, index) => rpc.mock.calls[index][0] === "record_quote_wave_provisional") ?? 0);
+    const provisionalOrder = rpc.mock.invocationCallOrder.find((_, index) => rpc.mock.calls[index][0] === "record_quote_wave_provisional") ?? 0;
+    expect(provisionalOrder).toBeLessThan(wave.getWaveInvoiceFinancials.mock.invocationCallOrder.at(-1) ?? 0);
+    expect(wave.getWaveInvoiceFinancials.mock.invocationCallOrder.at(-1) ?? 0)
       .toBeLessThan(wave.approveWaveInvoice.mock.invocationCallOrder[0]);
     expect(wave.approveWaveInvoice.mock.invocationCallOrder[0])
       .toBeLessThan(rpc.mock.invocationCallOrder.at(-1) ?? 0);
@@ -157,6 +178,9 @@ describe("quote Wave provisioning", () => {
     wave.getWaveInvoiceFinancials.mockResolvedValue({ subtotalCents: 10000, gstCents: 501, pstCents: 600, totalCents: 11101 });
     await expect(provisionQuoteWaveInvoice(client, orderId)).rejects.toMatchObject({ ambiguous: true });
     expect(wave.approveWaveInvoice).not.toHaveBeenCalled();
+    expect(rpc).toHaveBeenCalledWith("record_quote_wave_provisional", expect.objectContaining({
+      p_wave_invoice_id: "wave-invoice",
+    }));
     expect(rpc).toHaveBeenCalledWith("fail_quote_wave_provisioning", expect.objectContaining({ p_ambiguous: true }));
     expect(rpc).not.toHaveBeenCalledWith("complete_quote_wave_provisioning", expect.anything());
   });
@@ -198,6 +222,38 @@ describe("quote Wave provisioning", () => {
     expect(rpc).toHaveBeenCalledWith("fail_quote_wave_provisioning", expect.objectContaining({
       p_ambiguous: false,
     }));
+  });
+
+  it("recovers a retained draft without creating a duplicate invoice", async () => {
+    const { client, rpc } = clientFor({
+      action: "wait",
+      order: {
+        ...storedOrder,
+        status: "pending_payment",
+        paid_at: null,
+        wave_invoice_id: "retained-invoice",
+        quote_wave_state: "ambiguous",
+        quote_wave_reservation_id: reservationId,
+      },
+    });
+    wave.getWaveInvoicePaymentSnapshot.mockResolvedValueOnce({
+      id: "retained-invoice",
+      invoiceNumber: "4321",
+      status: "DRAFT",
+    });
+
+    await expect(recoverProvisionalOrderWaveInvoice(client, orderId)).resolves.toEqual({
+      action: "ready",
+      invoiceId: "retained-invoice",
+    });
+    expect(wave.createWaveInvoice).not.toHaveBeenCalled();
+    expect(wave.approveWaveInvoice).toHaveBeenCalledWith("retained-invoice");
+    expect(rpc).toHaveBeenCalledWith("complete_quote_wave_provisioning", {
+      p_order_id: orderId,
+      p_reservation_id: reservationId,
+      p_wave_invoice_id: "retained-invoice",
+      p_wave_invoice_number: "4321",
+    });
   });
 
   it("provisions a normal catalog order from the server-authoritative plan", async () => {

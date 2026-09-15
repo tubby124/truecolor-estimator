@@ -418,10 +418,24 @@ export interface WaveInvoiceFinancials {
   totalCents: number;
 }
 
+/** Parse Wave Money.minorUnitValue without going through floating point.
+ * Wave documents this as the exact minor-currency unit and deprecates raw.
+ */
+export function parseWaveMinorUnitValue(value: unknown): number {
+  if (typeof value !== "string" || !/^-?\d+$/.test(value)) {
+    throw new Error("Wave returned an invalid or fractional minor-unit amount");
+  }
+  const exact = BigInt(value);
+  if (exact > BigInt(Number.MAX_SAFE_INTEGER) || exact < BigInt(Number.MIN_SAFE_INTEGER)) {
+    throw new Error("Wave returned an unsafe minor-unit amount");
+  }
+  return Number(exact);
+}
+
 /** Read actual provider cents, including each named tax. Never infer tax from a grand total.
  * Fields verified against Wave's official API Reference September 6, 2026. */
 export async function getWaveInvoiceFinancials(invoiceId: string): Promise<WaveInvoiceFinancials> {
-  type Money = { value: string };
+  type Money = { minorUnitValue: string };
   const data = await waveQuery<{ business: { invoice: {
     id: string; currency: { code: string }; total: Money; taxTotal: Money;
     items: { subtotal: Money; taxes: { salesTax: { id: string }; amount: Money | null }[] }[];
@@ -429,8 +443,8 @@ export async function getWaveInvoiceFinancials(invoiceId: string): Promise<WaveI
     `query($businessId: ID!, $invoiceId: ID!) {
       business(id: $businessId) {
         invoice(id: $invoiceId) {
-          id currency { code } total { value } taxTotal { value }
-          items { subtotal { value } taxes { salesTax { id } amount { value } } }
+          id currency { code } total { minorUnitValue } taxTotal { minorUnitValue }
+          items { subtotal { minorUnitValue } taxes { salesTax { id } amount { minorUnitValue } } }
         }
       }
     }`, { businessId: WAVE_BUSINESS_ID, invoiceId },
@@ -439,24 +453,18 @@ export async function getWaveInvoiceFinancials(invoiceId: string): Promise<WaveI
   if (!invoice || invoice.id !== invoiceId || invoice.currency.code !== "CAD" || !invoice.items.length) {
     throw new Error("Wave invoice financial readback is unavailable or not CAD");
   }
-  const cents = (value: string | undefined) => {
-    if (typeof value !== "string" || !/^-?\d+(?:\.\d+)?$/.test(value)) throw new Error("Wave returned invalid monetary precision");
-    const amount = Math.round(Number(value) * 100);
-    if (!Number.isSafeInteger(amount) || Math.abs(Number(value) * 100 - amount) > 1e-7) throw new Error("Wave returned an invalid amount or fractional cents");
-    return amount;
-  };
   let subtotalCents = 0, gstCents = 0, pstCents = 0;
   for (const item of invoice.items) {
-    subtotalCents += cents(item.subtotal.value);
+    subtotalCents += parseWaveMinorUnitValue(item.subtotal.minorUnitValue);
     for (const tax of item.taxes) {
-      const amount = cents(tax.amount?.value);
+      const amount = parseWaveMinorUnitValue(tax.amount?.minorUnitValue);
       if (tax.salesTax.id === WAVE_GST_TAX_ID) gstCents += amount;
       else if (tax.salesTax.id === WAVE_PST_TAX_ID) pstCents += amount;
       else throw new Error("Wave invoice contains an unexpected tax");
     }
   }
-  const totalCents = cents(invoice.total.value);
-  if (gstCents + pstCents !== cents(invoice.taxTotal.value) || subtotalCents + gstCents + pstCents !== totalCents) {
+  const totalCents = parseWaveMinorUnitValue(invoice.total.minorUnitValue);
+  if (gstCents + pstCents !== parseWaveMinorUnitValue(invoice.taxTotal.minorUnitValue) || subtotalCents + gstCents + pstCents !== totalCents) {
     throw new Error("Wave invoice financial readback does not reconcile");
   }
   return { subtotalCents, gstCents, pstCents, totalCents };

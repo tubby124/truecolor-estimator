@@ -11,20 +11,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { processWavePaymentEffects } from "@/lib/payment/wave-payment-effects";
 import { createServiceClient } from "@/lib/supabase/server";
-
-interface WavePaymentAcceptance {
-  outcome:
-    | "transitioned"
-    | "already_processed"
-    | "not_found"
-    | "not_wave_order"
-    | "legacy_already_paid"
-    | "not_payable";
-  order_id: string | null;
-  order_number: string | null;
-  payment_transitioned: boolean;
-  effects_pending: number;
-}
+import { reconcileWaveInvoicePayments } from "@/lib/wave/payments";
 
 function safeSignatureEqual(signature: string, expected: string): boolean {
   const signatureBytes = Buffer.from(signature);
@@ -110,47 +97,53 @@ export async function POST(req: NextRequest) {
   }
 
   const waveInvoiceId = resource.id;
-  const { data, error } = await supabase.rpc("accept_wave_paid_invoice", {
-    p_wave_invoice_id: waveInvoiceId,
-  });
-  if (error) {
-    console.error("[wave-webhook] atomic payment acceptance failed:", error.message);
+  let reconciliation;
+  try {
+    // The signed event is only a prompt to read Wave. Provider payment fields,
+    // amount, and identity all come from authenticated GraphQL readback.
+    reconciliation = await reconcileWaveInvoicePayments(supabase, waveInvoiceId, {
+      enqueueCustomerEffects: true,
+      enqueueStaffEffect: true,
+    });
+  } catch (error) {
+    console.error(
+      "[wave-webhook] verified payment readback/acceptance failed:",
+      error instanceof Error ? error.message : "unknown error",
+    );
     await logWebhookEvent({
       eventType: "invoice.paid",
       resourceId: waveInvoiceId,
       matchedOrderId: null,
       ok: false,
-      detail: "atomic payment acceptance failed",
+      detail: "verified payment readback or atomic acceptance failed",
     });
-    // The transition, ledger, and work rows share one transaction. A non-200
-    // safely asks Wave to retry because no partial payment state committed.
     return NextResponse.json(
       { ok: false, error: "Payment acceptance failed" },
       { status: 503 },
     );
   }
 
-  const acceptance = (Array.isArray(data) ? data[0] : data) as
-    | WavePaymentAcceptance
-    | null;
-  if (!acceptance?.outcome) {
-    console.error("[wave-webhook] atomic payment acceptance returned no result");
-    return NextResponse.json(
-      { ok: false, error: "Payment acceptance returned no result" },
-      { status: 503 },
-    );
+  if (reconciliation.verifiedPayments.length === 0) {
+    await logWebhookEvent({
+      eventType: "invoice.paid",
+      resourceId: waveInvoiceId,
+      matchedOrderId: null,
+      ok: true,
+      detail: `no verified Wave Payments customer capture; ignored payments=${reconciliation.ignoredPayments}`,
+    });
+    return NextResponse.json({ ok: true, outcome: "no_verified_provider_payment" });
   }
 
-  const accepted =
-    acceptance.outcome === "transitioned" ||
-    acceptance.outcome === "already_processed";
+  const acceptance = reconciliation.acceptances.at(-1);
+  if (!acceptance) return NextResponse.json({ ok: false, error: "Payment acceptance returned no result" }, { status: 503 });
+  const accepted = ["transitioned", "partial", "overpaid", "already_processed"].includes(acceptance.outcome);
   await logWebhookEvent({
     eventType: "invoice.paid",
     resourceId: waveInvoiceId,
     matchedOrderId: acceptance.order_id,
     ok: acceptance.outcome !== "not_found",
     detail: accepted
-      ? `order ${acceptance.order_number ?? acceptance.order_id} ${acceptance.outcome}; durable effects=${acceptance.effects_pending}`
+      ? `order ${acceptance.order_number ?? acceptance.order_id} ${acceptance.outcome}; provider=Wave Payments; verified=${reconciliation.verifiedPayments.length}; durable effects=${acceptance.effects_pending}`
       : `invoice payment skipped: ${acceptance.outcome}`,
   });
 

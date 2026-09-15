@@ -50,6 +50,14 @@ jobs:
         run: |
           node scripts/db/structured-quote-pst20-regression.mjs |
             psql -X -v ON_ERROR_STOP=1 --host 127.0.0.1 --username postgres --dbname postgres
+      - name: Wave provider payment recovery migration regression
+        shell: bash
+        env:
+          PGPASSWORD: ${{ github.run_id }}
+        run: |
+          createdb --host 127.0.0.1 --username postgres wave_provider_regression
+          psql -X -v ON_ERROR_STOP=1 --host 127.0.0.1 --username postgres --dbname wave_provider_regression \
+            --file supabase/tests/wave-provider-payment-recovery.sql
       - name: Social approval migration regression
         env:
           PGPASSWORD: ${{ github.run_id }}
