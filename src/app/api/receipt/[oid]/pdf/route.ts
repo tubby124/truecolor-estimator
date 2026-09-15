@@ -18,6 +18,7 @@ import { createElement } from "react";
 import type { ReactElement } from "react";
 import { ReceiptPdf } from "@/lib/receipt/ReceiptPdf";
 import type { ReceiptPdfData } from "@/lib/receipt/ReceiptPdf";
+import { loadReceiptPaymentSourceEvidence } from "@/lib/payment/receipt-payment-sources";
 
 const SUPABASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://dczbgraekmzirxknjvwe.supabase.co";
@@ -121,6 +122,8 @@ export async function GET(
   });
 
   const items = Array.isArray(order.order_items) ? order.order_items : [];
+  const paymentEvidence = await loadReceiptPaymentSourceEvidence(admin, order.id);
+  const isPaid = PAID_STATUSES.includes(order.status);
 
   const data: ReceiptPdfData = {
     orderNumber: order.order_number,
@@ -129,7 +132,8 @@ export async function GET(
     customerName: customer?.name ?? "Customer",
     customerEmail: customer?.email ?? "",
     customerCompany: customer?.company ?? null,
-    paymentMethod: order.payment_method,
+    paymentSources: paymentEvidence.sources,
+    paymentPending: !isPaid && !paymentEvidence.hasRecordedPayment,
     items: items.map((i) => ({
       product_name: i.product_name,
       qty: i.qty,
@@ -154,7 +158,6 @@ export async function GET(
 
   // ── Render PDF ────────────────────────────────────────────────────────────────
   try {
-    const isPaid = PAID_STATUSES.includes(order.status);
     const titleWord = isPaid ? "Receipt" : "Order-Summary";
     const filename = `${titleWord}-${order.order_number}.pdf`;
 
