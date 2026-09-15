@@ -49,3 +49,11 @@ The reviewed additive migration `20260915141000_wave_provider_payment_recovery.s
 The five older identity gaps were subsequently resolved from exact app-generated order numbers inside the authenticated Clover order line items. Archived/voided records remain excluded; other historical repairs are still being prepared.
 
 Receipt reliability limit: the UI/history guard prevents routine duplicate sends and intentional resend requests expire after five minutes. If the mail provider accepts an automatic receipt but writing its email log fails, the application reports uncertainty. Exactly-once email is not guaranteed beyond the provider's 24-hour idempotency retention; verify provider delivery before manually resending an uncertain older message.
+
+## Current provider protocol and checkout clarity
+
+The current [Wave webhook setup guide](https://developer.waveapps.com/hc/en-us/articles/51070420388628-Webhooks-Setup-Guide) exposed a second protocol defect: the handler expected a legacy raw-body signature and nested resource envelope. The repair implements timestamped raw-body HMAC verification, a five-minute replay window, configured-business matching, raw invoice-ID encoding, and documented paid/partial/overpaid events. Provider readback remains the only source of payment truth. Actual Wave subscription/account delivery still requires provider-side confirmation; authenticated synthetic tests do not prove Wave delivery.
+
+The existing database-scheduled `wave-poll` job was verified active at six-hour intervals. Release changes its interval to 15 minutes and lifecycle's stale threshold to 30 minutes. Archived/voided orders are excluded. The existing effect worker was verified scheduled every five minutes in Railway.
+
+Clover now uses saved item names and quantities in both initial and order-retry checkouts. Persisted dimensions/add-ons appear when space permits, and balance payments are labelled explicitly. Clover's existing 126-character name cap can require a `+N more` summary; no prices or tax calculations are changed. Existing hosted sessions are resumed until their provider expiry, then replaced through the normal reservation.

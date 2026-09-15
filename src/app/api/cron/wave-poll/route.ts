@@ -44,6 +44,8 @@ export async function GET(req: NextRequest) {
       .select("id, order_number, wave_invoice_id, wave_invoice_approved_at, wave_payment_recorded_at, quote_wave_state, quote_wave_reservation_id, status")
       .gte("created_at", cutoff)
       .not("wave_invoice_id", "is", null)
+      .not("is_archived", "is", true)
+      .is("voided_at", null)
       .or("wave_invoice_approved_at.is.null,wave_payment_recorded_at.is.null,status.eq.pending_payment");
     if (error) {
       await recordCronRun("wave-poll", false, error.message.slice(0, 200));

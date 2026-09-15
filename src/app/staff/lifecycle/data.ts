@@ -76,7 +76,7 @@ const EXPECTED_CRONS: Array<{ name: string; maxAgeHours: number }> = [
   { name: "gsc-sync",               maxAgeHours: 26 },  // daily
   { name: "ga4-sync",               maxAgeHours: 26 },  // daily — Phase 9d defense-in-depth alongside gsc-sync
   { name: "dashboard-alerts",       maxAgeHours: 2  },  // hourly Telegram push layer
-  { name: "wave-poll",              maxAgeHours: 7  },  // every 6h — backfills Wave state changes the webhook missed
+  { name: "wave-poll",              maxAgeHours: 0.5 }, // every 15m — verified provider recovery when a webhook is missed
   { name: "wave-payment-effects",   maxAgeHours: 0.5 }, // every 5m — crash recovery for Wave receipts/analytics/CRM
   { name: "google-ads-monitor",     maxAgeHours: 0.2 }, // primary every 5m; alert after two missed runs
   { name: "google-ads-conversions", maxAgeHours: 0.5 }, // every 15m — revenue + quote measurement delivery

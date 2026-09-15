@@ -130,7 +130,7 @@ export async function POST(req: NextRequest) {
       const effects = await processWavePaymentEffects({
         supabase,
         orderId: acceptance.order_id,
-        maxJobs: 3,
+        maxJobs: 4,
       });
       console.log(
         `[wave-webhook] durable effects order=${acceptance.order_number ?? acceptance.order_id} ` +

@@ -95,7 +95,7 @@ describe("Wave paid-invoice verified readback", () => {
     expect(mocks.processWavePaymentEffects).toHaveBeenCalledWith({
       supabase: h.supabase,
       orderId: "order-123",
-      maxJobs: 3,
+      maxJobs: 4,
     });
     expect(h.webhookEvents[0]).toEqual(expect.objectContaining({
       ok: true,

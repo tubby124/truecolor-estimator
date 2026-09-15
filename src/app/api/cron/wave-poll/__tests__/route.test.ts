@@ -54,11 +54,13 @@ function database(orders: PollOrderFixture[] = [{
     select: vi.fn(),
     gte: vi.fn(),
     not: vi.fn(),
+    is: vi.fn(),
     or: vi.fn().mockResolvedValue({ data: orders, error: null }),
   };
   chain.select.mockReturnValue(chain);
   chain.gte.mockReturnValue(chain);
   chain.not.mockReturnValue(chain);
+  chain.is.mockReturnValue(chain);
   return { from: vi.fn().mockReturnValue(chain), chain };
 }
 
