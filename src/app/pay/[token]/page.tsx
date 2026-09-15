@@ -16,6 +16,7 @@ import {
   resolveStoredQuotePaymentBreakdown,
   type QuotePaymentBreakdown,
 } from "@/lib/payment/quote-order";
+import { loadCloverOrderDescription } from "@/lib/payment/clover-order-description";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -100,6 +101,7 @@ export default async function PaymentGatewayPage({ params, searchParams }: Props
   try {
     const orderId = signedOrderId;
     if (!orderId) return <ExpiredPage />;
+    let isPartialBalance = false;
 
     // Stale-link and payment-ledger checks for order-scoped tokens.
     if (orderId) {
@@ -147,8 +149,18 @@ export default async function PaymentGatewayPage({ params, searchParams }: Props
         if (remainingCents !== amountCents) {
           return <UpdatedLinkPage />;
         }
+        isPartialBalance = remainingCents < Math.round(Number(orderCheck.total) * 100);
       }
     }
+
+    // Build the customer-facing Clover label from the saved order rows. The
+    // signed token still controls the amount, and the ledger guard above still
+    // requires that amount to equal the balance due.
+    description = await loadCloverOrderDescription(
+      createServiceClient(),
+      orderId,
+      isPartialBalance,
+    );
 
     let createdSessionId: string | null = null;
     {

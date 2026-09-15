@@ -29,7 +29,18 @@ function request(secret = "cron-secret") {
   });
 }
 
-function database(orders = [{
+interface PollOrderFixture {
+  id: string;
+  order_number: string;
+  wave_invoice_id: string;
+  wave_invoice_approved_at: string | null;
+  wave_payment_recorded_at: string | null;
+  quote_wave_state: string | null;
+  quote_wave_reservation_id: string | null;
+  status: string;
+}
+
+function database(orders: PollOrderFixture[] = [{
     id: "order-1",
     order_number: "TC-1",
     wave_invoice_id: "invoice-1",
