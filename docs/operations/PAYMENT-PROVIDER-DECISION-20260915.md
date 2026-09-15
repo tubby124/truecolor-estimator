@@ -12,7 +12,7 @@ Selected target: Wave online plus Clover in person for the invoice-led business,
 - Wave's [current webhook guide](https://developer.waveapps.com/hc/en-us/articles/51070420388628-Webhooks-Setup-Guide) requires Pro authorization for webhook delivery. An active configuration does not establish delivery.
 - [Published Wave pricing](https://www.waveapps.com/pricing): Pro CA$25/month or CA$250/year. Standard card processing is 2.9% + CA$0.60, Amex 3.4% + CA$0.60. The Pro fixed-fee waiver applies only to the first ten monthly transactions, a maximum CA$6/month saving. [Fee details](https://support.waveapps.com/hc/en-us/articles/218323823-Online-payments-processing-fees-and-timelines). Pro would be chosen for automation, not assumed fee savings.
 - [Clover Canadian pricing](https://www.clover.com/ca/pricing) varies by merchant agreement; published examples do not establish this business's rate.
-- Five active, unpaid linked website orders currently specify Clover while their Wave invoices also permit online card/bank payment. No change to those flags is authorized by the discussion.
+- Five active, unpaid linked website orders currently specify Clover while their Wave invoices also permit online card/bank payment. The owner selected Wave online, but postponed the provider migration until the current repair is finished; these flags remain unchanged in this repair.
 - The deployed repair reconciles actual providers and polls Wave every fifteen minutes. A follow-up provider check on customer payment-link entry closes the stale local state interval before opening Clover. Independently active payment channels still have a race after the last provider read.
 
 ## Proposed operating model
@@ -36,3 +36,20 @@ Manual payment links remain available. The portal should produce a single durabl
 Acceptance cases before claiming the workflow is reusable: a manual custom invoice; a multi-item website order; a deposit followed by a balance payment; an in-person Clover payment against an online-issued invoice; a repeated link after payment; a refund with provider/accounting/website reconciliation. Preserve quoted items, taxes, discounts and total in every case. No test charge or customer communication is authorized by this proposal.
 
 The [incident audit](PAYMENT-INCIDENT-AUDIT-20260915.md) and [issue #98](https://github.com/tubby124/truecolor-estimator/issues/98) retain the deployed repair evidence and historical holds.
+
+
+## Staff entrypoints required in the Wave migration
+
+The owner explicitly requires both order-card payment-link actions and quote sending to remain consistent. The migration must cover this complete map:
+
+| Staff action | Current implementation | Migration requirement |
+|---|---|---|
+| Incoming quote → Send Price Quote → Send Branded Quote | `QuoteCard.tsx`, `QuoteBuilderModal.tsx`, `/api/staff/quotes/[id]/send-quote` | Preserve quoted revision/items/taxes and update payable link and provider wording |
+| Order card → Resend payment link | `StaffOrderCard.tsx`, `OrdersTable.tsx`, `/api/staff/orders/[id]/resend-payment` | Email the same durable order link and current remaining balance |
+| Order card → Get payment link → Copy link / Copy message | `StaffOrderCard.tsx`, `/api/staff/orders/[id]/payment-link` | Copy the same provider-aware order link; this action sends no email |
+| Orders → New Quote → Send Quote / Send Invoice | `StaffOrdersActions.tsx`, `/api/staff/manual-order` | Preserve existing payable behavior and make modal preview, saved amount and email agree |
+| Estimator / multi-quote cart → Email quote / Email Customer | `QuotePanel.tsx`, `MultiQuoteCart.tsx`, `EmailModal.tsx`, `/api/email/send` | Preserve explicitly nonpayable estimate emails; do not silently create an invoice |
+| Lifecycle orphan → Email customer | `OrphanPanel.tsx`, `staff/lifecycle/data.ts` | Update prefilled processor wording and resolve the same durable order link |
+| Quote → Reply by Email / Send Reply | `/api/staff/quotes/[id]/send-reply` | Preserve free-text reply restrictions; this is not a payment-link route |
+
+One server-side resolver should validate order state, invoice identity and remaining balance before routing a payable link. Keep the True Color order link durable; do not make staff choose between unconnected provider links. Test both actual staff payment-link buttons, payable quote sending, nonpayable estimates, customer email HTML/plain text and copied messages before claiming the migration complete. The current repair corrects misleading manual-quote copy but retains the current provider routing.
