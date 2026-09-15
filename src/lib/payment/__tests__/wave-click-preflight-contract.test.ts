@@ -11,7 +11,7 @@ describe("existing-order Wave click-time checkout contract", () => {
     const preflight = source("src/lib/payment/wave-click-preflight.ts");
 
     expect(preflight).toContain("reconcileWaveInvoicePayments(");
-    expect(preflight).toContain("enqueueCustomerEffects: false");
+    expect(preflight).toContain("customerEffectMaxAgeMs: LIVE_WAVE_CUSTOMER_EFFECT_MAX_AGE_MS");
     expect(preflight).toContain("enqueueStaffEffect: true");
     expect(preflight).toContain("await fetchOrderLedger");
     expect(preflight).toContain("Wave provider payment acceptance did not complete");

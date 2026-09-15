@@ -3,8 +3,8 @@
  *
  * Provider readback for linked Wave invoices. It recovers a retained
  * provisional invoice and ingests only verified Wave Payments captures.
- * Poll recovery suppresses customer-facing effects; signed live webhooks
- * explicitly request the normal receipt and analytics effects.
+ * Recent verified captures enqueue normal receipt and analytics effects.
+ * Older recovered captures suppress customer-facing effects.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -13,6 +13,7 @@ import { recordCronRun } from "@/lib/cron/heartbeat";
 import { recoverProvisionalOrderWaveInvoice } from "@/lib/payment/quote-wave";
 import { createServiceClient } from "@/lib/supabase/server";
 import {
+  LIVE_WAVE_CUSTOMER_EFFECT_MAX_AGE_MS,
   getWaveInvoicePaymentSnapshot,
   reconcileWaveInvoicePaymentSnapshot,
 } from "@/lib/wave/payments";
@@ -75,7 +76,8 @@ export async function GET(req: NextRequest) {
         }
 
         const reconciliation = await reconcileWaveInvoicePaymentSnapshot(supabase, snapshot, {
-          enqueueCustomerEffects: false,
+          enqueueCustomerEffects: true,
+          customerEffectMaxAgeMs: LIVE_WAVE_CUSTOMER_EFFECT_MAX_AGE_MS,
           enqueueStaffEffect: true,
         });
         providerPaymentsAccepted += reconciliation.verifiedPayments.length;
@@ -97,7 +99,7 @@ export async function GET(req: NextRequest) {
               verified_payments: reconciliation.verifiedPayments.length,
               ignored_payments: reconciliation.ignoredPayments,
               outcome: last?.outcome ?? null,
-              customer_effects_suppressed: true,
+              customer_effect_policy: "verified_capture_within_24_hours",
             },
           });
         }
@@ -124,7 +126,7 @@ export async function GET(req: NextRequest) {
       partial_orders: partialOrders,
       fully_paid_orders: fullyPaidOrders,
       wave_errors: waveErrors,
-      customer_effects_suppressed: true,
+      customer_effect_policy: "verified_capture_within_24_hours",
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "wave-poll failed";

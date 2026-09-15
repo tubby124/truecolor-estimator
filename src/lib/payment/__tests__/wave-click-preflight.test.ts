@@ -5,7 +5,7 @@ const mocks = vi.hoisted(() => ({
   fetchLedger: vi.fn(),
 }));
 
-vi.mock("@/lib/wave/payments", () => ({ reconcileWaveInvoicePayments: mocks.reconcile }));
+vi.mock("@/lib/wave/payments", () => ({ LIVE_WAVE_CUSTOMER_EFFECT_MAX_AGE_MS: 86_400_000, reconcileWaveInvoicePayments: mocks.reconcile }));
 vi.mock("@/lib/orders/payLink", () => ({
   fetchOrderLedger: mocks.fetchLedger,
   remainingBalanceCents: (total: number, ledger: Array<{ amount: number }>) => Math.round(total * 100) - ledger.reduce((sum, row) => sum + Math.round(row.amount * 100), 0),
@@ -55,7 +55,8 @@ describe("Wave click-time Clover preflight", () => {
       orderId: ORDER_ID, waveInvoiceId: INVOICE_ID, requestedAmountCents: 10_000,
     })).resolves.toEqual({ action: "already_paid" });
     expect(mocks.reconcile).toHaveBeenCalledWith(expect.anything(), INVOICE_ID, {
-      enqueueCustomerEffects: false,
+      enqueueCustomerEffects: true,
+      customerEffectMaxAgeMs: 86_400_000,
       enqueueStaffEffect: true,
     });
     expect(mocks.fetchLedger).not.toHaveBeenCalled();

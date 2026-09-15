@@ -10,6 +10,7 @@ vi.mock("../client", () => ({
 }));
 
 import {
+  LIVE_WAVE_CUSTOMER_EFFECT_MAX_AGE_MS,
   getWaveInvoicePaymentSnapshot,
   parseWavePaymentAmount,
   reconcileWaveInvoicePaymentSnapshot,
@@ -167,4 +168,66 @@ describe("Wave provider payment readback", () => {
       { enqueueCustomerEffects: true, enqueueStaffEffect: true },
     )).rejects.toThrow("conflicts with the local ledger");
   });
+
+  it.each([
+    ["recent capture", 15 * 60 * 1000, true],
+    ["24-hour boundary", 24 * 60 * 60 * 1000, true],
+    ["historical capture", 24 * 60 * 60 * 1000 + 1, false],
+    ["tolerated clock skew", -5 * 60 * 1000, true],
+    ["future-dated capture", -5 * 60 * 1000 - 1, false],
+  ])("limits live customer effects: %s", async (_label, ageMs, expected) => {
+    const now = Date.parse("2026-09-15T12:30:00.000Z");
+    const clock = vi.spyOn(Date, "now").mockReturnValue(now);
+    const rpc = vi.fn().mockResolvedValue({ data: [{ outcome: "transitioned" }], error: null });
+    try {
+      await reconcileWaveInvoicePaymentSnapshot(
+        { rpc } as never,
+        snapshot([{ ...customerPayment, createdAt: new Date(now - ageMs).toISOString() }]),
+        { enqueueCustomerEffects: true, enqueueStaffEffect: true, customerEffectMaxAgeMs: LIVE_WAVE_CUSTOMER_EFFECT_MAX_AGE_MS },
+      );
+      expect(rpc).toHaveBeenCalledWith("accept_wave_provider_payment", expect.objectContaining({
+        p_enqueue_customer_effects: expected,
+        p_enqueue_staff_effect: true,
+      }));
+    } finally {
+      clock.mockRestore();
+    }
+  });
+
+  it("keeps explicit historical recovery silent even for a recent capture", async () => {
+    const rpc = vi.fn().mockResolvedValue({ data: [{ outcome: "transitioned" }], error: null });
+    await reconcileWaveInvoicePaymentSnapshot(
+      { rpc } as never,
+      snapshot([{ ...customerPayment, createdAt: new Date().toISOString() }]),
+      { enqueueCustomerEffects: false, enqueueStaffEffect: false, customerEffectMaxAgeMs: LIVE_WAVE_CUSTOMER_EFFECT_MAX_AGE_MS },
+    );
+    expect(rpc).toHaveBeenCalledWith("accept_wave_provider_payment", expect.objectContaining({
+      p_enqueue_customer_effects: false,
+      p_enqueue_staff_effect: false,
+    }));
+  });
+
+
+  it("applies age policy per capture when an old deposit is completed today", async () => {
+    const now = Date.now();
+    const rpc = vi.fn()
+      .mockResolvedValueOnce({ data: [{ outcome: "partial" }], error: null })
+      .mockResolvedValueOnce({ data: [{ outcome: "transitioned" }], error: null });
+    await reconcileWaveInvoicePaymentSnapshot({ rpc } as never, snapshot([
+      { ...customerPayment, id: "final", amount: "359.75", createdAt: new Date(now).toISOString() },
+      { ...customerPayment, id: "deposit", amount: "1000.00", createdAt: new Date(now - 48 * 60 * 60 * 1000).toISOString() },
+    ]), { enqueueCustomerEffects: true, enqueueStaffEffect: true, customerEffectMaxAgeMs: LIVE_WAVE_CUSTOMER_EFFECT_MAX_AGE_MS });
+    expect(rpc.mock.calls.map((call) => [call[1].p_wave_payment_id, call[1].p_enqueue_customer_effects]))
+      .toEqual([["deposit", false], ["final", true]]);
+  });
+
+  it("does not request customer effects for an already-processed old full payment", async () => {
+    const rpc = vi.fn().mockResolvedValue({ data: [{ outcome: "already_processed" }], error: null });
+    const result = await reconcileWaveInvoicePaymentSnapshot({ rpc } as never,
+      snapshot([{ ...customerPayment, createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString() }]),
+      { enqueueCustomerEffects: true, enqueueStaffEffect: true, customerEffectMaxAgeMs: LIVE_WAVE_CUSTOMER_EFFECT_MAX_AGE_MS });
+    expect(result.acceptances[0].outcome).toBe("already_processed");
+    expect(rpc).toHaveBeenCalledWith("accept_wave_provider_payment", expect.objectContaining({ p_enqueue_customer_effects: false }));
+  });
+
 });

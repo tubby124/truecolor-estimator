@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { fetchOrderLedger, remainingBalanceCents } from "@/lib/orders/payLink";
-import { reconcileWaveInvoicePayments } from "@/lib/wave/payments";
+import { LIVE_WAVE_CUSTOMER_EFFECT_MAX_AGE_MS, reconcileWaveInvoicePayments } from "@/lib/wave/payments";
 
 const PAID_STATUSES = new Set(["payment_received", "in_production", "ready_for_pickup", "complete"]);
 const ACCEPTED_OUTCOMES = new Set(["transitioned", "partial", "overpaid", "already_processed"]);
@@ -42,7 +42,8 @@ export async function preflightWaveBeforeCloverCheckout(
   input: { orderId: string; waveInvoiceId: string; requestedAmountCents: number },
 ): Promise<WaveClickPreflightResult> {
   const reconciliation = await reconcileWaveInvoicePayments(supabase, input.waveInvoiceId, {
-    enqueueCustomerEffects: false,
+    enqueueCustomerEffects: true,
+    customerEffectMaxAgeMs: LIVE_WAVE_CUSTOMER_EFFECT_MAX_AGE_MS,
     enqueueStaffEffect: true,
   });
   if (reconciliation.acceptances.some((acceptance) => !ACCEPTED_OUTCOMES.has(acceptance.outcome))) {
