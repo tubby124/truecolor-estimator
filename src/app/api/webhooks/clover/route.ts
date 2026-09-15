@@ -18,6 +18,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "crypto";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
+import { loadReceiptPaymentSources } from "@/lib/payment/receipt-payment-sources";
 import { approveWaveInvoice, recordWavePayment, findCustomerByEmail, getWaveInvoicePublicUrl } from "@/lib/wave/invoice";
 import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
 import { incrementCustomerOrderStats } from "@/lib/customers/incrementOrderStats";
@@ -909,7 +910,7 @@ export async function POST(req: NextRequest) {
                         isRush: Boolean(fullOrder.is_rush),
                         discountCode: fullOrder.discount_code ?? null,
                         discountAmount: fullOrder.discount_amount ? Number(fullOrder.discount_amount) : null,
-                        paymentMethod: "clover_card",
+                        paymentSources: await loadReceiptPaymentSources(supabase, order.id),
                         oid: order.id,
                         receiptToken: fullOrder.receipt_token ?? null,
                         waveInvoiceUrl,

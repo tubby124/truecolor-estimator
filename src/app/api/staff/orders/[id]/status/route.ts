@@ -18,6 +18,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
 import { sendOrderStatusEmail } from "@/lib/email/statusUpdate";
 import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
+import { loadReceiptPaymentSources } from "@/lib/payment/receipt-payment-sources";
 import { approveWaveInvoice, recordWavePayment, findCustomerByEmail, getWaveInvoicePublicUrl } from "@/lib/wave/invoice";
 import { incrementCustomerOrderStats } from "@/lib/customers/incrementOrderStats";
 import { sendTelegramNotification, escapeTelegramHtml } from "@/lib/notifications/telegram";
@@ -329,7 +330,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
                 isRush: Boolean(order.is_rush),
                 discountCode: order.discount_code ?? null,
                 discountAmount: order.discount_amount ? Number(order.discount_amount) : null,
-                paymentMethod: order.payment_method ?? undefined,
+                paymentSources: await loadReceiptPaymentSources(supabase, id),
                 oid: id,
                 receiptToken: (order as { receipt_token?: string | null }).receipt_token ?? null,
                 waveInvoiceUrl,

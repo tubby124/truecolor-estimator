@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient, requireStaffUser } from "@/lib/supabase/server";
 import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
+import { loadReceiptPaymentSources } from "@/lib/payment/receipt-payment-sources";
 import { approveWaveInvoice, recordWavePayment, findCustomerByEmail, getWaveInvoicePublicUrl } from "@/lib/wave/invoice";
 import { incrementCustomerOrderStats } from "@/lib/customers/incrementOrderStats";
 import { syncCustomerToBrevo } from "@/lib/brevo/customerSync";
@@ -310,7 +311,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       isRush: Boolean(order.is_rush),
       discountCode: order.discount_code ?? null,
       discountAmount: order.discount_amount ? Number(order.discount_amount) : null,
-      paymentMethod: "clover_card",
+      paymentSources: await loadReceiptPaymentSources(supabase, order.id),
       oid: order.id,
       receiptToken: order.receipt_token ?? null,
       waveInvoiceUrl,

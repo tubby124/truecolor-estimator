@@ -11,6 +11,10 @@ import { emailHeader } from "./components/emailHeader";
 import { escHtml } from "./components/escHtml";
 import { preheader } from "./components/preheader";
 import { productAnchor } from "./components/productAnchor";
+import {
+  receiptPaymentSourceLabel,
+  type ReceiptPaymentSource,
+} from "@/lib/payment/receipt-payment-sources";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -36,7 +40,7 @@ export interface SendPaymentReceiptParams {
   isRush: boolean;
   discountCode?: string | null;
   discountAmount?: number | null;
-  paymentMethod: string;
+  paymentSources: ReceiptPaymentSource[];
   /** Order UUID — used to build the PDF download link */
   oid?: string;
   /** Guest receipt token — used to build the PDF download link (no login required) */
@@ -92,12 +96,7 @@ function buildReceiptHtml(p: SendPaymentReceiptParams): string {
     year: "numeric",
   });
 
-  const paymentLabel =
-    p.paymentMethod === "clover_card"
-      ? "Credit / debit card (Clover)"
-      : p.paymentMethod === "wave"
-      ? "Wave Invoice"
-      : "Interac e-Transfer";
+  const paymentLabel = receiptPaymentSourceLabel(p.paymentSources);
 
   // ── Item rows ──
   const itemRows = p.items
@@ -292,12 +291,7 @@ function buildReceiptText(p: SendPaymentReceiptParams): string {
     day: "numeric",
     year: "numeric",
   });
-  const paymentLabel =
-    p.paymentMethod === "clover_card"
-      ? "Credit / debit card (Clover)"
-      : p.paymentMethod === "wave"
-      ? "Wave Invoice"
-      : "Interac e-Transfer";
+  const paymentLabel = receiptPaymentSourceLabel(p.paymentSources);
 
   const lines = [
     `PAYMENT RECEIPT — True Color Display Printing`,

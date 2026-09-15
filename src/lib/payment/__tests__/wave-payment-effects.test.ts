@@ -91,6 +91,21 @@ function orderQuery() {
   };
 }
 
+function paymentQuery() {
+  const result = {
+    data: [
+      { amount: 50, method: "wave", status: "recorded", recorded_at: "2026-07-24T12:05:00.000Z" },
+      { amount: 61, method: "clover", status: "recorded", recorded_at: "2026-07-24T12:06:00.000Z" },
+    ],
+    error: null,
+  };
+  return {
+    select() { return this; },
+    eq() { return this; },
+    order() { return Promise.resolve(result); },
+  };
+}
+
 describe("Wave payment effect worker", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -120,8 +135,9 @@ describe("Wave payment effect worker", () => {
         throw new Error(`Unexpected RPC: ${name}`);
       },
       from(table: string) {
-        if (table !== "orders") throw new Error(`Unexpected table: ${table}`);
-        return orderQuery();
+        if (table === "orders") return orderQuery();
+        if (table === "order_payments") return paymentQuery();
+        throw new Error(`Unexpected table: ${table}`);
       },
     };
     mocks.sendMeasurementProtocolPurchase
@@ -178,8 +194,9 @@ describe("Wave payment effect worker", () => {
         throw new Error(`Unexpected RPC: ${name}`);
       },
       from(table: string) {
-        if (table !== "orders") throw new Error(`Unexpected table: ${table}`);
-        return orderQuery();
+        if (table === "orders") return orderQuery();
+        if (table === "order_payments") return paymentQuery();
+        throw new Error(`Unexpected table: ${table}`);
       },
     };
 
@@ -202,6 +219,7 @@ describe("Wave payment effect worker", () => {
         expect.objectContaining({
           orderNumber: "TC-0123",
           idempotencyKey: "wave-receipt/order-123",
+          paymentSources: ["wave", "clover"],
         }),
       );
     }

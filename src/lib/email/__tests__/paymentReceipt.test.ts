@@ -33,7 +33,7 @@ describe("sendPaymentReceipt", () => {
       pst: 6,
       total: 111,
       isRush: false,
-      paymentMethod: "wave",
+      paymentSources: ["wave"],
       oid: "order-123",
       idempotencyKey: "wave-receipt/order-123",
     });
@@ -44,5 +44,34 @@ describe("sendPaymentReceipt", () => {
         orderId: "order-123",
       }),
     );
+  });
+
+  it("renders every recorded provider in HTML and plain text", async () => {
+    await sendPaymentReceipt({
+      orderNumber: "TC-0456",
+      customerName: "Test Customer",
+      customerEmail: "customer@example.com",
+      createdAt: "2026-09-15T12:00:00.000Z",
+      items: [{
+        product_name: "Wall Decal",
+        qty: 1,
+        width_in: 24,
+        height_in: 36,
+        sides: 1,
+        line_total: 100,
+      }],
+      subtotal: 100,
+      gst: 5,
+      pst: 6,
+      total: 111,
+      isRush: false,
+      paymentSources: ["wave", "clover"],
+      oid: "order-456",
+    });
+
+    expect(sendEmail).toHaveBeenCalledWith(expect.objectContaining({
+      html: expect.stringContaining("Paid via Wave Payments + Credit / debit card (Clover)"),
+      text: expect.stringContaining("Payment:  Wave Payments + Credit / debit card (Clover)"),
+    }));
   });
 });

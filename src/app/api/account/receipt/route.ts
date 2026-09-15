@@ -12,6 +12,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendPaymentReceipt } from "@/lib/email/paymentReceipt";
+import { loadReceiptPaymentSources } from "@/lib/payment/receipt-payment-sources";
 
 const SUPABASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL ??
@@ -104,7 +105,7 @@ export async function POST(req: NextRequest) {
       isRush: Boolean(order.is_rush),
       discountCode: order.discount_code,
       discountAmount: order.discount_amount ? Number(order.discount_amount) : null,
-      paymentMethod: order.payment_method,
+      paymentSources: await loadReceiptPaymentSources(supabase, order.id),
       oid: order.id,
       receiptToken: (order as { receipt_token?: string | null }).receipt_token ?? null,
     });
