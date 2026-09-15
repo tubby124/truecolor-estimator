@@ -244,7 +244,7 @@ export async function POST(req: NextRequest) {
       // An uncertain provider/email result must never generate a new invoice or
       // send again. The existing order is the durable recovery entry point.
       return NextResponse.json({ orderId: existing.id, orderNumber: existing.order_number, paymentUrl: null, duplicate: true,
-        customerEmailSent: false, deliveryWarning: "This request was already saved. Review its accounting and email status on the existing order before retrying delivery." });
+        customerEmailSent: false, emailStatus: "duplicate", deliveryWarning: "This request was already saved. Review its accounting and email status on the existing order before retrying delivery." });
     };
     const duplicate = await readDuplicate();
     if (duplicate) return duplicate;
@@ -733,7 +733,7 @@ export async function POST(req: NextRequest) {
         `Action: reconcile the Wave reservation before resending payment.`
       ).catch(() => {});
       return NextResponse.json(
-        { error: "Wave accounting setup could not be confirmed. No payment email was sent.", orderId: order.id },
+        { error: "Wave accounting setup could not be confirmed. No payment email was sent.", emailStatus: "payment_setup_blocked", orderId: order.id },
         { status: 503 },
       );
     }
@@ -866,6 +866,7 @@ export async function POST(req: NextRequest) {
       orderNumber: order.order_number,
       paymentUrl,
       customerEmailSent,
+      emailStatus: customerEmailSent ? "accepted_by_mail_service" : "failed",
       ...(customerEmailSent ? {} : { deliveryWarning: "The order was saved, but the customer email failed. Retry delivery from this order; do not create another order." }),
       quoteRequestId,
       linkSource,
