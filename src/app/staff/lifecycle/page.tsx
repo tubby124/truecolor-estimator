@@ -110,7 +110,7 @@ export default async function LifecyclePage() {
           <div className="space-y-2">
             <StatusRollupPanel rollup={data.rollup} />
             <HealthTiles snap={data.health} />
-            <PaymentHealthPanel snapshot={data.paymentHealth} />
+            <div id="panel-payments" className="scroll-mt-20"><PaymentHealthPanel snapshot={data.paymentHealth} /></div>
             <div id="panel-paid-search-weekly" className="scroll-mt-20">
               <PaidSearchWeeklyPanel snapshot={data.paidSearchWeekly} />
             </div>

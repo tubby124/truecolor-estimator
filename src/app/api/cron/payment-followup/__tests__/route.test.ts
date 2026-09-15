@@ -73,6 +73,7 @@ describe("payment-followup human-touch deferral", () => {
         id: "order-id",
         order_number: "TC-TEST-1",
         total: 68.82,
+        wave_invoice_id: "invoice", wave_invoice_approved_at: "2026-01-01", quote_wave_state: "ready",
         payment_method: "card",
         created_at: "2026-01-01T00:00:00.000Z",
         followup_count: 0,
@@ -113,6 +114,7 @@ describe("payment-followup human-touch deferral", () => {
       skipped: { humanTouch: 1 },
     });
     expect(auditEvents.select).toHaveBeenCalledWith("entity_id, event_type, at");
+    expect(auditEvents.in).toHaveBeenCalledWith("event_type", expect.arrayContaining(["order.payment_link_resent", "order.proof_sent"]));
     expect(auditEvents.gte).toHaveBeenCalledWith("at", expect.any(String));
     expect(mocks.buildPayLink).not.toHaveBeenCalled();
     expect(mocks.sendEmail).not.toHaveBeenCalled();

@@ -1,3 +1,4 @@
+import { actualPaymentLabel } from "@/lib/staff/payment-display";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -178,6 +179,16 @@ async function fetchOrders() {
   let orders = data ?? [];
   if (orders.length === 0) return orders;
 
+  const ids = orders.map(o => o.id);
+  const [paymentRows, receiptRows] = await Promise.all([
+    supabase.from("order_payments").select("order_id,method,status,amount").in("order_id", ids),
+    supabase.from("email_log").select("order_id,sent_at,status").in("order_id", ids).like("subject", "Receipt —%").in("status", ["sent", "delivered", "opened", "clicked"]).order("sent_at", { ascending: false }),
+  ]);
+  orders = orders.map(o => ({ ...o,
+    actual_payment_label: paymentRows.error ? null : actualPaymentLabel((paymentRows.data ?? []).filter(p => p.order_id === o.id), o.total),
+    receipt_sent_at: receiptRows.error ? null : (receiptRows.data ?? []).find(p => p.order_id === o.id)?.sent_at ?? null,
+  }));
+
   const latestAttemptByOrder = new Map<string, LatestPaymentAttempt>();
   const orderIds = orders.map((o) => o.id);
   const { data: attempts, error: attemptsErr } = await supabase
@@ -209,7 +220,7 @@ async function fetchOrders() {
     .from("audit_events")
     .select("entity_id, detail")
     .eq("event_type", "clover.payment_voided")
-    .gte("created_at", cutoff30d);
+    .gte("at", cutoff30d);
 
   if (voidEvents && voidEvents.length > 0) {
     const voidLabelByOrderId = new Map<string, string>();

@@ -1,3 +1,4 @@
+import { paymentLinkBlock } from "@/lib/orders/payment-readiness";
 /**
  * GET /api/cron/payment-followup
  *
@@ -41,10 +42,10 @@ const REPLY_TO = "True Color Display Printing <info@true-color.ca>";
 
 /** Staff activity types that mean "a human is on it" — defer the robot. */
 const HUMAN_TOUCH_EVENTS = [
-  "payment_link_resent",
+  "order.payment_link_resent",
   "order.reply_sent",
   "order.reply",
-  "proof_sent",
+  "order.proof_sent",
 ] as const;
 
 export async function GET(req: NextRequest) {
@@ -72,6 +73,7 @@ export async function GET(req: NextRequest) {
       .select(`
         id, order_number, total, payment_method, created_at, is_rush,
         followup_count, followup_paused_at, paid_at, wave_payment_recorded_at, is_archived,
+        wave_invoice_id, wave_invoice_approved_at, quote_wave_state, quote_checkout_state, quote_request_id,
         order_items ( product_name, qty ),
         customers ( name, email )
       `)
@@ -168,6 +170,10 @@ export async function GET(req: NextRequest) {
         const customer = customerRaw as { name: string; email: string } | null;
         if (!customer?.email) continue;
         const latestAttempt = latestAttemptByOrder.get(order.id) ?? null;
+        if (paymentLinkBlock({ ...order, status: "pending_payment" })) {
+          skipped.notDue++;
+          continue;
+        }
 
         // Ambiguous Clover matches may be real captured money. Do not ask the
         // customer to retry and risk a double payment; route it to staff only.

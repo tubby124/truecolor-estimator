@@ -1593,7 +1593,14 @@ export async function fetchLifecycleData(): Promise<LifecycleData> {
     const key = `${event.entity_id}/${detail.status}`;
     if (!latestNotificationOutcomes.has(key)) latestNotificationOutcomes.set(key, detail.outcome);
   }
+  const [unmatchedCaptures, paidPending] = await Promise.all([
+    supabase.from("payment_attempts").select("id", { count: "exact", head: true }).eq("status", "payment_captured").is("order_id", null),
+    supabase.from("orders").select("id", { count: "exact", head: true }).eq("status", "pending_payment").is("voided_at", null).or("is_archived.is.null,is_archived.eq.false").not("wave_payment_recorded_at", "is", null),
+  ]);
+  const paymentIntegrity = { unmatchedCaptures: unmatchedCaptures.count ?? 0, paidPending: paidPending.count ?? 0, queryFailed: Boolean(unmatchedCaptures.error || paidPending.error) };
+
   const rollup: StatusRollup = buildRollup({
+    paymentIntegrity,
     unconfirmedOrderNotifications: [...latestNotificationOutcomes.values()].filter((outcome) => outcome === "unconfirmed").length,
     orderNotificationQueryFailed: Boolean(notificationQueryError),
     bookkeepingRisks,

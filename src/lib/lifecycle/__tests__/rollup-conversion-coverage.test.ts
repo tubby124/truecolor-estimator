@@ -95,3 +95,13 @@ describe("paid revenue that never reached the conversion outbox", () => {
     expect(rollup.reds.map((i) => i.key)).toEqual(["measurement-outbox:revenue:dead"]);
   });
 });
+
+it("alerts on captured money without an order and provider-paid orders still pending", () => {
+  const result = buildRollup(baseInputs({ paymentIntegrity: { unmatchedCaptures: 2, paidPending: 1, queryFailed: false } }));
+  expect(result.reds.map(r => r.key)).toEqual(expect.arrayContaining(["payments:unmatched-captures", "payments:paid-pending"]));
+  expect(result.reds.filter(r => r.key.startsWith("payments:")).every(r => r.panel === "panel-payments")).toBe(true);
+});
+it("does not hide an unreadable payment reconciliation check", () => {
+  const result = buildRollup(baseInputs({ paymentIntegrity: { unmatchedCaptures: 0, paidPending: 0, queryFailed: true } }));
+  expect(result.reds.map(r => r.key)).toContain("payments:integrity-query");
+});

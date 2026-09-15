@@ -1,3 +1,4 @@
+import { paymentLinkBlock } from "@/lib/orders/payment-readiness";
 /**
  * POST /api/staff/orders/[id]/resend-payment
  *
@@ -45,7 +46,8 @@ export async function POST(req: NextRequest, { params }: Params) {
         pst,
         pst_exempt,
         pst_vendor_number,
-        voided_at,
+        voided_at, is_archived, paid_at, wave_payment_recorded_at,
+        wave_invoice_approved_at, quote_wave_state, quote_checkout_state, quote_request_id,
         payment_method,
         wave_invoice_id,
         notes,
@@ -68,6 +70,12 @@ export async function POST(req: NextRequest, { params }: Params) {
     }
     if (order.voided_at) {
       return NextResponse.json({ error: "This payment request was voided and cannot be resent" }, { status: 409 });
+    }
+
+    const blocked = paymentLinkBlock(order);
+    if (blocked) {
+      await recordAuditEvent({ actor_type: "staff", actor_id: staffCheck.email, event_type: "order.payment_link_blocked", entity_type: "order", entity_id: id, detail: { reason: blocked } });
+      return NextResponse.json({ error: blocked }, { status: 409 });
     }
 
     const customerRaw = Array.isArray(order.customers) ? order.customers[0] : order.customers;

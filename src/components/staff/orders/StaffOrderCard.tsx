@@ -305,13 +305,13 @@ export function StaffOrderCard({
               )}
               {order.wave_payment_recorded_at && (
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-700">
-                  W Paid
+                  Wave bookkeeping synced
                 </span>
               )}
               {order.wave_invoice_id && !order.wave_payment_recorded_at &&
                 (order.status === "payment_received" || order.status === "ready_for_pickup") && (
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
-                  W Unpaid
+                  Wave bookkeeping pending
                 </span>
               )}
               {order.payment_method === "clover_card" &&
@@ -361,7 +361,7 @@ export function StaffOrderCard({
               {customer?.email}
               {customer?.phone ? ` · ${customer.phone}` : ""}
               {" · "}
-              {order.payment_method === "clover_card" ? "Card" : order.payment_method === "wave" ? "Invoice" : "e-Transfer"}
+              {order.actual_payment_label ?? (order.status !== "pending_payment" ? "Payment source needs reconciliation" : order.payment_method === "clover_card" ? "Requested: Clover card" : order.payment_method === "wave" ? "Requested: Wave" : "Requested: e-Transfer")}
               {" · $"}
               {Number(order.total).toFixed(2)} CAD
               {" · "}
@@ -632,7 +632,7 @@ export function StaffOrderCard({
                 )}
                 {order.wave_payment_recorded_at ? (
                   <span className="text-xs bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded-full font-semibold">
-                    ✓ Payment recorded
+                    ✓ Bookkeeping payment recorded
                   </span>
                 ) : (
                   <span className="text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">
@@ -1018,11 +1018,11 @@ export function StaffOrderCard({
                 {sendingReceipt
                   ? "Sending…"
                   : receiptSent
-                  ? "✓ Receipt sent!"
+                  ? "🧾 Resend receipt"
                   : "🧾 Send receipt"}
               </button>
               <p className="text-xs text-gray-400 mt-1">
-                Emails a payment receipt to {customer.email}
+                {receiptSent ? "A receipt has already been sent. Resend sends another copy to " : "Emails a payment receipt to "}{customer.email}
               </p>
             </div>
           )}
