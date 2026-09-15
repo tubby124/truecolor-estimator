@@ -366,6 +366,31 @@ export async function POST(req: NextRequest) {
             });
             return NextResponse.json({ ok: true });
           }
+          if (!paymentId?.trim()) {
+            const attemptRecorded = await recordPaymentAttempt(supabase, {
+              order_id: pendingOrder.id,
+              status: "ambiguous",
+              amount: reportedAmountCents / 100,
+              clover_checkout_session_id: checkoutSessionId ?? null,
+              clover_order_id: cloverOrderId ?? null,
+              failure_label: "Clover payment ID was missing from a captured callback",
+              failure_detail: "The payment cannot be made idempotent or posted until Clover supplies its payment ID.",
+              raw_event: event,
+            });
+            await logWebhookEvent({
+              eventType: eventTypeStr,
+              resourceId: matchRef ?? checkoutSessionId ?? null,
+              matchedOrderId: pendingOrder.id,
+              ok: false,
+              detail: attemptRecorded
+                ? "captured payment missing payment id; durable unresolved attempt recorded; retry requested"
+                : "captured payment missing payment id; unresolved attempt could not be recorded; retry requested",
+            });
+            return NextResponse.json(
+              { ok: false, error: "Clover payment ID was missing" },
+              { status: 503 },
+            );
+          }
           if (!hasVerifiedCloverAmount(reportedAmountCents)) {
             await recordPaymentAttempt(supabase, {
               order_id: pendingOrder.id,
@@ -472,21 +497,39 @@ export async function POST(req: NextRequest) {
           // 23505 = unique_violation → already recorded for this Clover payment ID. Idempotent ack.
           if (ledgerInsertErr && (ledgerInsertErr as { code?: string }).code !== "23505") {
             console.error("[clover-webhook] ledger insert failed:", ledgerInsertErr.message);
-            void sendTelegramNotification(
-              `🚨 <b>Ledger insert failed</b>\n` +
-              `Order <b>${escapeTelegramHtml(pendingOrder.order_number)}</b> · $${reportedDollars.toFixed(2)}\n` +
-              `Customer was charged by Clover but the ledger row never landed.\n` +
-              `Error: ${escapeTelegramHtml(ledgerInsertErr.message.slice(0, 200))}\n` +
-              `Action: record the payment manually in the staff Payments tab.`
-            ).catch(() => {});
-            // Don't return — still try to update the order status as a best-effort fallback.
+            await logWebhookEvent({
+              eventType: eventTypeStr,
+              resourceId: paymentId,
+              matchedOrderId: pendingOrder.id,
+              ok: false,
+              detail: `ledger insert failed; retry requested: ${ledgerInsertErr.message}`,
+            });
+            return NextResponse.json(
+              { ok: false, error: "Payment ledger could not be recorded" },
+              { status: 503 },
+            );
           }
 
           // Read the full ledger AFTER our insert so the sum includes this payment.
-          const { data: ledgerRows } = await supabase
+          const { data: ledgerRows, error: ledgerReadErr } = await supabase
             .from("order_payments")
             .select("amount, method, status")
             .eq("order_id", pendingOrder.id);
+          if (ledgerReadErr || !Array.isArray(ledgerRows)) {
+            const detail = ledgerReadErr?.message ?? "ledger read returned no rows";
+            console.error("[clover-webhook] ledger read failed:", detail);
+            await logWebhookEvent({
+              eventType: eventTypeStr,
+              resourceId: paymentId,
+              matchedOrderId: pendingOrder.id,
+              ok: false,
+              detail: `ledger read failed; retry requested: ${detail}`,
+            });
+            return NextResponse.json(
+              { ok: false, error: "Payment ledger could not be verified" },
+              { status: 503 },
+            );
+          }
           const ledgerEntries: OrderPaymentLedgerEntry[] = ((ledgerRows ?? []) as Array<{ amount: number | string; method: string; status: string | null }>).map((r) => ({
             amount: Number(r.amount),
             method: r.method as OrderPaymentLedgerEntry["method"],
@@ -583,15 +626,20 @@ export async function POST(req: NextRequest) {
                      wave_invoice_id, wave_invoice_approved_at, wave_payment_recorded_at,
                      order_items ( merchant_offer_id, commerce_product_id, product_name, qty, line_total )`);
 
-          if (error) {
-            console.error("[clover-webhook] order update failed:", error.message);
+          if (error || !updatedOrders || updatedOrders.length === 0) {
+            const detail = error?.message ?? "order update returned no rows";
+            console.error("[clover-webhook] order update failed:", detail);
             await logWebhookEvent({
               eventType: eventTypeStr,
               resourceId: paymentId ?? matchRef ?? null,
               matchedOrderId: pendingOrder.id,
               ok: false,
-              detail: `order update failed: ${error.message}`,
+              detail: `order update failed; retry requested: ${detail}`,
             });
+            return NextResponse.json(
+              { ok: false, error: "Payment status could not be updated" },
+              { status: 503 },
+            );
           } else {
             const count = updatedOrders?.length ?? 0;
             // Audit event: payment received via Clover webhook

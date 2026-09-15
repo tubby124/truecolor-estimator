@@ -866,6 +866,7 @@ export async function POST(req: NextRequest) {
             { status: 503 },
           );
         }
+        let openedCheckout: Awaited<ReturnType<typeof createCloverCheckout>> | null = null;
         try {
           const clover = await createCloverCheckout(totalCents, description, contact.email, redirectUrl, order.id);
           await completeOrderCheckout(supabase, {
@@ -875,13 +876,7 @@ export async function POST(req: NextRequest) {
             sessionId: clover.sessionId,
             expiresAt: clover.expiresAt,
           });
-          await recordPaymentAttempt(supabase, {
-            order_id: order.id,
-            status: "checkout_opened",
-            amount: total,
-            clover_checkout_session_id: clover.sessionId || null,
-            customer_message: "Secure Clover checkout opened. We are waiting for payment confirmation.",
-          });
+          openedCheckout = clover;
           checkoutUrl = clover.checkoutUrl;
         } catch (cloverError) {
           const ambiguous = !(cloverError instanceof CloverCheckoutError) || cloverError.outcome === "ambiguous";
@@ -902,6 +897,17 @@ export async function POST(req: NextRequest) {
             },
             { status: ambiguous ? 409 : 503 },
           );
+        }
+        // Payment-attempt telemetry must never invalidate a checkout session
+        // already durably committed by completeOrderCheckout.
+        if (openedCheckout) {
+          void recordPaymentAttempt(supabase, {
+            order_id: order.id,
+            status: "checkout_opened",
+            amount: total,
+            clover_checkout_session_id: openedCheckout.sessionId || null,
+            customer_message: "Secure Clover checkout opened. We are waiting for payment confirmation.",
+          });
         }
       }
 

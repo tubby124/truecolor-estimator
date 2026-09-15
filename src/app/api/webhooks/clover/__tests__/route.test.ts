@@ -4,14 +4,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   createServiceClient: vi.fn(),
   fetchAmount: vi.fn(),
+  approveWaveInvoice: vi.fn(),
+  recordWavePayment: vi.fn(),
+  sendPaymentReceipt: vi.fn(),
 }));
 
 vi.mock("@/lib/supabase/server", () => ({ createServiceClient: mocks.createServiceClient }));
 vi.mock("@/lib/payment/clover", () => ({ fetchCloverPaymentAmountCents: mocks.fetchAmount }));
-vi.mock("@/lib/email/paymentReceipt", () => ({ sendPaymentReceipt: vi.fn().mockResolvedValue(undefined) }));
+vi.mock("@/lib/email/paymentReceipt", () => ({ sendPaymentReceipt: mocks.sendPaymentReceipt }));
 vi.mock("@/lib/wave/invoice", () => ({
-  approveWaveInvoice: vi.fn().mockResolvedValue(undefined),
-  recordWavePayment: vi.fn().mockResolvedValue(undefined),
+  approveWaveInvoice: mocks.approveWaveInvoice,
+  recordWavePayment: mocks.recordWavePayment,
   findCustomerByEmail: vi.fn().mockResolvedValue(null),
   getWaveInvoicePublicUrl: vi.fn().mockResolvedValue(null),
 }));
@@ -59,16 +62,23 @@ function createHarness(options: {
   durableSessionOrderId?: string | null;
   historicalSessionOrderId?: string | null;
   referenceOrderId?: string | null;
+  orderStatus?: string;
+  ledgerInsertError?: { code?: string; message: string } | null;
+  ledgerReadError?: { message: string } | null;
+  orderUpdateError?: { message: string } | null;
 } = {}) {
   const paymentAttempts: Array<Record<string, unknown>> = [];
   const webhookEvents: Array<Record<string, unknown>> = [];
+  const ledgerInserts: Array<Record<string, unknown>> = [];
+  let ledgerReads = 0;
+  let orderUpdates = 0;
   let paymentAttemptSelects = 0;
 
   const order = {
     id: ORDER_A,
     order_number: "TC-2026-0001",
     total: 10,
-    status: "payment_received",
+    status: options.orderStatus ?? "payment_received",
     customer_id: "customer-1",
     customers: { name: "Test Customer", email: "customer@example.test", company: null },
   };
@@ -81,6 +91,14 @@ function createHarness(options: {
           select() { return this; },
           eq(column: string, value: unknown) { filters.set(column, value); return this; },
           is(column: string, value: unknown) { filters.set(`is:${column}`, value); return this; },
+          update() {
+            orderUpdates += 1;
+            return {
+              eq() { return this; },
+              is() { return this; },
+              async select() { return { data: null, error: options.orderUpdateError ?? null }; },
+            };
+          },
           async maybeSingle() {
             if (filters.has("quote_checkout_session_id")) {
               const id = options.durableSessionOrderId === undefined ? ORDER_A : options.durableSessionOrderId;
@@ -104,6 +122,25 @@ function createHarness(options: {
           async insert(row: Record<string, unknown>) { paymentAttempts.push(row); return { error: null }; },
         };
       }
+      if (table === "order_payments") {
+        return {
+          async insert(row: Record<string, unknown>) {
+            ledgerInserts.push(row);
+            return { error: options.ledgerInsertError ?? null };
+          },
+          select() {
+            ledgerReads += 1;
+            return {
+              async eq() {
+                return {
+                  data: options.ledgerReadError ? null : [{ amount: 10, method: "clover", status: "recorded" }],
+                  error: options.ledgerReadError ?? null,
+                };
+              },
+            };
+          },
+        };
+      }
       if (table === "webhook_events") {
         return { async insert(row: Record<string, unknown>) { webhookEvents.push(row); return { error: null }; } };
       }
@@ -111,7 +148,15 @@ function createHarness(options: {
     },
   };
 
-  return { supabase, paymentAttempts, webhookEvents, get paymentAttemptSelects() { return paymentAttemptSelects; } };
+  return {
+    supabase,
+    paymentAttempts,
+    webhookEvents,
+    ledgerInserts,
+    get ledgerReads() { return ledgerReads; },
+    get orderUpdates() { return orderUpdates; },
+    get paymentAttemptSelects() { return paymentAttemptSelects; },
+  };
 }
 
 describe("Clover webhook durable identity", () => {
@@ -119,6 +164,9 @@ describe("Clover webhook durable identity", () => {
     vi.clearAllMocks();
     process.env.CLOVER_WEBHOOK_SECRET = SECRET;
     mocks.fetchAmount.mockResolvedValue(1000);
+    mocks.approveWaveInvoice.mockResolvedValue(undefined);
+    mocks.recordWavePayment.mockResolvedValue(undefined);
+    mocks.sendPaymentReceipt.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -223,5 +271,83 @@ describe("Clover webhook durable identity", () => {
       status: "card_declined",
       clover_checkout_session_id: SESSION,
     }));
+  });
+
+  it("records a missing payment id as unresolved and asks Clover to retry before any ledger effect", async () => {
+    const harness = createHarness({ orderStatus: "pending_payment" });
+    mocks.createServiceClient.mockReturnValue(harness.supabase);
+
+    const response = await POST(request(captured({ id: undefined })));
+
+    expect(response.status).toBe(503);
+    expect(harness.ledgerInserts).toHaveLength(0);
+    expect(harness.orderUpdates).toBe(0);
+    expect(harness.paymentAttempts).toContainEqual(expect.objectContaining({
+      status: "ambiguous",
+      failure_label: "Clover payment ID was missing from a captured callback",
+    }));
+  });
+
+  it("returns retryable failure when the ledger insert fails and runs no payment side effects", async () => {
+    const harness = createHarness({
+      orderStatus: "pending_payment",
+      ledgerInsertError: { code: "08006", message: "database unavailable" },
+    });
+    mocks.createServiceClient.mockReturnValue(harness.supabase);
+
+    const response = await POST(request(captured()));
+
+    expect(response.status).toBe(503);
+    expect(harness.ledgerInserts).toHaveLength(1);
+    expect(harness.ledgerReads).toBe(0);
+    expect(harness.orderUpdates).toBe(0);
+    expect(mocks.recordWavePayment).not.toHaveBeenCalled();
+    expect(mocks.sendPaymentReceipt).not.toHaveBeenCalled();
+  });
+
+  it("returns retryable failure instead of acknowledging an unreadable ledger as a partial payment", async () => {
+    const harness = createHarness({
+      orderStatus: "pending_payment",
+      ledgerReadError: { message: "read timeout" },
+    });
+    mocks.createServiceClient.mockReturnValue(harness.supabase);
+
+    const response = await POST(request(captured()));
+
+    expect(response.status).toBe(503);
+    expect(harness.ledgerReads).toBe(1);
+    expect(harness.orderUpdates).toBe(0);
+    expect(mocks.recordWavePayment).not.toHaveBeenCalled();
+  });
+
+  it("re-reads the ledger after a same-reference duplicate so a retry can finish a prior committed payment", async () => {
+    const harness = createHarness({
+      orderStatus: "pending_payment",
+      ledgerInsertError: { code: "23505", message: "duplicate payment reference" },
+      orderUpdateError: { message: "write timeout" },
+    });
+    mocks.createServiceClient.mockReturnValue(harness.supabase);
+
+    const response = await POST(request(captured()));
+
+    expect(response.status).toBe(503);
+    expect(harness.ledgerReads).toBe(1);
+    expect(harness.orderUpdates).toBe(1);
+    expect(mocks.recordWavePayment).not.toHaveBeenCalled();
+  });
+
+  it("returns retryable failure and suppresses effects when the paid-state transition does not commit", async () => {
+    const harness = createHarness({
+      orderStatus: "pending_payment",
+      orderUpdateError: { message: "write timeout" },
+    });
+    mocks.createServiceClient.mockReturnValue(harness.supabase);
+
+    const response = await POST(request(captured()));
+
+    expect(response.status).toBe(503);
+    expect(harness.orderUpdates).toBe(1);
+    expect(mocks.recordWavePayment).not.toHaveBeenCalled();
+    expect(mocks.sendPaymentReceipt).not.toHaveBeenCalled();
   });
 });
