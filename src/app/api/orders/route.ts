@@ -91,6 +91,10 @@ export interface CreateOrderRequest extends LatestPaidHintPayload {
 // sticker-v2-bridge, services.v1.csv, here) and the one most likely to be missed on a
 // repricing, since it lives outside src/lib/engine.
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+// `order_items.pricing_version` is a legacy required column. The order-minimum
+// surcharge is system-generated rather than a catalog item, so it has no
+// commerce identity to supply this value.
+const SYSTEM_PRICING_VERSION = "v1_2026-02-19";
 
 // Server-side price revalidation lives in src/lib/orders/revalidate.ts (pure) so it
 // can be unit-tested without this route's server-only imports. Re-exported for
@@ -679,7 +683,7 @@ export async function POST(req: NextRequest) {
       merchant_offer_id: item.commerce_identity?.merchantOfferId ?? null,
       offer_version: item.commerce_identity?.offerVersion ?? null,
       configuration_fingerprint: item.commerce_identity?.configurationFingerprint ?? null,
-      pricing_version: item.commerce_identity?.pricingVersion ?? null,
+      pricing_version: item.commerce_identity?.pricingVersion ?? SYSTEM_PRICING_VERSION,
       pricing_rule_id: item.commerce_identity?.pricingRuleId ?? null,
       fulfillment_selection: "pickup",
       production_sla_anchor: "artwork_approval_and_payment",
@@ -715,7 +719,7 @@ export async function POST(req: NextRequest) {
         merchant_offer_id: null,
         offer_version: null,
         configuration_fingerprint: null,
-        pricing_version: null,
+        pricing_version: SYSTEM_PRICING_VERSION,
         pricing_rule_id: null,
         fulfillment_selection: "pickup",
         production_sla_anchor: "artwork_approval_and_payment",
